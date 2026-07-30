@@ -1,0 +1,20 @@
+{
+    "folders": [
+        {
+            "name": "tchat",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "rust-analyzer.linkedProjects": [
+            "./Cargo.toml"
+        ],
+        "rust-analyzer.check.command": "check",
+        "rust-analyzer.check.allTargets": true
+    },
+    "extensions": {
+        "recommendations": [
+            "rust-lang.rust-analyzer"
+        ]
+    }
+}

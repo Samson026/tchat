@@ -1,3 +1,5 @@
+mod db;
+
 use axum::{
     Router,
     extract::ws::{WebSocket, WebSocketUpgrade},
