@@ -1,36 +1,26 @@
+mod api;
 mod db;
 
-use axum::{
-    Router,
-    extract::ws::{WebSocket, WebSocketUpgrade},
-    response::Response,
-    routing::get,
-};
-use protocol::{SERVER_ADDRESS, WEBSOCKET_PATH};
+use axum::{Router, routing::get, routing::post};
+use protocol::{LOGIN_PATH, SERVER_ADDRESS, WEBSOCKET_PATH, CREATE_USER_PATH};
 use std::io;
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    let app = Router::new().route(WEBSOCKET_PATH, get(upgrade));
+    let db = db::Database::connect("tchat.db")
+        .await
+        .expect("Could not connect to db");
+
+    let app = Router::new()
+        .route(LOGIN_PATH, post(api::login))
+        .with_state(db)
+        .route(CREATE_USER_PATH, post(api::create_user))
+        .with_state(db)
+        .route(WEBSOCKET_PATH, get(api::upgrade));
+
     let listener = TcpListener::bind(SERVER_ADDRESS).await?;
 
     println!("server listening on ws://{SERVER_ADDRESS}{WEBSOCKET_PATH}");
     axum::serve(listener, app).await
-}
-
-async fn upgrade(ws: WebSocketUpgrade) -> Response {
-    ws.on_upgrade(handle_socket)
-}
-
-async fn handle_socket(mut socket: WebSocket) {
-    while let Some(message) = socket.recv().await {
-        let Ok(message) = message else {
-            return;
-        };
-
-        if socket.send(message).await.is_err() {
-            return;
-        }
-    }
 }

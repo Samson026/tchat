@@ -1,13 +1,14 @@
 mod models;
 
+use sqlx::Error;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
 use std::path::Path;
-use sqlx::Error;
 
-use models::{User, Message};
+pub use models::{Message, User};
 
-struct Database {
-    pool: SqlitePool
+#[derive(Clone)]
+pub struct Database {
+    pool: SqlitePool,
 }
 
 impl Database {
@@ -24,37 +25,37 @@ impl Database {
             .await?;
 
         sqlx::query(
-        "CREATE TABLE IF NOT EXIST users (
+            "CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL UNIQUE
-            )"
+            )",
         )
         .execute(&pool)
         .await?;
 
         sqlx::query(
-            "CREATE TABLE IF NOT EXIST messages (
+            "CREATE TABLE IF NOT EXISTS messages (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 sender_id NOT NULL,
                 receiver_id NOT NULL,
                 content TEXT NOT NULL,
-                time DATETIME DEFAULT CURRENT_TIMESTAMP
+                time DATETIME DEFAULT CURRENT_TIMESTAMP,
 
                 FOREIGN KEY (sender_id) REFERENCES users(id),
                 FOREIGN KEY (receiver_id) REFERENCES users(id)
-            )"
+            )",
         )
         .execute(&pool)
         .await?;
 
-        Ok(Self { pool } )
+        Ok(Self { pool })
     }
 
     pub async fn add_user(&mut self, username: &str) -> Result<(), sqlx::Error> {
         sqlx::query(
             "INSERT INTO users (username)
                     VALUES(?)
-            "
+            ",
         )
         .bind(username)
         .execute(&self.pool)
@@ -63,21 +64,30 @@ impl Database {
         Ok(())
     }
 
-    pub async fn get_user(&mut self, username: &str) -> Result<User, sqlx::Error> {
-        sqlx::query_as::<_, User>("
+    pub async fn get_user(&self, username: &str) -> Result<User, sqlx::Error> {
+        sqlx::query_as::<_, User>(
+            "
             SELECT (id, username) FROM users
             WHERE username == ?
-        ")
+        ",
+        )
         .bind(username)
         .fetch_one(&self.pool)
         .await
     }
 
-    pub async fn add_message(&mut self, message: &str, sender: &User, receiver: &User) -> Result<(), sqlx::Error> {
-        sqlx::query("
-            INSERT INTO messages (sender_id, recv_id, content)
+    pub async fn add_message(
+        &mut self,
+        message: &str,
+        sender: &User,
+        receiver: &User,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "
+            INSERT INTO messages (sender_id, receiver_id, content)
             VALUES (?, ?, ?)
-        ")
+        ",
+        )
         .bind(sender.id)
         .bind(receiver.id)
         .bind(message)
@@ -87,10 +97,14 @@ impl Database {
         Ok(())
     }
 
-    pub async fn get_messages(&mut self, sender: &User, receiver: &User) -> Result<Vec<Message>, sqlx::Error> {
+    pub async fn get_messages(
+        &mut self,
+        sender: &User,
+        receiver: &User,
+    ) -> Result<Vec<Message>, sqlx::Error> {
         sqlx::query_as::<_, Message>(
             "SELECT * FROM messages
-            WHERE sender_id == ? AND receiver_id == ?"
+            WHERE sender_id == ? AND receiver_id == ?",
         )
         .bind(sender.id)
         .bind(receiver.id)
