@@ -2,21 +2,23 @@ mod ws;
 mod api;
 mod client;
 
-use protocol::SERVER_URL;
-use ws::WebSocketConnection;
 use tokio_tungstenite::tungstenite::Result;
+use api::Client;
 
 
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mut client = WebSocketConnection::connect(SERVER_URL).await?;
+    let mut client = Client::new().await.expect("Error");
 
-    client.send("").await?;
-
-    if let Some(response) = client.recv().await? {
-        println!("{response}");
-    }
-
+    match client.login("Sammi").await {
+        Ok(user) => {
+            println!("{}", user.id);
+            println!("{}", user.username);
+        }
+        Err(error) => {
+            eprint!("Error {error}");
+        }
+    };
     Ok(())
 }

@@ -51,23 +51,21 @@ impl Database {
         Ok(Self { pool })
     }
 
-    pub async fn add_user(&mut self, username: &str) -> Result<(), sqlx::Error> {
-        sqlx::query(
+    pub async fn add_user(&mut self, username: &str) -> Result<User, sqlx::Error> {
+        sqlx::query_as::<_, User>(
             "INSERT INTO users (username)
                     VALUES(?)
             ",
         )
         .bind(username)
-        .execute(&self.pool)
-        .await?;
-
-        Ok(())
+        .fetch_one(&self.pool)
+        .await
     }
 
     pub async fn get_user(&self, username: &str) -> Result<User, sqlx::Error> {
         sqlx::query_as::<_, User>(
             "
-            SELECT (id, username) FROM users
+            SELECT * FROM users
             WHERE username == ?
         ",
         )

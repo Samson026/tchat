@@ -14,10 +14,9 @@ async fn main() -> io::Result<()> {
 
     let app = Router::new()
         .route(LOGIN_PATH, post(api::login))
-        .with_state(db)
         .route(CREATE_USER_PATH, post(api::create_user))
-        .with_state(db)
-        .route(WEBSOCKET_PATH, get(api::upgrade));
+        .route(WEBSOCKET_PATH, get(api::upgrade))
+        .with_state(db);
 
     let listener = TcpListener::bind(SERVER_ADDRESS).await?;
 

@@ -4,7 +4,7 @@ use models::{User, NewUserRequest};
 use serde::de::Unexpected::Other;
 use reqwest::Error;
 
-use protocol::SERVER_ADDRESS;
+use protocol::{SERVER_ADDRESS, CREATE_USER_PATH, LOGIN_PATH};
 
 pub struct Client {
     client: reqwest::Client,
@@ -22,8 +22,12 @@ impl Client {
             username: username.to_string()
         };
 
+        println!("got here");
+        
+        let url = format!("http://{SERVER_ADDRESS}{CREATE_USER_PATH}");
+        println!("{url}");
         self.client
-        .post(SERVER_ADDRESS)
+        .post(url)
         .json(&body)
         .send()
         .await?
@@ -36,8 +40,9 @@ impl Client {
             username: username.to_string()
         };
 
+        let url = format!("http://{SERVER_ADDRESS}{LOGIN_PATH}");
         self.client
-        .post(SERVER_ADDRESS)
+        .post(url)
         .json(&body)
         .send()
         .await?
