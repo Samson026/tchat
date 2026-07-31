@@ -3,22 +3,22 @@ mod api;
 mod client;
 
 use tokio_tungstenite::tungstenite::Result;
-use api::Client;
+use client::ClientApp;
 
 
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mut client = Client::new().await.expect("Error");
+    let mut client = ClientApp::new().await.expect("Error");
 
-    match client.login("Sammi").await {
-        Ok(user) => {
-            println!("{}", user.id);
-            println!("{}", user.username);
-        }
-        Err(error) => {
-            eprint!("Error {error}");
-        }
-    };
+    client.login("Sammi").await?;
+
+    let user = client.user.as_ref().unwrap();
+    println!("{}", user.id);
+    println!("{}", user.username);
+
+    client.connect_ws().await?;
+
+    
     Ok(())
 }

@@ -77,8 +77,8 @@ impl Database {
     pub async fn add_message(
         &mut self,
         message: &str,
-        sender: &User,
-        receiver: &User,
+        sender: &i64,
+        receiver: &i64,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             "
@@ -86,8 +86,8 @@ impl Database {
             VALUES (?, ?, ?)
         ",
         )
-        .bind(sender.id)
-        .bind(receiver.id)
+        .bind(sender)
+        .bind(receiver)
         .bind(message)
         .execute(&self.pool)
         .await?;

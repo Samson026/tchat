@@ -1643,10 +1643,13 @@ name = "server"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "futures-util",
  "protocol",
  "serde",
+ "serde_json",
  "sqlx",
  "tokio",
+ "tokio-tungstenite 0.30.0",
 ]
 
 [[package]]

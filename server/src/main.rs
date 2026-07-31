@@ -1,5 +1,6 @@
 mod api;
 mod db;
+mod state;
 
 use axum::{Router, routing::get, routing::post};
 use protocol::{LOGIN_PATH, SERVER_ADDRESS, WEBSOCKET_PATH, CREATE_USER_PATH};
@@ -12,11 +13,13 @@ async fn main() -> io::Result<()> {
         .await
         .expect("Could not connect to db");
 
+    let appState = state::AppState::new(db);
+
     let app = Router::new()
         .route(LOGIN_PATH, post(api::login))
         .route(CREATE_USER_PATH, post(api::create_user))
         .route(WEBSOCKET_PATH, get(api::upgrade))
-        .with_state(db);
+        .with_state(appState);
 
     let listener = TcpListener::bind(SERVER_ADDRESS).await?;
 
