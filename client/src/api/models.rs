@@ -8,7 +8,7 @@ pub struct User {
 
 #[derive(Serialize)]
 pub struct NewUserRequest {
-    pub username: String
+    pub username: String,
 }
 
 #[derive(Deserialize, Serialize)]

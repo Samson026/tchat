@@ -2,28 +2,25 @@ use std::io::Error;
 
 use protocol::SERVER_URL;
 
-use crate::api::{Client};
+use crate::api::Client;
 use crate::api::models::ChatMessage;
 use crate::api::models::User;
 use crate::ws::WebSocketConnection;
 
-
 pub struct ClientApp {
     client: Client,
     ws: Option<WebSocketConnection>,
-    pub user: Option<User>
+    pub user: Option<User>,
 }
 
 impl ClientApp {
     pub async fn new() -> Result<Self, Error> {
-        let client = Client::new()
-            .await
-            .map_err(Error::other)?;
+        let client = Client::new().await.map_err(Error::other)?;
 
         Ok(Self {
             client,
             ws: None,
-            user: None
+            user: None,
         })
     }
 
@@ -33,9 +30,7 @@ impl ClientApp {
                 self.user = Some(user);
                 Ok(())
             }
-            Err(error) => {
-                Err(std::io::Error::other(error))
-            }
+            Err(error) => Err(std::io::Error::other(error)),
         }
     }
 
@@ -45,22 +40,17 @@ impl ClientApp {
                 self.user = Some(user);
                 Ok(())
             }
-            Err(error) => {
-                Err(std::io::Error::other(error))
-            }
+            Err(error) => Err(std::io::Error::other(error)),
         }
     }
 
     pub async fn connect_ws(&mut self) -> Result<(), Error> {
-        let user = self
-            .user
-            .as_ref()
-            .unwrap();
+        let user = self.user.as_ref().unwrap();
         let url = format!("{SERVER_URL}?user_id={}", user.id);
         self.ws = Some(
             WebSocketConnection::connect(&url)
-            .await
-            .map_err(Error::other)?,
+                .await
+                .map_err(Error::other)?,
         );
         Ok(())
     }
@@ -71,7 +61,7 @@ impl ClientApp {
         let msg = ChatMessage {
             sender_id: user.id,
             receiver_id: *receiver_id,
-            content: message.to_string()
+            content: message.to_string(),
         };
 
         if let Err(error) = ws.send(message).await {
