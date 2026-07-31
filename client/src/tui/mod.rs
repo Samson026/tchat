@@ -9,6 +9,7 @@ use ratatui::{
 };
 
 use crate::tui::Screen::{Chat, Login};
+use crate::client::ClientApp;
 
 #[derive(Debug)]
 enum Screen {
@@ -21,16 +22,18 @@ pub struct App {
     exit: bool,
     input: String,
     output: String,
-    screen: Screen
+    screen: Screen,
+    client: ClientApp
 }
 
 impl App {
-    pub fn new() -> Self {
+    pub fn new(client: ClientApp) -> Self {
         Self {
             exit: false,
             input: String::new(),
             output: String::new(),
-            screen: Login
+            screen: Login,
+            client: client
         }
     }
 
@@ -57,15 +60,34 @@ impl App {
     }
 
     async fn handle_key_event(&mut self, key_event: KeyEvent) {
+        match self.screen {
+            Login => self.login_handle_key_event(key_event).await,
+            Chat => todo!()
+        }
+    }
+
+    async fn login_handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Esc => self.exit(),
             KeyCode::Char(c) => self.input.push(c),
+            KeyCode::Enter => {
+                let username = self.input.clone();
+                self.input = String::new();
+                match self.client.login(&username).await {
+                    Ok(()) =>  {
+                        self.output = format!("Welcome, {}", username)
+                    },
+                    Err(error) => {
+                        self.output = format!("Error, {}", error)
+                    }
+                }
+            }
             KeyCode::Backspace => {
                 self.input.pop();
             },
             _ => {}
         }
-    }
+    }   
 
     fn exit(&mut self) {
         self.exit = true;
@@ -83,9 +105,12 @@ impl App {
             ])
             .areas(area);
 
-        Paragraph::new("Type username to login")
+        let text = format!("Type username to login:\n\n{}", self.output.to_string());
+        Paragraph::new(text)
                 .block(Block::bordered())
                 .render(display_area, buf);
+        
+
 
         Paragraph::new(self.input.as_str())
                 .block(Block::bordered())

@@ -6,6 +6,7 @@ use tokio_tungstenite::{
     tungstenite::{Message, Result},
 };
 
+#[derive(Debug)]
 pub struct WebSocketConnection {
     socket: WebSocketStream<MaybeTlsStream<TcpStream>>,
 }

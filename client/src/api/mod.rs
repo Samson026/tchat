@@ -6,6 +6,7 @@ use serde::de::Unexpected::Other;
 
 use protocol::{CREATE_USER_PATH, LOGIN_PATH, SERVER_ADDRESS};
 
+#[derive(Debug)]
 pub struct Client {
     client: reqwest::Client,
 }

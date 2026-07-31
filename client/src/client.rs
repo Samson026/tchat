@@ -7,6 +7,7 @@ use crate::api::models::ChatMessage;
 use crate::api::models::User;
 use crate::ws::WebSocketConnection;
 
+#[derive(Debug)]
 pub struct ClientApp {
     client: Client,
     ws: Option<WebSocketConnection>,
