@@ -9,4 +9,8 @@ protocol = { path = "../crates/protocol" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 sqlx = { version = "0.9.0", features = ["chrono", "runtime-tokio", "sqlite"] }
-tokio = { version = "1.53.1", features = ["macros", "net", "rt-multi-thread", "sync"] }
+tokio = { version = "1.53.1", features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
+
+[dev-dependencies]
+futures-util = "0.3.33"
+tokio-tungstenite = "0.30.0"
