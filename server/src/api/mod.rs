@@ -52,7 +52,45 @@ pub async fn handle_socket(mut socket: WebSocket, user_id: i64, app_state: AppSt
         .await
         .insert(user_id, outgoing_tx);
 
-    while let Some(message) = socket.recv().await {
-        
-    }
+    loop {
+      tokio::select! {
+          incoming = socket.recv() => {
+              // Handle data received from this client.
+              match incoming {
+                Some(Ok(Message::Text(text))) => {
+                    let parsed: ChatMessage = serde_json::from_str(&text).unwrap();
+                    
+                    let recv = {
+                        let connections = app_state.connections.read().await;
+                        connections.get(&parsed.recv_id).cloned()
+                    };
+
+                    if let Some(recv) = recv {
+                        let _ = recv.send(parsed);
+                    }
+                },
+                Some(Ok(Message::Close(_))) | None => {
+                    break;
+                }
+                Some(Err(error)) => {
+                    eprint!("Error: {error}");
+                },
+                Some(Ok(_)) => {}
+              }
+          }
+
+          Some(outgoing) = outgoing_rx.recv() => {
+              match serde_json::to_string(&outgoing) {
+                Ok(json) => {
+                    if let Err(error) = socket.send(Message::Text(json.into())).await {
+                        eprint!("Error: {error}");
+                    }
+                },
+                Err(error) => {
+                    eprint!("Error: {error}");
+                }
+              };
+          }
+      }
+  }
 }

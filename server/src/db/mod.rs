@@ -86,8 +86,8 @@ impl Database {
             VALUES (?, ?, ?)
         ",
         )
-        .bind(sender.id)
-        .bind(receiver.id)
+        .bind(sender)
+        .bind(receiver)
         .bind(message)
         .execute(&self.pool)
         .await?;
