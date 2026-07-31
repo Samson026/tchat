@@ -77,8 +77,8 @@ impl Database {
     pub async fn add_message(
         &mut self,
         message: &str,
-        sender: &User,
-        receiver: &User,
+        sender: &i64,
+        receiver: &i64,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             "
