@@ -60,13 +60,14 @@ impl ClientApp {
     pub async fn send_message(&mut self, receiver_id: &i64, message: &str) -> Result<(), Error> {
         let ws = self.ws.as_mut().unwrap();
         let user = self.user.as_ref().unwrap();
-        let _msg = ChatMessage {
+        let msg = ChatMessage {
             sender_id: user.id,
-            receiver_id: *receiver_id,
+            recv_id: *receiver_id,
             content: message.to_string(),
         };
+        let message = serde_json::to_string(&msg).map_err(Error::other)?;
 
-        if let Err(error) = ws.send(message).await {
+        if let Err(error) = ws.send(&message).await {
             return Err(Error::other(error));
         }
         Ok(())

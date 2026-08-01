@@ -14,6 +14,6 @@ pub struct NewUserRequest {
 #[derive(Deserialize, Serialize)]
 pub struct ChatMessage {
     pub sender_id: i64,
-    pub receiver_id: i64,
+    pub recv_id: i64,
     pub content: String,
 }
