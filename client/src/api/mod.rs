@@ -2,10 +2,8 @@ pub mod models;
 
 use models::{NewUserRequest, User};
 use reqwest::Error;
-use serde::de::Unexpected::Other;
 
 use protocol::{CREATE_USER_PATH, GET_MESSAGES, GET_USERS, LOGIN_PATH, SERVER_ADDRESS};
-use tokio_tungstenite::tungstenite::Error::Url;
 
 use crate::api::models::ChatMessage;
 
@@ -63,10 +61,7 @@ impl Client {
 
         self.client
             .get(url)
-            .query(&[
-                ("sender_id", *sender_id),
-                ("recv_id", *receiver_id),
-            ])
+            .query(&[("sender_id", *sender_id), ("recv_id", *receiver_id)])
             .send()
             .await?
             .error_for_status()?

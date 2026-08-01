@@ -74,6 +74,7 @@ impl Database {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn add_message(
         &mut self,
         message: &str,
@@ -110,13 +111,9 @@ impl Database {
         .await
     }
 
-    pub async fn get_users(
-        &mut self
-    ) -> Result<Vec<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>(
-            "SELECT * FROM users"
-        )
-        .fetch_all(&self.pool)
-        .await
+    pub async fn get_users(&mut self) -> Result<Vec<User>, sqlx::Error> {
+        sqlx::query_as::<_, User>("SELECT * FROM users")
+            .fetch_all(&self.pool)
+            .await
     }
 }

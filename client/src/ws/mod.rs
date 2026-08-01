@@ -1,5 +1,4 @@
 use futures_util::{SinkExt, StreamExt};
-use protocol::SERVER_URL;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
@@ -21,6 +20,7 @@ impl WebSocketConnection {
         self.socket.send(Message::text(message)).await
     }
 
+    #[allow(dead_code)]
     pub async fn recv(&mut self) -> Result<Option<String>> {
         while let Some(message) = self.socket.next().await {
             match message? {

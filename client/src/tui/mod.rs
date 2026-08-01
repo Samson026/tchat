@@ -17,6 +17,7 @@ use crate::{
 #[derive(Debug)]
 enum Screen {
     Login,
+    #[allow(dead_code)]
     Chat,
     Users,
 }
@@ -27,7 +28,7 @@ pub struct App {
     output: String,
     screen: Screen,
     client: ClientApp,
-    chat: Vec<ChatMessage>,
+    _chat: Vec<ChatMessage>,
     users: Option<Vec<User>>,
 }
 
@@ -38,8 +39,8 @@ impl App {
             input: String::new(),
             output: String::new(),
             screen: Login,
-            client: client,
-            chat: Vec::<ChatMessage>::with_capacity(10),
+            client,
+            _chat: Vec::<ChatMessage>::with_capacity(10),
             users: None,
         }
     }
@@ -122,7 +123,7 @@ impl App {
         let inner = block.inner(area);
         block.render(area, buf);
 
-        let text = format!("Type username to login:\n\n{}", self.output.to_string());
+        let text = format!("Type username to login:\n\n{}", self.output);
         Paragraph::new(text).render(inner, buf);
     }
 
@@ -141,7 +142,7 @@ impl App {
 
         let mut constraints = Vec::<Constraint>::new();
 
-        for i in 0..10 {
+        for _ in 0..10 {
             constraints.push(Constraint::Length(3))
         }
 

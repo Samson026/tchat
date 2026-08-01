@@ -9,7 +9,7 @@ use tui::App;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mut client = ClientApp::new().await.expect("Error");
+    let client = ClientApp::new().await.expect("Error");
 
     // client.login("Sammi").await?;
 

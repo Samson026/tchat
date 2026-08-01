@@ -1,14 +1,8 @@
 pub mod models;
 
-use std::sync::mpsc::Receiver;
-
-use crate::{
-    api::models::ChatMessage,
-    db::{Message as DBMessage, User},
-    state::AppState,
-};
+use crate::{api::models::ChatMessage, db::User, state::AppState};
 use axum::{
-    Error, Json,
+    Json,
     extract::{
         Query, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
@@ -63,17 +57,14 @@ pub async fn get_messages(
                 .collect::<Vec<_>>(),
         )
         .into_response(),
-        Err(error) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
+        Err(_) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
     }
 }
 
-pub async fn get_users(
-    State(mut app_state): State<AppState>) -> Response {
+pub async fn get_users(State(mut app_state): State<AppState>) -> Response {
     match app_state.db.get_users().await {
-        Ok(users) => {
-            Json(users).into_response()
-        }
-        Err(error) => (StatusCode::NOT_FOUND, "Messages not found").into_response()
+        Ok(users) => Json(users).into_response(),
+        Err(_) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
     }
 }
 

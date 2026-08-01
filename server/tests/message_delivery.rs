@@ -10,7 +10,7 @@ use axum::{
     routing::{get, post},
 };
 use futures_util::{SinkExt, StreamExt};
-use protocol::{CREATE_USER_PATH, LOGIN_PATH, WEBSOCKET_PATH};
+use protocol::{CREATE_USER_PATH, GET_MESSAGES, GET_USERS, LOGIN_PATH, WEBSOCKET_PATH};
 use sqlx::sqlite::SqlitePoolOptions;
 use std::{
     fs,
@@ -54,6 +54,8 @@ async fn spawn_test_server() -> (JoinHandle<()>, String, i64, i64, String, Strin
         .route(LOGIN_PATH, post(api::login))
         .route(CREATE_USER_PATH, post(api::create_user))
         .route(WEBSOCKET_PATH, get(api::upgrade))
+        .route(GET_MESSAGES, get(api::get_messages))
+        .route(GET_USERS, get(api::get_users))
         .with_state(app_state);
 
     let listener = TcpListener::bind("127.0.0.1:0")

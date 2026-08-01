@@ -8,6 +8,7 @@ pub struct User {
     pub username: String,
 }
 
+#[allow(dead_code)]
 #[derive(FromRow)]
 pub struct Message {
     pub id: i64,
