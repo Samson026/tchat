@@ -1,4 +1,4 @@
-use std::io;
+use std::io::{self, Error};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
@@ -22,6 +22,13 @@ enum Screen {
     Users,
 }
 
+enum Command {
+    Chat {
+        User: String
+    },
+    Users
+}
+
 pub struct App {
     exit: bool,
     input: String,
@@ -30,6 +37,19 @@ pub struct App {
     client: ClientApp,
     _chat: Vec<ChatMessage>,
     users: Option<Vec<User>>,
+}
+
+fn parse_cmd(cmd: &str) -> Result<Command, String> {
+    let args = shell_words::split(cmd)
+        .map_err(|error| error.to_string())?;
+
+    match args.as_slice() {
+        [command, username] if command == "/chat" => {
+            Ok(Command::Chat { User: username.to_string() })
+        },
+        [] => Err("Enter a command".to_string()),
+        [command, ..] => Err(format!("Unknown command: {command}"))
+    }
 }
 
 impl App {
@@ -68,11 +88,12 @@ impl App {
     }
 
     async fn handle_key_event(&mut self, key_event: KeyEvent) {
-        match self.screen {
-            Login => self.login_handle_key_event(key_event).await,
-            Chat => todo!(),
-            Users => self.users_handle_key_event(key_event),
-        }
+        match 
+        // match self.screen {
+        //     Login => self.login_handle_key_event(key_event).await,
+        //     Chat => todo!(),
+        //     Users => self.users_handle_key_event(key_event),
+        // }
     }
 
     async fn login_handle_key_event(&mut self, key_event: KeyEvent) {
@@ -116,6 +137,33 @@ impl App {
 
     fn exit(&mut self) {
         self.exit = true;
+    }
+
+    async fn handle_command(&mut self) {
+        let cmd = parse_cmd(&self.input);
+
+        match cmd {
+            Ok(cmd) => {
+                match cmd {
+                    Command::Chat { User: username } => {
+                        self.screen = Chat;
+                    },
+                    Command::Users => {
+                        self.users = match self.client.get_users().await {
+                            Ok(users) => {
+                                Some(users)
+                            },
+                            Err(_) => None
+                        };
+                        self.screen = Users;
+                    }
+                    _ => todo!()
+                }
+            }
+            Err(error) => {
+                self.output = error;
+            } 
+        }
     }
 
     fn render_login(&self, area: Rect, buf: &mut Buffer) {
