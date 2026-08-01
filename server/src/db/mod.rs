@@ -74,6 +74,7 @@ impl Database {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn add_message(
         &mut self,
         message: &str,
@@ -97,16 +98,22 @@ impl Database {
 
     pub async fn get_messages(
         &mut self,
-        sender: &User,
-        receiver: &User,
+        sender_id: &i64,
+        receiver_id: &i64,
     ) -> Result<Vec<Message>, sqlx::Error> {
         sqlx::query_as::<_, Message>(
             "SELECT * FROM messages
             WHERE sender_id == ? AND receiver_id == ?",
         )
-        .bind(sender.id)
-        .bind(receiver.id)
+        .bind(sender_id)
+        .bind(receiver_id)
         .fetch_all(&self.pool)
         .await
+    }
+
+    pub async fn get_users(&mut self) -> Result<Vec<User>, sqlx::Error> {
+        sqlx::query_as::<_, User>("SELECT * FROM users")
+            .fetch_all(&self.pool)
+            .await
     }
 }

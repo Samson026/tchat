@@ -3,7 +3,9 @@ mod db;
 mod state;
 
 use axum::{Router, routing::get, routing::post};
-use protocol::{LOGIN_PATH, SERVER_ADDRESS, WEBSOCKET_PATH, CREATE_USER_PATH};
+use protocol::{
+    CREATE_USER_PATH, GET_MESSAGES, GET_USERS, LOGIN_PATH, SERVER_ADDRESS, WEBSOCKET_PATH,
+};
 use std::io;
 use tokio::net::TcpListener;
 
@@ -13,13 +15,15 @@ async fn main() -> io::Result<()> {
         .await
         .expect("Could not connect to db");
 
-    let appState = state::AppState::new(db);
+    let app_state = state::AppState::new(db);
 
     let app = Router::new()
         .route(LOGIN_PATH, post(api::login))
         .route(CREATE_USER_PATH, post(api::create_user))
         .route(WEBSOCKET_PATH, get(api::upgrade))
-        .with_state(appState);
+        .route(GET_MESSAGES, get(api::get_messages))
+        .route(GET_USERS, get(api::get_users))
+        .with_state(app_state);
 
     let listener = TcpListener::bind(SERVER_ADDRESS).await?;
 
