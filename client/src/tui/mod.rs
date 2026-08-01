@@ -8,6 +8,7 @@ use ratatui::{
     macros::constraint,
     widgets::{Block, Borders, Paragraph, Widget},
 };
+use tokio_tungstenite::tungstenite::client;
 
 use self::Screen::{Chat, Login, Users};
 use crate::{
@@ -165,7 +166,15 @@ impl App {
                 }
                 Command::Message { Content } => match self.chatting_user.as_ref() {
                     Some(recv) => match self.client.send_message(&recv.id, &Content).await {
-                        Ok(_) => {}
+                        Ok(_) => {
+                            if let Some(user) = self.client.user.as_ref() {
+                                self.chat.push(ChatMessage { 
+                                    sender_id: user.id, 
+                                    recv_id: recv.id, 
+                                    content: Content 
+                                })
+                            }
+                        }
                         Err(error) => self.output = error.to_string(),
                     },
                     None => {
