@@ -222,7 +222,15 @@ impl App {
         let areas = Layout::vertical(constraints).split(messages_area);
 
         for (chat, area) in self.chat.iter().zip(areas.iter()) {
-            Paragraph::new(chat.content.as_str())
+            let sender_name = match (self.client.user.as_ref(), self.chatting_user.as_ref()) {
+                (Some(user), _) => user.username.as_str(),
+                (_, Some(chatting_user)) => chatting_user.username.as_str(),
+                _ => "Unknown"
+            };
+
+            let msg = format!("{sender_name}: {}", chat.content);
+
+            Paragraph::new(msg)
                 .block(Block::default().borders(Borders::BOTTOM))
                 .render(*area, buf);
         }
