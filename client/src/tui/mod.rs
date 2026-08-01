@@ -2,21 +2,23 @@ use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
-    DefaultTerminal, Frame, buffer::Buffer, layout::{
-        Constraint::{self, Percentage},
-        Flex, Layout, Rect,
-    }, symbols::block, text::Line, widgets::{Block, Borders, List, Paragraph, Widget, Wrap},
+    DefaultTerminal, Frame,
+    buffer::Buffer,
+    layout::{Constraint, Layout, Rect},
+    widgets::{Block, Borders, Paragraph, Widget, Wrap},
 };
-use tokio_tungstenite::tungstenite::protocol::frame;
 
-use crate::{api::models::{ChatMessage, User}, client::ClientApp};
-use crate::tui::Screen::{Chat, Login};
+use self::Screen::{Chat, Login, Users};
+use crate::{
+    api::models::{ChatMessage, User},
+    client::ClientApp,
+};
 
 #[derive(Debug)]
 enum Screen {
     Login,
     Chat,
-    Users
+    Users,
 }
 
 pub struct App {
@@ -26,7 +28,7 @@ pub struct App {
     screen: Screen,
     client: ClientApp,
     chat: Vec<ChatMessage>,
-    users: Option<Vec<User>
+    users: Option<Vec<User>>,
 }
 
 impl App {
@@ -38,7 +40,7 @@ impl App {
             screen: Login,
             client: client,
             chat: Vec::<ChatMessage>::with_capacity(10),
-            users: None
+            users: None,
         }
     }
 
@@ -68,6 +70,7 @@ impl App {
         match self.screen {
             Login => self.login_handle_key_event(key_event).await,
             Chat => todo!(),
+            Users => self.users_handle_key_event(key_event),
         }
     }
 
@@ -79,8 +82,20 @@ impl App {
                 let username = self.input.clone();
                 self.input = String::new();
                 match self.client.login(&username).await {
-                    Ok(()) =>  {
-                        self.users = self.client.get_users
+                    Ok(()) => match self.client.get_users().await {
+                        Ok(users) => {
+                            let current_user_id = self.client.user.as_ref().map(|user| user.id);
+                            self.users = Some(
+                                users
+                                    .into_iter()
+                                    .filter(|user| Some(user.id) != current_user_id)
+                                    .collect(),
+                            );
+                            self.screen = Users;
+                        }
+                        Err(error) => {
+                            self.output = format!("Error: {}", error);
+                        }
                     },
                     Err(error) => self.output = format!("Error, {}", error),
                 }
@@ -89,6 +104,12 @@ impl App {
                 self.input.pop();
             }
             _ => {}
+        }
+    }
+
+    fn users_handle_key_event(&mut self, key_event: KeyEvent) {
+        if key_event.code == KeyCode::Esc {
+            self.exit();
         }
     }
 
@@ -130,19 +151,14 @@ impl App {
         let mut constraints = Vec::<Constraint>::new();
 
         for i in 0..10 {
-            constraints.push(
-                Constraint::Length(3)
-            )
+            constraints.push(Constraint::Length(3))
         }
 
-        let areas = Layout::vertical(constraints)
-            .split(display_area);
+        let areas = Layout::vertical(constraints).split(display_area);
 
         for area in areas.iter() {
             Paragraph::new("test")
-                .block(Block::default()
-                    .borders(Borders::BOTTOM)
-                )
+                .block(Block::default().borders(Borders::BOTTOM))
                 .render(*area, buf);
         }
 
@@ -152,42 +168,34 @@ impl App {
     }
 
     fn render_users(&self, area: Rect, buf: &mut Buffer) {
-        Block::bordered().title("Chat").render(area, buf);
+        Block::bordered().title("Users").render(area, buf);
 
         let [display_area, input_area] =
             Layout::vertical([Constraint::Percentage(90), Constraint::Percentage(10)]).areas(area);
 
-        let text = format!("Welcome, {}", self.client.user.as_ref().unwrap().username);
-        Paragraph::new(text)
-            .block(Block::bordered())
-            .render(display_area, buf);
+        if let Some(users) = self.users.as_ref() {
+            if users.is_empty() {
+                Paragraph::new("No other users found.")
+                    .block(Block::bordered())
+                    .render(display_area, buf);
+            } else {
+                let constraints: Vec<Constraint> =
+                    users.iter().map(|_| Constraint::Length(3)).collect();
 
-        let mut constraints = Vec::<Constraint>::new();
+                let areas = Layout::vertical(constraints).split(display_area);
 
-        for i in 0..10 {
-            constraints.push(
-                Constraint::Length(3)
-            )
-        }
-
-        let areas = Layout::vertical(constraints)
-            .split(display_area);
-
-        for area in areas.iter() {
-            Paragraph::new("test")
-                .block(Block::default()
-                    .borders(Borders::BOTTOM)
-                )
-                .render(*area, buf);
+                for (user, area) in users.iter().zip(areas.iter()) {
+                    Paragraph::new(user.username.as_str())
+                        .block(Block::default().borders(Borders::BOTTOM))
+                        .render(*area, buf);
+                }
+            }
         }
 
         Paragraph::new(self.input.as_str())
             .block(Block::bordered())
             .render(input_area, buf);
     }
-
-
-
 }
 
 impl Widget for &App {
@@ -196,6 +204,7 @@ impl Widget for &App {
         match self.screen {
             Login => self.render_login(area, buf),
             Chat => self.render_chat(area, buf),
+            Users => self.render_users(area, buf),
         }
     }
 }

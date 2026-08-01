@@ -75,9 +75,10 @@ impl Client {
     }
 
     pub async fn get_users(&mut self) -> Result<Vec<User>, Error> {
+        let url = format!("http://{SERVER_ADDRESS}{GET_USERS}");
 
-        let url = format!("http://{SERVER_ADDRESS}{GET_USERS}")
-        self.client.get(url)
+        self.client
+            .get(url)
             .send()
             .await?
             .error_for_status()?

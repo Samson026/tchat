@@ -87,5 +87,7 @@ impl ClientApp {
         }
     }
 
-    
+    pub async fn get_users(&mut self) -> Result<Vec<User>, Error> {
+        self.client.get_users().await.map_err(Error::other)
+    }
 }
