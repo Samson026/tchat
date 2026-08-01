@@ -5,7 +5,7 @@ use ratatui::{
     DefaultTerminal, Frame,
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
-    widgets::{Block, Borders, Paragraph, Widget, Wrap},
+    widgets::{Block, Borders, Paragraph, Widget},
 };
 
 use self::Screen::{Chat, Login, Users};
@@ -118,35 +118,26 @@ impl App {
     }
 
     fn render_login(&self, area: Rect, buf: &mut Buffer) {
-        Block::bordered().title("Login").render(area, buf);
-
-        let [display_area, input_area] =
-            Layout::vertical([Constraint::Percentage(90), Constraint::Percentage(10)]).areas(area);
+        let block = Block::bordered().title("Login");
+        let inner = block.inner(area);
+        block.render(area, buf);
 
         let text = format!("Type username to login:\n\n{}", self.output.to_string());
-        Paragraph::new(text)
-            .block(Block::bordered())
-            .render(display_area, buf);
-
-        let block = Block::bordered();
-        let inner_area = block.inner(input_area);
-        block.render(input_area, buf);
-
-        Paragraph::new(self.input.as_str())
-            .wrap(Wrap { trim: false })
-            .render(inner_area, buf)
+        Paragraph::new(text).render(inner, buf);
     }
 
     fn render_chat(&self, area: Rect, buf: &mut Buffer) {
-        Block::bordered().title("Users").render(area, buf);
+        let block = Block::bordered().title("Chat");
+        let inner = block.inner(area);
+        block.render(area, buf);
 
-        let [display_area, input_area] =
-            Layout::vertical([Constraint::Percentage(90), Constraint::Percentage(10)]).areas(area);
+        let [header_area, messages_area] =
+            Layout::vertical([Constraint::Length(3), Constraint::Min(0)]).areas(inner);
 
         let text = format!("Welcome, {}", self.client.user.as_ref().unwrap().username);
         Paragraph::new(text)
             .block(Block::bordered())
-            .render(display_area, buf);
+            .render(header_area, buf);
 
         let mut constraints = Vec::<Constraint>::new();
 
@@ -154,35 +145,28 @@ impl App {
             constraints.push(Constraint::Length(3))
         }
 
-        let areas = Layout::vertical(constraints).split(display_area);
+        let areas = Layout::vertical(constraints).split(messages_area);
 
         for area in areas.iter() {
             Paragraph::new("test")
                 .block(Block::default().borders(Borders::BOTTOM))
                 .render(*area, buf);
         }
-
-        Paragraph::new(self.input.as_str())
-            .block(Block::bordered())
-            .render(input_area, buf);
     }
 
     fn render_users(&self, area: Rect, buf: &mut Buffer) {
-        Block::bordered().title("Users").render(area, buf);
-
-        let [display_area, input_area] =
-            Layout::vertical([Constraint::Percentage(90), Constraint::Percentage(10)]).areas(area);
+        let block = Block::bordered().title("Users");
+        let inner = block.inner(area);
+        block.render(area, buf);
 
         if let Some(users) = self.users.as_ref() {
             if users.is_empty() {
-                Paragraph::new("No other users found.")
-                    .block(Block::bordered())
-                    .render(display_area, buf);
+                Paragraph::new("No other users found.").render(inner, buf);
             } else {
                 let constraints: Vec<Constraint> =
                     users.iter().map(|_| Constraint::Length(3)).collect();
 
-                let areas = Layout::vertical(constraints).split(display_area);
+                let areas = Layout::vertical(constraints).split(inner);
 
                 for (user, area) in users.iter().zip(areas.iter()) {
                     Paragraph::new(user.username.as_str())
@@ -191,10 +175,6 @@ impl App {
                 }
             }
         }
-
-        Paragraph::new(self.input.as_str())
-            .block(Block::bordered())
-            .render(input_area, buf);
     }
 }
 
@@ -204,12 +184,8 @@ impl Widget for &App {
         let inner = block.inner(area);
         block.render(area, buf);
 
-        let [display_area, input_area] = Layout::vertical([
-            Constraint::Percentage(90),
-            Constraint::Percentage(10)
-        ])
-        .areas(inner);
-
+        let [display_area, input_area] =
+            Layout::vertical([Constraint::Percentage(90), Constraint::Percentage(10)]).areas(inner);
 
         match self.screen {
             Login => self.render_login(display_area, buf),
