@@ -22,6 +22,9 @@ enum Screen {
 enum Command {
     Chat { User: String },
     Users,
+    Message {
+        Content: String
+    }
 }
 
 pub struct App {
@@ -43,6 +46,7 @@ fn parse_cmd(cmd: &str) -> Result<Command, String> {
             User: username.to_string(),
         }),
         [command] if command == "/users" => Ok(Command::Users),
+        [command, content] if command == "/msg" => Ok(Command::Message { Content: content.to_string() }),
         [] => Err("Enter a command".to_string()),
         [command, ..] => Err(format!("Unknown command: {command}")),
     }
@@ -103,6 +107,7 @@ impl App {
                                         .collect(),
                                 );
                                 self.screen = Users;
+                                let _ = self.client.connect_ws().await;
                             }
                             Err(error) => {
                                 self.output = format!("Error: {}", error);
@@ -151,6 +156,20 @@ impl App {
                         Err(_) => None,
                     };
                     self.screen = Users;
+                },
+                Command::Message { Content } => {
+                    match self.chatting_user.as_ref() {
+                        Some(recv) => {
+                            match self.client.send_message(&recv.id, &Content).await {
+                                Ok(_) => {},
+                                Err(error) => {self.output = error.to_string()}
+                            }
+                             
+                        }
+                        None => {
+                            self.output = String::from("Not currently chatting");
+                        }
+                    }
                 }
                 _ => todo!(),
             },
