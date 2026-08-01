@@ -200,11 +200,25 @@ impl App {
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        Block::bordered().render(area, buf);
+        let block = Block::bordered();
+        let inner = block.inner(area);
+        block.render(area, buf);
+
+        let [display_area, input_area] = Layout::vertical([
+            Constraint::Percentage(90),
+            Constraint::Percentage(10)
+        ])
+        .areas(inner);
+
+
         match self.screen {
-            Login => self.render_login(area, buf),
-            Chat => self.render_chat(area, buf),
-            Users => self.render_users(area, buf),
+            Login => self.render_login(display_area, buf),
+            Chat => self.render_chat(display_area, buf),
+            Users => self.render_users(display_area, buf),
         }
+
+        Paragraph::new(self.input.as_str())
+            .block(Block::bordered())
+            .render(input_area, buf);
     }
 }
