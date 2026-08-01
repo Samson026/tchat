@@ -2,10 +2,7 @@ use std::io::{self, Error};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
-    DefaultTerminal, Frame,
-    buffer::Buffer,
-    layout::{Constraint, Layout, Rect},
-    widgets::{Block, Borders, Paragraph, Widget},
+    DefaultTerminal, Frame, buffer::Buffer, layout::{Constraint, Layout, Rect}, macros::constraint, widgets::{Block, Borders, Paragraph, Widget},
 };
 
 use self::Screen::{Chat, Login, Users};
@@ -33,8 +30,9 @@ pub struct App {
     output: String,
     screen: Screen,
     client: ClientApp,
-    _chat: Vec<ChatMessage>,
+    chat: Vec<ChatMessage>,
     users: Option<Vec<User>>,
+    chatting_user: Option<User>
 }
 
 fn parse_cmd(cmd: &str) -> Result<Command, String> {
@@ -58,8 +56,9 @@ impl App {
             output: String::new(),
             screen: Login,
             client,
-            _chat: Vec::<ChatMessage>::with_capacity(10),
+            chat: Vec::<ChatMessage>::with_capacity(10),
             users: None,
+            chatting_user: None
         }
     }
 
@@ -131,7 +130,20 @@ impl App {
         match cmd {
             Ok(cmd) => match cmd {
                 Command::Chat { User: username } => {
-                    self.screen = Chat;
+                    if  let Some(users) = self.users.as_ref() {
+                        if let Some(recv) = users.iter().find(|user| user.username == username) {
+                            self.chatting_user = Some(recv.clone());
+                            match self.client.get_messages(&recv.id).await {
+                                Ok(messages) => {
+                                    self.chat = messages;
+                                    self.screen = Chat;
+                                }
+                                Err(error) => {
+                                    self.output = error.to_string();
+                                }
+                            }
+                        }
+                    }
                 }
                 Command::Users => {
                     self.users = match self.client.get_users().await {
@@ -166,18 +178,22 @@ impl App {
         let [header_area, messages_area] =
             Layout::vertical([Constraint::Length(3), Constraint::Min(0)]).areas(inner);
 
-        let text = format!("Welcome, {}", self.client.user.as_ref().unwrap().username);
+        let username = self.chatting_user.as_ref().map_or("Unknown user",|user| user.username.as_str());
+        let text = format!("Chatting with, {username}", );
         Paragraph::new(text)
             .block(Block::bordered())
             .render(header_area, buf);
 
-        let mut constraints = Vec::<Constraint>::new();
+        let constraints: Vec<Constraint> = 
+            self.chat.iter().map(|_| Constraint::Length(3)).collect();
 
-        for _ in 0..10 {
-            constraints.push(Constraint::Length(3))
+        let areas = Layout::vertical(constraints).split(inner);
+
+        for (chat, area) in self.chat.iter().zip(areas.iter()) {
+            Paragraph::new(chat.content.as_str())
+                .block(Block::default().borders(Borders::BOTTOM))
+                .render(*area, buf);
         }
-
-        let areas = Layout::vertical(constraints).split(messages_area);
 
         for area in areas.iter() {
             Paragraph::new("test")
