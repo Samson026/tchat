@@ -1,7 +1,7 @@
 mod api;
 mod client;
-mod ws;
 mod tui;
+mod ws;
 
 use client::ClientApp;
 use tokio_tungstenite::tungstenite::Result;
@@ -21,10 +21,12 @@ async fn main() -> Result<()> {
 
     let mut tui = App::new(client);
     let mut terminal = ratatui::init();
-    
+
     match terminal.clear() {
         Ok(()) => tui.run(&mut terminal).await?,
-        Err(error) => {eprint!("Error: {error}");}
+        Err(error) => {
+            eprint!("Error: {error}");
+        }
     }
     ratatui::restore();
     Ok(())

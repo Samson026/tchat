@@ -4,7 +4,10 @@ use models::{NewUserRequest, User};
 use reqwest::Error;
 use serde::de::Unexpected::Other;
 
-use protocol::{CREATE_USER_PATH, LOGIN_PATH, SERVER_ADDRESS};
+use protocol::{CREATE_USER_PATH, GET_MESSAGES, GET_USERS, LOGIN_PATH, SERVER_ADDRESS};
+use tokio_tungstenite::tungstenite::Error::Url;
+
+use crate::api::models::ChatMessage;
 
 #[derive(Debug)]
 pub struct Client {
@@ -48,6 +51,37 @@ impl Client {
             .send()
             .await?
             .json::<User>()
+            .await
+    }
+
+    pub async fn get_message(
+        &mut self,
+        sender_id: &i64,
+        receiver_id: &i64,
+    ) -> Result<Vec<ChatMessage>, Error> {
+        let url = format!("http://{SERVER_ADDRESS}{GET_MESSAGES}");
+
+        self.client
+            .get(url)
+            .query(&[
+                ("sender_id", *sender_id),
+                ("recv_id", *receiver_id),
+            ])
+            .send()
+            .await?
+            .error_for_status()?
+            .json::<Vec<ChatMessage>>()
+            .await
+    }
+
+    pub async fn get_users(&mut self) -> Result<Vec<User>, Error> {
+
+        let url = format!("http://{SERVER_ADDRESS}{GET_USERS}")
+        self.client.get(url)
+            .send()
+            .await?
+            .error_for_status()?
+            .json::<Vec<User>>()
             .await
     }
 }

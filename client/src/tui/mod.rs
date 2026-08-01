@@ -5,25 +5,28 @@ use ratatui::{
     DefaultTerminal, Frame, buffer::Buffer, layout::{
         Constraint::{self, Percentage},
         Flex, Layout, Rect,
-    }, symbols::block, text::Line, widgets::{Block, List, Paragraph, Widget, Wrap},
+    }, symbols::block, text::Line, widgets::{Block, Borders, List, Paragraph, Widget, Wrap},
 };
+use tokio_tungstenite::tungstenite::protocol::frame;
 
+use crate::{api::models::{ChatMessage, User}, client::ClientApp};
 use crate::tui::Screen::{Chat, Login};
-use crate::client::ClientApp;
 
 #[derive(Debug)]
 enum Screen {
     Login,
-    Chat
+    Chat,
+    Users
 }
 
-#[derive(Debug)]
 pub struct App {
     exit: bool,
     input: String,
     output: String,
     screen: Screen,
-    client: ClientApp
+    client: ClientApp,
+    chat: Vec<ChatMessage>,
+    users: Option<Vec<User>
 }
 
 impl App {
@@ -33,7 +36,9 @@ impl App {
             input: String::new(),
             output: String::new(),
             screen: Login,
-            client: client
+            client: client,
+            chat: Vec::<ChatMessage>::with_capacity(10),
+            users: None
         }
     }
 
@@ -62,7 +67,7 @@ impl App {
     async fn handle_key_event(&mut self, key_event: KeyEvent) {
         match self.screen {
             Login => self.login_handle_key_event(key_event).await,
-            Chat => todo!()
+            Chat => todo!(),
         }
     }
 
@@ -75,56 +80,122 @@ impl App {
                 self.input = String::new();
                 match self.client.login(&username).await {
                     Ok(()) =>  {
-                        self.output = format!("Welcome, {}", username)
+                        self.users = self.client.get_users
                     },
-                    Err(error) => {
-                        self.output = format!("Error, {}", error)
-                    }
+                    Err(error) => self.output = format!("Error, {}", error),
                 }
             }
             KeyCode::Backspace => {
                 self.input.pop();
-            },
+            }
             _ => {}
         }
-    }   
+    }
 
     fn exit(&mut self) {
         self.exit = true;
     }
 
     fn render_login(&self, area: Rect, buf: &mut Buffer) {
-        Block::bordered()
-            .title("Login")
-            .render(area, buf);
-        
-        let [display_area, input_area] = 
-            Layout::vertical([
-                Constraint::Percentage(70),
-                Constraint::Percentage(30)
-            ])
-            .areas(area);
+        Block::bordered().title("Login").render(area, buf);
+
+        let [display_area, input_area] =
+            Layout::vertical([Constraint::Percentage(90), Constraint::Percentage(10)]).areas(area);
 
         let text = format!("Type username to login:\n\n{}", self.output.to_string());
         Paragraph::new(text)
-                .block(Block::bordered())
-                .render(display_area, buf);
-        
+            .block(Block::bordered())
+            .render(display_area, buf);
 
+        let block = Block::bordered();
+        let inner_area = block.inner(input_area);
+        block.render(input_area, buf);
 
         Paragraph::new(self.input.as_str())
-                .block(Block::bordered())
-                .render(input_area, buf);
+            .wrap(Wrap { trim: false })
+            .render(inner_area, buf)
     }
+
+    fn render_chat(&self, area: Rect, buf: &mut Buffer) {
+        Block::bordered().title("Users").render(area, buf);
+
+        let [display_area, input_area] =
+            Layout::vertical([Constraint::Percentage(90), Constraint::Percentage(10)]).areas(area);
+
+        let text = format!("Welcome, {}", self.client.user.as_ref().unwrap().username);
+        Paragraph::new(text)
+            .block(Block::bordered())
+            .render(display_area, buf);
+
+        let mut constraints = Vec::<Constraint>::new();
+
+        for i in 0..10 {
+            constraints.push(
+                Constraint::Length(3)
+            )
+        }
+
+        let areas = Layout::vertical(constraints)
+            .split(display_area);
+
+        for area in areas.iter() {
+            Paragraph::new("test")
+                .block(Block::default()
+                    .borders(Borders::BOTTOM)
+                )
+                .render(*area, buf);
+        }
+
+        Paragraph::new(self.input.as_str())
+            .block(Block::bordered())
+            .render(input_area, buf);
+    }
+
+    fn render_users(&self, area: Rect, buf: &mut Buffer) {
+        Block::bordered().title("Chat").render(area, buf);
+
+        let [display_area, input_area] =
+            Layout::vertical([Constraint::Percentage(90), Constraint::Percentage(10)]).areas(area);
+
+        let text = format!("Welcome, {}", self.client.user.as_ref().unwrap().username);
+        Paragraph::new(text)
+            .block(Block::bordered())
+            .render(display_area, buf);
+
+        let mut constraints = Vec::<Constraint>::new();
+
+        for i in 0..10 {
+            constraints.push(
+                Constraint::Length(3)
+            )
+        }
+
+        let areas = Layout::vertical(constraints)
+            .split(display_area);
+
+        for area in areas.iter() {
+            Paragraph::new("test")
+                .block(Block::default()
+                    .borders(Borders::BOTTOM)
+                )
+                .render(*area, buf);
+        }
+
+        Paragraph::new(self.input.as_str())
+            .block(Block::bordered())
+            .render(input_area, buf);
+    }
+
+
+
 }
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        Block::bordered()
-            .render(area, buf);
+        Block::bordered().render(area, buf);
         match self.screen {
             Login => self.render_login(area, buf),
-            Chat => todo!()
+            Chat => self.render_chat(area, buf),
         }
     }
 }

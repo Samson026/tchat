@@ -8,7 +8,7 @@ crossterm = "0.29.0"
 futures-util = "0.3.33"
 protocol = { path = "../crates/protocol" }
 ratatui = "0.30.2"
-reqwest = { version = "0.13.4", features = ["json"] }
+reqwest = { version = "0.13.4", features = ["json", "query"] }
 serde = { version = "1.0.229", features = ["derive"] }
 tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread"] }
 tokio-tungstenite = "0.30.0"

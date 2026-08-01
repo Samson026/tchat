@@ -5,12 +5,22 @@ mod db;
 #[path = "../src/state.rs"]
 mod state;
 
-use axum::{Router, routing::{get, post}};
+use axum::{
+    Router,
+    routing::{get, post},
+};
 use futures_util::{SinkExt, StreamExt};
 use protocol::{CREATE_USER_PATH, LOGIN_PATH, WEBSOCKET_PATH};
 use sqlx::sqlite::SqlitePoolOptions;
-use std::{fs, time::{Duration, SystemTime, UNIX_EPOCH}};
-use tokio::{net::TcpListener, task::JoinHandle, time::{sleep, timeout}};
+use std::{
+    fs,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
+use tokio::{
+    net::TcpListener,
+    task::JoinHandle,
+    time::{sleep, timeout},
+};
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 
 fn test_db_path() -> String {
@@ -49,9 +59,7 @@ async fn spawn_test_server() -> (JoinHandle<()>, String, i64, i64, String, Strin
     let listener = TcpListener::bind("127.0.0.1:0")
         .await
         .expect("could not bind test listener");
-    let addr = listener
-        .local_addr()
-        .expect("could not read listener addr");
+    let addr = listener.local_addr().expect("could not read listener addr");
 
     let server = tokio::spawn(async move {
         axum::serve(listener, app)
@@ -111,8 +119,7 @@ async fn sending_a_message_delivers_it_to_the_other_user() {
 
         sender_socket
             .send(Message::text(
-                serde_json::to_string(&sent_message)
-                    .expect("could not serialize sent message"),
+                serde_json::to_string(&sent_message).expect("could not serialize sent message"),
             ))
             .await
             .expect("sender failed to send message");
@@ -127,8 +134,8 @@ async fn sending_a_message_delivers_it_to_the_other_user() {
             panic!("receiver got a non-text websocket message");
         };
 
-        let delivered: api::models::ChatMessage = serde_json::from_str(&text)
-            .expect("could not deserialize delivered message");
+        let delivered: api::models::ChatMessage =
+            serde_json::from_str(&text).expect("could not deserialize delivered message");
 
         assert_eq!(delivered.sender_id, sent_message.sender_id);
         assert_eq!(delivered.recv_id, sent_message.recv_id);

@@ -70,4 +70,22 @@ impl ClientApp {
         }
         Ok(())
     }
+
+    pub async fn get_messages(&mut self, receiver_id: &i64) -> Result<Vec<ChatMessage>, Error> {
+        let user = match self.user.as_ref() {
+            Some(user) => user,
+            None => {
+                return Err(Error::other("User not logged in"));
+            }
+        };
+
+        match self.client.get_message(&user.id, receiver_id).await {
+            Ok(messages) => Ok(messages),
+            Err(error) => {
+                Err(Error::other(error))
+            }
+        }
+    }
+
+    
 }
