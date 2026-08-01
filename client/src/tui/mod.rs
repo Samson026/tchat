@@ -23,10 +23,8 @@ enum Screen {
 }
 
 enum Command {
-    Chat {
-        User: String
-    },
-    Users
+    Chat { User: String },
+    Users,
 }
 
 pub struct App {
@@ -40,15 +38,15 @@ pub struct App {
 }
 
 fn parse_cmd(cmd: &str) -> Result<Command, String> {
-    let args = shell_words::split(cmd)
-        .map_err(|error| error.to_string())?;
+    let args = shell_words::split(cmd).map_err(|error| error.to_string())?;
 
     match args.as_slice() {
-        [command, username] if command == "/chat" => {
-            Ok(Command::Chat { User: username.to_string() })
-        },
+        [command, username] if command == "/chat" => Ok(Command::Chat {
+            User: username.to_string(),
+        }),
+        [command] if command == "/users" => Ok(Command::Users),
         [] => Err("Enter a command".to_string()),
-        [command, ..] => Err(format!("Unknown command: {command}"))
+        [command, ..] => Err(format!("Unknown command: {command}")),
     }
 }
 
@@ -88,50 +86,38 @@ impl App {
     }
 
     async fn handle_key_event(&mut self, key_event: KeyEvent) {
-        match 
-        // match self.screen {
-        //     Login => self.login_handle_key_event(key_event).await,
-        //     Chat => todo!(),
-        //     Users => self.users_handle_key_event(key_event),
-        // }
-    }
-
-    async fn login_handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Esc => self.exit(),
             KeyCode::Char(c) => self.input.push(c),
-            KeyCode::Enter => {
-                let username = self.input.clone();
-                self.input = String::new();
-                match self.client.login(&username).await {
-                    Ok(()) => match self.client.get_users().await {
-                        Ok(users) => {
-                            let current_user_id = self.client.user.as_ref().map(|user| user.id);
-                            self.users = Some(
-                                users
-                                    .into_iter()
-                                    .filter(|user| Some(user.id) != current_user_id)
-                                    .collect(),
-                            );
-                            self.screen = Users;
-                        }
-                        Err(error) => {
-                            self.output = format!("Error: {}", error);
-                        }
-                    },
-                    Err(error) => self.output = format!("Error, {}", error),
+            KeyCode::Enter => match self.screen {
+                Login => {
+                    let username = self.input.clone();
+                    self.input = String::new();
+                    match self.client.login(&username).await {
+                        Ok(()) => match self.client.get_users().await {
+                            Ok(users) => {
+                                let current_user_id = self.client.user.as_ref().map(|user| user.id);
+                                self.users = Some(
+                                    users
+                                        .into_iter()
+                                        .filter(|user| Some(user.id) != current_user_id)
+                                        .collect(),
+                                );
+                                self.screen = Users;
+                            }
+                            Err(error) => {
+                                self.output = format!("Error: {}", error);
+                            }
+                        },
+                        Err(error) => self.output = format!("Error, {}", error),
+                    }
                 }
-            }
+                Chat | Users => self.handle_command().await,
+            },
             KeyCode::Backspace => {
                 self.input.pop();
             }
             _ => {}
-        }
-    }
-
-    fn users_handle_key_event(&mut self, key_event: KeyEvent) {
-        if key_event.code == KeyCode::Esc {
-            self.exit();
         }
     }
 
@@ -143,27 +129,24 @@ impl App {
         let cmd = parse_cmd(&self.input);
 
         match cmd {
-            Ok(cmd) => {
-                match cmd {
-                    Command::Chat { User: username } => {
-                        self.screen = Chat;
-                    },
-                    Command::Users => {
-                        self.users = match self.client.get_users().await {
-                            Ok(users) => {
-                                Some(users)
-                            },
-                            Err(_) => None
-                        };
-                        self.screen = Users;
-                    }
-                    _ => todo!()
+            Ok(cmd) => match cmd {
+                Command::Chat { User: username } => {
+                    self.screen = Chat;
                 }
-            }
+                Command::Users => {
+                    self.users = match self.client.get_users().await {
+                        Ok(users) => Some(users),
+                        Err(_) => None,
+                    };
+                    self.screen = Users;
+                }
+                _ => todo!(),
+            },
             Err(error) => {
                 self.output = error;
-            } 
+            }
         }
+        self.input = String::new();
     }
 
     fn render_login(&self, area: Rect, buf: &mut Buffer) {
