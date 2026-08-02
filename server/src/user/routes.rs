@@ -1,8 +1,20 @@
-use axum::{Json, extract::State, http::StatusCode, response::{IntoResponse, Response}};
+use axum::{
+    Json, Router,
+    extract::State,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    routing::{get, post},
+};
+use protocol::{CREATE_USER_PATH, GET_USERS, LOGIN_PATH};
 
 use crate::{state::AppState, user::models::{LoginRequest, User}};
 
-
+pub fn router() -> Router<AppState> {
+    Router::new()
+        .route(CREATE_USER_PATH, post(create_user))
+        .route(LOGIN_PATH, post(login))
+        .route(GET_USERS, get(get_users))
+}
 
 pub async fn create_user(
     State(mut app_state): State<AppState>,
