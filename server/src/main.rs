@@ -2,9 +2,10 @@ mod api;
 mod db;
 mod messages;
 mod state;
-pub mod user;
+mod user;
+mod websocket;
 
-use axum::{Router, routing::get};
+use axum::Router;
 use protocol::{SERVER_ADDRESS, WEBSOCKET_PATH};
 use std::io;
 use tokio::net::TcpListener;
@@ -24,7 +25,7 @@ async fn main() -> io::Result<()> {
     let app = Router::new()
         .merge(user::router())
         .merge(messages::router())
-        .route(WEBSOCKET_PATH, get(api::upgrade))
+        .merge(websocket::router())
         .with_state(app_state);
 
     let listener = TcpListener::bind(SERVER_ADDRESS).await?;
