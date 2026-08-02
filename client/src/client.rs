@@ -57,6 +57,30 @@ impl ClientApp {
         Ok(())
     }
 
+    pub fn websocket_connected(&self) -> bool {
+        self.ws.is_some()
+    }
+
+    pub async fn recv_msg(&mut self) -> Result<Option<ChatMessage>, Error> {
+        let result = match self.ws.as_mut() {
+            Some(ws) => ws.recv().await,
+            None => return Err(Error::other("Websocket is not connected"))
+        };
+
+        match result {
+            Ok(Some(json)) => {
+                let message = serde_json::from_str::<ChatMessage>(&json).map_err(Error::other)?;
+                Ok(Some(message))
+            },
+            Ok(None) => {
+                Ok(None)
+            },
+            Err(error) => {
+                Err(Error::other(error))
+            }
+        }
+    }
+
     pub async fn send_message(&mut self, receiver_id: &i64, message: &str) -> Result<(), Error> {
         let ws = self.ws.as_mut().unwrap();
         let user = self.user.as_ref().unwrap();

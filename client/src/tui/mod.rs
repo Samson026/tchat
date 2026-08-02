@@ -1,6 +1,7 @@
 use std::io::{self, Error};
 
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use crossterm::event::{self, Event, EventStream, KeyCode, KeyEvent, KeyEventKind};
+use futures_util::StreamExt;
 use ratatui::{
     DefaultTerminal, Frame,
     buffer::Buffer,
@@ -76,23 +77,36 @@ impl App {
     pub async fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
-            self.handle_events().await?
+            let mut events = EventStream::new();
+            tokio::select! {
+                event = events.next() => {
+                    match event {
+                        Some(Ok(Event::Key(key_event))) => {
+                            self.handle_key_event(key_event).await
+                        }
+                        _ => {}
+                    }
+                },
+
+                message = self.client.recv_msg(), if self.client.websocket_connected() => {
+                    match message {
+                        Ok(Some(msg)) => {
+                            self.chat.push(msg);
+                        }
+                        Ok(None) => {},
+                        Err(error) => {
+                            self.output = error.to_string();
+                        }
+                    }
+                }
+            }
+            
         }
         Ok(())
     }
 
     fn draw(&self, frame: &mut Frame) {
         frame.render_widget(self, frame.area());
-    }
-
-    async fn handle_events(&mut self) -> io::Result<()> {
-        match event::read()? {
-            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                self.handle_key_event(key_event).await
-            }
-            _ => {}
-        }
-        Ok(())
     }
 
     async fn handle_key_event(&mut self, key_event: KeyEvent) {
@@ -168,10 +182,10 @@ impl App {
                     Some(recv) => match self.client.send_message(&recv.id, &Content).await {
                         Ok(_) => {
                             if let Some(user) = self.client.user.as_ref() {
-                                self.chat.push(ChatMessage { 
-                                    sender_id: user.id, 
-                                    recv_id: recv.id, 
-                                    content: Content 
+                                self.chat.push(ChatMessage {
+                                    sender_id: user.id,
+                                    recv_id: recv.id,
+                                    content: Content,
                                 })
                             }
                         }
@@ -225,7 +239,7 @@ impl App {
             let sender_name = match (self.client.user.as_ref(), self.chatting_user.as_ref()) {
                 (Some(user), _) => user.username.as_str(),
                 (_, Some(chatting_user)) => chatting_user.username.as_str(),
-                _ => "Unknown"
+                _ => "Unknown",
             };
 
             let msg = format!("{sender_name}: {}", chat.content);
