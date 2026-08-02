@@ -237,7 +237,7 @@ impl App {
 
         for (chat, area) in self.chat.iter().zip(areas.iter()) {
             let sender_name = match (self.client.user.as_ref(), self.chatting_user.as_ref()) {
-                (Some(user), _) => user.username.as_str(),
+                (Some(user), _) if user.id == chat.sender_id => user.username.as_str(),
                 (_, Some(chatting_user)) => chatting_user.username.as_str(),
                 _ => "Unknown",
             };
