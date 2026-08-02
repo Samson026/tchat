@@ -1,6 +1,7 @@
 mod api;
 mod db;
 mod state;
+pub mod user;
 
 use axum::{Router, routing::get, routing::post};
 use protocol::{

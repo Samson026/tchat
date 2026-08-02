@@ -13,30 +13,6 @@ use axum::{
 
 use models::{ChatHistoryReq, LoginRequest, WebSocketParams};
 
-pub async fn create_user(
-    State(mut app_state): State<AppState>,
-    Json(data): Json<LoginRequest>,
-) -> Response {
-    println!("create user called");
-
-    match app_state.db.add_user(&data.username).await {
-        Ok(user) => Json(user).into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Could not create user").into_response(),
-    }
-}
-
-pub async fn login(
-    State(app_state): State<AppState>,
-    Json(data): Json<LoginRequest>,
-) -> Result<Json<User>, (StatusCode, &'static str)> {
-    println!("login called");
-
-    match app_state.db.get_user(&data.username).await {
-        Ok(user) => Ok(Json(user)),
-        Err(_) => Err((StatusCode::NOT_FOUND, "User not found")),
-    }
-}
-
 pub async fn get_messages(
     State(mut app_state): State<AppState>,
     Query(params): Query<ChatHistoryReq>,
