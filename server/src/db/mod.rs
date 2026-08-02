@@ -102,11 +102,15 @@ impl Database {
         receiver_id: &i64,
     ) -> Result<Vec<Message>, sqlx::Error> {
         sqlx::query_as::<_, Message>(
-            "SELECT * FROM messages
-            WHERE sender_id == ? AND receiver_id == ?",
+            "SELECT id, sender_id, receiver_id AS recv_id, content, time FROM messages
+            WHERE (sender_id = ? AND receiver_id = ?)
+                OR (sender_id = ? AND receiver_id = ?)
+            ORDER BY time ASC, id ASC",
         )
         .bind(sender_id)
         .bind(receiver_id)
+        .bind(receiver_id)
+        .bind(sender_id)
         .fetch_all(&self.pool)
         .await
     }
