@@ -1,10 +1,6 @@
-mod models;
-
 use sqlx::Error;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
 use std::path::Path;
-
-pub use models::User;
 
 #[derive(Clone)]
 pub struct Database {

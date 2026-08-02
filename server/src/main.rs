@@ -1,4 +1,3 @@
-mod api;
 mod db;
 mod messages;
 mod state;
