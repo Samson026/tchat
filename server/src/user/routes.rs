@@ -7,7 +7,10 @@ use axum::{
 };
 use protocol::{CREATE_USER_PATH, GET_USERS, LOGIN_PATH};
 
-use crate::{state::AppState, user::models::{LoginRequest, User}};
+use crate::{
+    state::AppState,
+    user::models::{LoginRequest, User},
+};
 
 pub fn router() -> Router<AppState> {
     Router::new()

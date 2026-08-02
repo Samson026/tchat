@@ -4,12 +4,12 @@ use crate::user::models::User;
 
 #[derive(Clone)]
 pub struct UserDB {
-    pool: SqlitePool
+    pool: SqlitePool,
 }
 
 impl UserDB {
     pub fn new(pool: SqlitePool) -> Self {
-        Self {pool: pool}
+        Self { pool: pool }
     }
 
     pub async fn add_user(&mut self, username: &str) -> Result<User, sqlx::Error> {

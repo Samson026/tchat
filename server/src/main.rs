@@ -1,12 +1,15 @@
 mod api;
 mod db;
+mod messages;
 mod state;
 pub mod user;
 
 use axum::{Router, routing::get};
-use protocol::{GET_MESSAGES, SERVER_ADDRESS, WEBSOCKET_PATH};
+use protocol::{SERVER_ADDRESS, WEBSOCKET_PATH};
 use std::io;
 use tokio::net::TcpListener;
+
+use crate::{messages::db::MessagesDB, user::db::UserDB};
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -14,12 +17,14 @@ async fn main() -> io::Result<()> {
         .await
         .expect("Could not connect to db");
 
-    let app_state = state::AppState::new(db);
+    let user_db = UserDB::new(db.pool.clone());
+    let message_db = MessagesDB::new(db.pool.clone());
+    let app_state = state::AppState::new(user_db, message_db);
 
     let app = Router::new()
         .merge(user::router())
+        .merge(messages::router())
         .route(WEBSOCKET_PATH, get(api::upgrade))
-        .route(GET_MESSAGES, get(api::get_messages))
         .with_state(app_state);
 
     let listener = TcpListener::bind(SERVER_ADDRESS).await?;
