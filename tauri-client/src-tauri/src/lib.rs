@@ -1,8 +1,9 @@
-use crate::{user::Client, ws::WsState};
+use crate::{user::Client, ws::WsState, messages::MessageClient};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 mod user;
 mod ws;
+mod messages;
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -15,11 +16,14 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(Client::new())
         .manage(WsState::new())
+        .manage(MessageClient::new())
         .invoke_handler(tauri::generate_handler![greet,
             ws::commands::connect_ws,
             ws::commands::send,
             user::commands::create_user,
-            user::commands::login])
+            user::commands::login,
+            messages::commands::get_messages,
+            messages::commands::get_users])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
