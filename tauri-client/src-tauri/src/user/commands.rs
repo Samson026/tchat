@@ -13,10 +13,10 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new() -> Result<Self, Error> {
+    pub fn new() -> Self {
         let client = reqwest::Client::new();
 
-        Ok(Self { client })
+        Self { client }
     }
 
     pub async fn create_user(&self, username: &str) -> Result<User, Error> {
