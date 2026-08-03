@@ -1,4 +1,4 @@
-mod commands;
+pub(crate) mod commands;
 mod models;
 
-pub use commands::{create_user, Client};
+pub use commands::Client;

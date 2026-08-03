@@ -37,7 +37,7 @@ impl Client {
             .await
     }
 
-    pub async fn login(&mut self, username: &str) -> Result<User, Error> {
+    pub async fn login(&self, username: &str) -> Result<User, Error> {
         let body = NewUserRequest {
             username: username.to_string(),
         };
@@ -61,6 +61,18 @@ pub async fn create_user(
     client
         .inner()
         .create_user(&username)
+        .await
+        .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+pub async fn login(
+    client: tauri::State<'_, Client>,
+    username: String
+) -> Result<User, String> {
+    client
+        .inner()
+        .login(&username)
         .await
         .map_err(|error| error.to_string())
 }
