@@ -22,8 +22,9 @@ pub fn run() {
             ws::commands::send,
             user::commands::create_user,
             user::commands::login,
+            user::commands::get_users,
             messages::commands::get_messages,
-            messages::commands::get_users])
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
