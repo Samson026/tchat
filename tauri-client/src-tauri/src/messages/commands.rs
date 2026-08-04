@@ -12,8 +12,7 @@ pub struct MessageClient {
 }
 
 impl MessageClient {
-    pub fn new() -> Self {
-        let client = reqwest::Client::new();
+    pub fn new(client: reqwest::Client) -> Self {
 
         Self { client }
     }

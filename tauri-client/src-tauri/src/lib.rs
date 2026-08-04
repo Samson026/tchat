@@ -12,11 +12,16 @@ fn greet(name: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let http_client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .expect("Failed to build http");
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(Client::new())
+        .manage(Client::new(http_client.clone()))
         .manage(WsState::new())
-        .manage(MessageClient::new())
+        .manage(MessageClient::new(http_client.clone()))
         .invoke_handler(tauri::generate_handler![greet,
             ws::commands::connect_ws,
             ws::commands::send,

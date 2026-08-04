@@ -16,11 +16,12 @@
             <input type="password"
                 class="w-full max-w-sm rounded-lg border border-border text-text bg-grey my-1 font-extralight"
                 placeholder="Password"
+                v-model="password"
             >
             <button
                 class="bg-primary w-30 self-center rounded-lg hover:bg-primary-hover my-2"
                 @click="login"
-                type="button"
+                type="submit"
             >
             Login
             </button>
@@ -38,6 +39,7 @@ import type { User } from "../models/user";
 import { useState } from "../stores/state";
 
 const username = ref("");
+const password = ref("")
 const user = ref<User | null>(null);
 const state = useState();
 const router = useRouter()
@@ -45,6 +47,7 @@ const router = useRouter()
 async function login() {
 	user.value = await invoke<User>("login", {
 		username: username.value,
+        password: password.value
 	});
 
 	if (user.value.username) {
