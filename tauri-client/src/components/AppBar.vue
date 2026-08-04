@@ -12,7 +12,6 @@
                 class="-ml-2"
             />
         </div>
-        
    </div>
 </template>
 

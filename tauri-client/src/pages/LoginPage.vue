@@ -33,13 +33,14 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import type { User } from "../models/user";
-import { router } from "../router";
 import { useState } from "../stores/state";
 
 const username = ref("");
 const user = ref<User | null>(null);
 const state = useState();
+const router = useRouter()
 
 async function login() {
 	user.value = await invoke<User>("login", {

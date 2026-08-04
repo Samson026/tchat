@@ -1,13 +1,15 @@
 
 
 use futures_util::{SinkExt, StreamExt, stream::{SplitSink, SplitStream}};
-use protocol::{SERVER_URL, WEBSOCKET_PATH};
+use protocol::{SERVER_ADDRESS, WEBSOCKET_PATH};
 use tauri::Emitter;
 use tokio::{net::TcpStream, sync::Mutex};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
     tungstenite::{Message, Result},
 };
+
+use crate::ws::models::ChatMessage;
 
 type Socket = WebSocketStream<MaybeTlsStream<TcpStream>>;
 type Writer = SplitSink<Socket, Message>;
@@ -25,7 +27,7 @@ impl WebSocketConnection {
     }
 
     pub fn split(self) -> (Writer, Reader) {
-        self.split()
+        self.socket.split()
     }
 }
 
@@ -45,9 +47,11 @@ impl WsState {
 pub async fn connect_ws(
     app: tauri::AppHandle,
     state: tauri::State<'_, WsState>,
+    user_id: i64
 ) -> Result<(), String> {
-    let url = format!("{SERVER_URL}{WEBSOCKET_PATH}");
-    let ws = WebSocketConnection::connect(&url).await
+    let url = format!("ws://{SERVER_ADDRESS}{WEBSOCKET_PATH}?user_id={user_id}");
+    let ws = WebSocketConnection::connect(&url)
+        .await
         .map_err(|error| error.to_string())?;
 
     let (writer, mut reader) = ws.split();
@@ -80,7 +84,7 @@ pub async fn connect_ws(
 #[tauri::command]
 pub async fn send(
     state: tauri::State<'_, WsState>,
-    message: String
+    message: ChatMessage
 ) -> Result<(), String> {
     let mut connection = state.connection.lock().await;
 
@@ -88,7 +92,9 @@ pub async fn send(
         .as_mut()
         .ok_or_else(|| "Websocket is not connected".to_string())?;
 
-    ws.send(Message::text(message)).await.map_err(|error| error.to_string())?;
+    let json = serde_json::to_string(&message).map_err(|error| error.to_string())?;
+
+    ws.send(Message::text(json)).await.map_err(|error| error.to_string())?;
     Ok(())
 }
 
