@@ -1,11 +1,12 @@
 <template>
-    <main>
-        <div>
+    <main class="h-full px-10 py-10">
+        <div class="flex flex-col h-full justify-end">
             <ChatMessage
                 v-for="(message, index) in state.chat"
                 :key="index"
                 :message="message"
                 :primary="message.sender_id === state.user?.id"
+                :class="message.sender_id === state.user?.id ? 'self-end' : 'self-start'"
             />
         </div>
     </main>
@@ -25,8 +26,8 @@ const state = useState()
 async function getChat(userID: number) {
     const recv_id: number = Number(route.params.id)
     state.chat = await invoke<Message[]>("get_messages", {
-        sender_id: state.user?.id,
-        receiver_id: recv_id
+        senderId: userID,
+        receiverId: recv_id
     })
 }
 

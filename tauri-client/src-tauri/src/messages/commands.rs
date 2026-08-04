@@ -12,10 +12,10 @@ pub struct MessageClient {
 }
 
 impl MessageClient {
-    pub fn new() -> Result<Self, Error> {
+    pub fn new() -> Self {
         let client = reqwest::Client::new();
 
-        Ok(Self { client })
+        Self { client }
     }
 
     pub async fn get_messages(

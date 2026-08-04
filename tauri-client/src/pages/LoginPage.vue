@@ -48,7 +48,7 @@ async function login() {
 
 	if (user.value.username) {
 		state.user = user.value;
-		router.push("/home/$2");
+		router.push("/home/2");
 	}
 }
 </script>

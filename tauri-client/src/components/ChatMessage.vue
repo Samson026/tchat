@@ -1,11 +1,8 @@
 <template>
-    <div class="flex w-min rounded-2xl"
+    <div class="flex w-min rounded-2xl my-0.5"
         :class="primary ? 'bg-primary' : 'bg-secondary'"
     >
-        <h3 class="text-text mx-2">
-            {{ state.getUsername(message.sender_id) }}:
-        </h3>
-        <p class="text-text mx-2 ml-1 w-fit whitespace-nowrap">
+        <p class="text-text px-3 ml-1 w-fit whitespace-nowrap min-w-5">
             {{ message.content }}
         </p>
     </div>
