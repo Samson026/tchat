@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-    import { useState } from '../stores/state';
+import { useState } from "../stores/state";
 
-    const state = useState()
+const state = useState();
 </script>

@@ -30,24 +30,24 @@
 </template>
 
 <script setup lang="ts">
-    import { invoke } from '@tauri-apps/api/core';
-    import { ref } from 'vue';
-    import { router } from '../router';
-    import { User } from '../models/user';
-    import { useState } from '../stores/state';
+import { invoke } from "@tauri-apps/api/core";
+import { ref } from "vue";
+import { router } from "../router";
+import type { User } from "../models/user";
+import { useState } from "../stores/state";
 
-    const username = ref("")
-    const user = ref<User | null>(null)
-    const state = useState()
+const username = ref("");
+const user = ref<User | null>(null);
+const state = useState();
 
-    async function login() {
-        user.value = await invoke<User>("login", {
-            username: username.value
-        })
+async function login() {
+	user.value = await invoke<User>("login", {
+		username: username.value,
+	});
 
-        if (user.value.username) {
-            state.user = user.value
-            router.push('/home')
-        }
-    }
+	if (user.value.username) {
+		state.user = user.value;
+		router.push("/home");
+	}
+}
 </script>
