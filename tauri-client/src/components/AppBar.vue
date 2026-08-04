@@ -17,11 +17,11 @@
 </template>
 
 <script setup lang="ts">
-import UserBtn from './UserBtn.vue';
 import { invoke } from '@tauri-apps/api/core';
 import { onMounted } from 'vue';
-import { useState } from '../stores/state.ts';
 import type { User } from '../models/user.ts';
+import { useState } from '../stores/state.ts';
+import UserBtn from './UserBtn.vue';
 
 const state = useState()
 

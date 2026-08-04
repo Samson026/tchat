@@ -11,7 +11,7 @@ export const useState = defineStore("stateStore", {
 		return {
 			// all these properties will have their type inferred automatically
 			user: null,
-			users: null
+			users: null,
 		};
 	},
 });

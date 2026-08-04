@@ -4,7 +4,7 @@ import HomePage from "../pages/HomePage.vue";
 import LoginPage from "../pages/LoginPage.vue";
 
 const routes = [
-	{ path: "/", component: HomePage },
+	{ path: "/", component: LoginPage },
 	{ path: "/about", component: App },
 	{ path: "/home", component: HomePage },
 ];
