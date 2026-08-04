@@ -68,15 +68,18 @@ async function sendMessage(message: string) {
         content: message,
     }
 
-    const resp = await invoke("send", {
-        message: msg
-    })
+    try{
+        await invoke("send", {
+            message: msg
+        })
 
-    console.log(resp)
-    if (state.chat === null) {
-        state.chat = [msg]
+        if (state.chat === null) {
+            state.chat = [msg]
+        }
+        state.chat.push(msg)
+    } catch (error) {
+        console.log(error)
     }
-    state.chat.push(msg)
 }
 
 async function handleSubmit() {
