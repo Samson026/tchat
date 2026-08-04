@@ -13,15 +13,15 @@ export const useState = defineStore("stateStore", {
 			// all these properties will have their type inferred automatically
 			user: null,
 			users: null,
-			chat: null
+			chat: null,
 		};
 	},
 	getters: {
 		getUsername: (state) => {
 			return (userId: number): string => {
 				const user = state.users?.find((user) => user.id === userId);
-				return user?.username ?? "Unknown user"
-			}
-		}
-	}
+				return user?.username ?? "Unknown user";
+			};
+		},
+	},
 });

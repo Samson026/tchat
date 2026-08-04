@@ -37,10 +37,10 @@
 
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import ChatMessage from '../components/ChatMessage.vue';
 import type { Message } from '../models/user.ts';
-import { useRoute } from 'vue-router';
-import { onMounted, ref } from 'vue';
 import { useState } from '../stores/state.ts';
 
 const route = useRoute()

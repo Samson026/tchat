@@ -10,12 +10,9 @@
 
 <script setup lang="ts">
 import type { Message } from '../models/user';
-import { useState } from '../stores/state';
-
-const state = useState()
 
 defineProps<{
     message: Message,
-    primary: Boolean 
+    primary: boolean 
 }>();
 </script>
