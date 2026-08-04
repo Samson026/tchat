@@ -34,12 +34,13 @@
 import { invoke } from "@tauri-apps/api/core";
 import { ref } from "vue";
 import type { User } from "../models/user";
-import { router } from "../router";
 import { useState } from "../stores/state";
+import { useRouter } from "vue-router";
 
 const username = ref("");
 const user = ref<User | null>(null);
 const state = useState();
+const router = useRouter()
 
 async function login() {
 	user.value = await invoke<User>("login", {
@@ -48,7 +49,7 @@ async function login() {
 
 	if (user.value.username) {
 		state.user = user.value;
-		router.push("/home/2");
+		router.push("/home");
 	}
 }
 </script>
