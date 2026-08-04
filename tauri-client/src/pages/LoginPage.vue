@@ -33,9 +33,9 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import type { User } from "../models/user";
 import { useState } from "../stores/state";
-import { useRouter } from "vue-router";
 
 const username = ref("");
 const user = ref<User | null>(null);

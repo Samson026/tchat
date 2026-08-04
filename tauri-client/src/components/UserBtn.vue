@@ -9,10 +9,10 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import type { User, Message } from '../models/user';
-import { useState } from '../stores/state';
 import { invoke } from '@tauri-apps/api/core';
+import { useRouter } from 'vue-router';
+import type { Message, User } from '../models/user';
+import { useState } from '../stores/state';
 
 const router = useRouter()
 const state = useState()
