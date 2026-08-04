@@ -7,26 +7,29 @@
 
             <h1 class="text-text text-center text-4xl font-semibold opacity-50 my-4 px-10">Login</h1>
 
-            <input 
-                type="text"
-                class="w-full max-w-sm rounded-lg border border-border text-text bg-grey my-1 font-extralight"
-                placeholder="Username"
-                v-model="username"
+            <form class="flex flex-col h-max"
+                @submit.prevent="login"
             >
-            <input type="password"
-                class="w-full max-w-sm rounded-lg border border-border text-text bg-grey my-1 font-extralight"
-                placeholder="Password"
-                v-model="password"
-            >
-            <button
-                class="bg-primary w-30 self-center rounded-lg hover:bg-primary-hover my-2"
-                @click="login"
-                type="submit"
-            >
-            Login
-            </button>
+                <input 
+                    type="text"
+                    class="w-full max-w-sm rounded-lg border border-border text-text bg-grey my-1 font-extralight"
+                    placeholder="Username"
+                    v-model="username"
+                >
+                <input type="password"
+                    class="w-full max-w-sm rounded-lg border border-border text-text bg-grey my-1 font-extralight"
+                    placeholder="Password"
+                    v-model="password"
+                >
+                <button
+                    class="bg-primary w-30 self-center rounded-lg hover:bg-primary-hover my-2"
+                    type="submit"
+                >
+                Login
+                </button>
+            </form>
+            
         </div>
-        
     </div>
   </main>
 </template>
