@@ -1,7 +1,7 @@
 import { createMemoryHistory, createRouter } from "vue-router";
 import App from "../App.vue";
-import Login from "../pages/Login.vue";
 import Home from "../pages/Home.vue";
+import Login from "../pages/Login.vue";
 
 const routes = [
 	{ path: "/", component: Login },

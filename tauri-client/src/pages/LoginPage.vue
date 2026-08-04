@@ -20,6 +20,7 @@
             <button
                 class="bg-sky-500 w-30 self-center rounded-lg hover:bg-sky-700 my-2"
                 @click="login"
+                type="button"
             >
             Login
             </button>
@@ -32,8 +33,8 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
 import { ref } from "vue";
-import { router } from "../router";
 import type { User } from "../models/user";
+import { router } from "../router";
 import { useState } from "../stores/state";
 
 const username = ref("");
