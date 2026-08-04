@@ -14,11 +14,14 @@
                 />
             </div>
             <div class="bg-surface w-full h-20 border border-border rounded-xl px-2 py-2">
-                <form class="flex h-full items-center">
+                <form class="flex h-full items-center"
+                    @submit.prevent="handleSubmit"
+                >
                     <input
                         type="text"
                         placeholder="Message"
                         class="text-text w-full h-full mx-2"
+                        v-model="inputRef"
                     >
                     <button class="text-text bg-primary rounded-2xl min-w-15"
                         type="submit"
@@ -37,11 +40,13 @@ import { invoke } from '@tauri-apps/api/core';
 import ChatMessage from '../components/ChatMessage.vue';
 import type { Message } from '../models/user.ts';
 import { useRoute } from 'vue-router';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useState } from '../stores/state.ts';
 
 const route = useRoute()
 const state = useState()
+
+const inputRef = ref("")
 
 async function getChat(userID: number) {
     const recv_id: number = Number(route.params.id)
@@ -51,8 +56,44 @@ async function getChat(userID: number) {
     })
 }
 
+async function sendMessage(message: string) {
+    if (!state.user)
+        return
+
+    const recv_id = Number(route.params.id)
+
+    const msg: Message = {
+        sender_id: state.user.id,
+        recv_id: recv_id,
+        content: message,
+    }
+
+    const resp = await invoke("send", {
+        message: msg
+    })
+
+    console.log(resp)
+    if (state.chat === null) {
+        state.chat = [msg]
+    }
+    state.chat.push(msg)
+}
+
+async function handleSubmit() {
+    if (inputRef.value === null)
+        return
+
+    await sendMessage(inputRef.value)
+    inputRef.value = ""
+}
+
 onMounted(async () => {
-    if (state.user)
+
+    if (state.user) {
+        await invoke("connect_ws", {
+            userId: state.user.id
+        })
         await getChat(state.user.id)
+    }
 })
 </script>
