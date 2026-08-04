@@ -6,10 +6,11 @@ use axum::{
     routing::{get, post},
 };
 use protocol::{CREATE_USER_PATH, GET_USERS, LOGIN_PATH};
+use tower_sessions::Session;
 
 use crate::{
     state::AppState,
-    user::models::{LoginRequest, User},
+    user::models::{LoginRequest},
 };
 
 pub fn router() -> Router<AppState> {
@@ -40,12 +41,20 @@ pub async fn get_users(State(mut app_state): State<AppState>) -> Response {
 
 pub async fn login(
     State(app_state): State<AppState>,
+    session: Session,
     Json(data): Json<LoginRequest>,
-) -> Result<Json<User>, (StatusCode, &'static str)> {
-    println!("login called");
-
+) -> Response {
+    
     match app_state.userDB.get_user(&data.username).await {
-        Ok(user) => Ok(Json(user)),
-        Err(_) => Err((StatusCode::NOT_FOUND, "User not found")),
+        Ok(user) => {
+            if (data.password == user.password) {
+                session.insert("user_id", user.id.clone()).await.unwrap();
+                return Json(user).into_response();
+            }
+            else {
+                return (StatusCode::UNAUTHORIZED, "Invalid password").into_response()
+            }
+        },
+        Err(_) => (StatusCode::NOT_FOUND, "User not found").into_response(),
     }
 }
