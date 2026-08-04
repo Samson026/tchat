@@ -1,9 +1,13 @@
 <template>
-    <h1>Welcome {{ state.$state.user?.username }}</h1>
+    <div class="flex bg-background">
+        <AppBar/>
+        <main class="flex-1">
+            <RouterView/>
+        </main>
+    </div>
+    
 </template>
 
 <script setup lang="ts">
-import { useState } from "../stores/state";
-
-const state = useState();
+import AppBar from "../components/AppBar.vue";
 </script>

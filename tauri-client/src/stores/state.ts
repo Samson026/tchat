@@ -1,5 +1,6 @@
 interface State {
 	user: User | null;
+	users: User[] | null;
 }
 
 import { defineStore } from "pinia";
@@ -10,6 +11,7 @@ export const useState = defineStore("stateStore", {
 		return {
 			// all these properties will have their type inferred automatically
 			user: null,
+			users: null,
 		};
 	},
 });

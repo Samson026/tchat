@@ -1,24 +1,24 @@
 <template>
-  <main class="grid min-h-screen place-items-center bg-slate-900 p-6 text-white">
+  <main class="grid min-h-screen place-items-center bg-background p-6 text-text">
     <h1 class="text-center text-5xl font-semibold">tChat</h1>
-    <div class="h-64 flex w-full max-w-sm rounded-xl bg-white shadow-2xl">
+    <div class="h-64 flex w-full max-w-sm rounded-xl bg-surface shadow-2xl">
        
         <div class="flex w-full flex-col px-20 py-4">
 
-            <h1 class="text-black text-center text-4xl font-semibold opacity-50 my-4 px-10">Login</h1>
+            <h1 class="text-text text-center text-4xl font-semibold opacity-50 my-4 px-10">Login</h1>
 
             <input 
                 type="text"
-                class="w-full max-w-sm rounded-lg border border-slate-200 text-black bg-grey my-1 font-extralight"
+                class="w-full max-w-sm rounded-lg border border-border text-text bg-grey my-1 font-extralight"
                 placeholder="Username"
                 v-model="username"
             >
             <input type="password"
-                class="w-full max-w-sm rounded-lg border border-slate-300 text-black bg-grey my-1 font-extralight"
+                class="w-full max-w-sm rounded-lg border border-border text-text bg-grey my-1 font-extralight"
                 placeholder="Password"
             >
             <button
-                class="bg-sky-500 w-30 self-center rounded-lg hover:bg-sky-700 my-2"
+                class="bg-primary w-30 self-center rounded-lg hover:bg-primary-hover my-2"
                 @click="login"
                 type="button"
             >
