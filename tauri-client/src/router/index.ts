@@ -12,7 +12,7 @@ const routes = [
 		component: HomePage,
 		children: [
 			{
-				path: "",
+				path: ":id",
 				component: ChatPage,
 			},
 		],
