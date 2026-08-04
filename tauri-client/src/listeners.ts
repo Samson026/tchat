@@ -5,8 +5,9 @@ import { useState } from './stores/state';
 
 
 export function setupListeners() {
+    const state = useState()
+    
     listen<string>("ws-message", (event) => {
-        const state = useState()
         const message = JSON.parse(event.payload) as Message;
         console.log(
             `got message ${event.payload}`
