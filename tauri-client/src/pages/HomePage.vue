@@ -1,9 +1,13 @@
 <template>
-    <h1>Welcome {{ state.$state.user?.username }}</h1>
+    <div class="bg-background">
+        <AppBar/>
+    </div>
+    
 </template>
 
 <script setup lang="ts">
 import { useState } from "../stores/state";
+import AppBar from "../components/AppBar.vue";
 
 const state = useState();
 </script>
