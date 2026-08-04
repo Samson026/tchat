@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::{api::models::ChatMessage, db::Database};
+use crate::{messages::db::MessagesDB, user::db::UserDB, websocket::ChatMessage};
 
 use tokio::sync::{RwLock, mpsc};
 
@@ -8,14 +8,16 @@ type ConnectionRegistry = Arc<RwLock<HashMap<i64, mpsc::UnboundedSender<ChatMess
 
 #[derive(Clone)]
 pub struct AppState {
-    pub db: Database,
+    pub userDB: UserDB,
+    pub messageDB: MessagesDB,
     pub connections: ConnectionRegistry,
 }
 
 impl AppState {
-    pub fn new(db: Database) -> Self {
+    pub fn new(userDB: UserDB, messageDB: MessagesDB) -> Self {
         Self {
-            db,
+            userDB,
+            messageDB,
             connections: Arc::new(RwLock::new(HashMap::new())),
         }
     }

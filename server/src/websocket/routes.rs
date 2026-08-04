@@ -1,71 +1,21 @@
-pub mod models;
-
-use crate::{api::models::ChatMessage, db::User, state::AppState};
 use axum::{
-    Json,
+    Router,
     extract::{
-        Query, State,
-        ws::{Message, WebSocket, WebSocketUpgrade},
+        Query, State, WebSocketUpgrade,
+        ws::{Message, WebSocket},
     },
-    http::StatusCode,
-    response::{IntoResponse, Response},
+    response::Response,
+    routing::get,
+};
+use protocol::WEBSOCKET_PATH;
+
+use crate::{
+    state::AppState,
+    websocket::models::{ChatMessage, WebSocketParams},
 };
 
-use models::{ChatHistoryReq, LoginRequest, WebSocketParams};
-
-pub async fn create_user(
-    State(mut app_state): State<AppState>,
-    Json(data): Json<LoginRequest>,
-) -> Response {
-    println!("create user called");
-
-    match app_state.db.add_user(&data.username).await {
-        Ok(user) => Json(user).into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Could not create user").into_response(),
-    }
-}
-
-pub async fn login(
-    State(app_state): State<AppState>,
-    Json(data): Json<LoginRequest>,
-) -> Result<Json<User>, (StatusCode, &'static str)> {
-    println!("login called");
-
-    match app_state.db.get_user(&data.username).await {
-        Ok(user) => Ok(Json(user)),
-        Err(_) => Err((StatusCode::NOT_FOUND, "User not found")),
-    }
-}
-
-pub async fn get_messages(
-    State(mut app_state): State<AppState>,
-    Query(params): Query<ChatHistoryReq>,
-) -> Response {
-    match app_state
-        .db
-        .get_messages(&params.sender_id, &params.recv_id)
-        .await
-    {
-        Ok(message) => Json(
-            message
-                .into_iter()
-                .map(|msg| ChatMessage {
-                    sender_id: msg.sender_id,
-                    recv_id: msg.recv_id,
-                    content: msg.content,
-                })
-                .collect::<Vec<_>>(),
-        )
-        .into_response(),
-        Err(_) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
-    }
-}
-
-pub async fn get_users(State(mut app_state): State<AppState>) -> Response {
-    match app_state.db.get_users().await {
-        Ok(users) => Json(users).into_response(),
-        Err(_) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
-    }
+pub fn router() -> Router<AppState> {
+    Router::new().route(WEBSOCKET_PATH, get(upgrade))
 }
 
 pub async fn upgrade(
@@ -105,7 +55,7 @@ pub async fn handle_socket(mut socket: WebSocket, user_id: i64, mut app_state: A
 
                       // add msg to db
 
-                      match app_state.db.add_message(&parsed.content, &parsed.sender_id, &parsed.recv_id).await {
+                      match app_state.messageDB.add_message(&parsed.content, &parsed.sender_id, &parsed.recv_id).await {
                         Ok(_) => {
                             println!("saved msg to db");
                         },

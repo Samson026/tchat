@@ -1,14 +1,10 @@
-mod models;
-
 use sqlx::Error;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
 use std::path::Path;
 
-pub use models::{Message, User};
-
 #[derive(Clone)]
 pub struct Database {
-    pool: SqlitePool,
+    pub pool: SqlitePool,
 }
 
 impl Database {
@@ -49,75 +45,5 @@ impl Database {
         .await?;
 
         Ok(Self { pool })
-    }
-
-    pub async fn add_user(&mut self, username: &str) -> Result<User, sqlx::Error> {
-        sqlx::query_as::<_, User>(
-            "INSERT INTO users (username)
-                    VALUES(?)
-            ",
-        )
-        .bind(username)
-        .fetch_one(&self.pool)
-        .await
-    }
-
-    pub async fn get_user(&self, username: &str) -> Result<User, sqlx::Error> {
-        sqlx::query_as::<_, User>(
-            "
-            SELECT * FROM users
-            WHERE username == ?
-        ",
-        )
-        .bind(username)
-        .fetch_one(&self.pool)
-        .await
-    }
-
-    #[allow(dead_code)]
-    pub async fn add_message(
-        &mut self,
-        message: &str,
-        sender: &i64,
-        receiver: &i64,
-    ) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            "
-            INSERT INTO messages (sender_id, receiver_id, content)
-            VALUES (?, ?, ?)
-        ",
-        )
-        .bind(sender)
-        .bind(receiver)
-        .bind(message)
-        .execute(&self.pool)
-        .await?;
-
-        Ok(())
-    }
-
-    pub async fn get_messages(
-        &mut self,
-        sender_id: &i64,
-        receiver_id: &i64,
-    ) -> Result<Vec<Message>, sqlx::Error> {
-        sqlx::query_as::<_, Message>(
-            "SELECT id, sender_id, receiver_id AS recv_id, content, time FROM messages
-            WHERE (sender_id = ? AND receiver_id = ?)
-                OR (sender_id = ? AND receiver_id = ?)
-            ORDER BY time ASC, id ASC",
-        )
-        .bind(sender_id)
-        .bind(receiver_id)
-        .bind(receiver_id)
-        .bind(sender_id)
-        .fetch_all(&self.pool)
-        .await
-    }
-
-    pub async fn get_users(&mut self) -> Result<Vec<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>("SELECT * FROM users")
-            .fetch_all(&self.pool)
-            .await
     }
 }

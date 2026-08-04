@@ -1,9 +1,6 @@
 use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize)]
-pub struct LoginRequest {
-    pub username: String,
-}
+use sqlx::prelude::FromRow;
+use sqlx::types::chrono::{DateTime, Utc};
 
 #[derive(Deserialize, Serialize)]
 pub struct ChatMessage {
@@ -12,9 +9,14 @@ pub struct ChatMessage {
     pub content: String,
 }
 
-#[derive(Deserialize)]
-pub struct WebSocketParams {
-    pub user_id: i64,
+#[allow(dead_code)]
+#[derive(FromRow)]
+pub struct Message {
+    pub id: i64,
+    pub sender_id: i64,
+    pub recv_id: i64,
+    pub content: String,
+    pub time: DateTime<Utc>,
 }
 
 #[derive(Deserialize, Serialize)]
