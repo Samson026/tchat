@@ -15,7 +15,7 @@ export const useState = defineStore("stateStore", {
 			user: null,
 			users: null,
 			chat: null,
-			chating_with: null
+			chating_with: null,
 		};
 	},
 	getters: {
