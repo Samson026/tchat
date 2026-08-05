@@ -27,4 +27,6 @@ tokio = "1.53.1"
 futures-util = "0.3.33"
 reqwest = { version = "0.13.4", features = ["cookies", "json", "query"] }
 protocol = { version = "0.1.0", path = "../../crates/protocol" }
+reqwest_cookie_store = "0.10.0"
+cookie_store = "0.22.1"
 

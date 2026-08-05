@@ -1,7 +1,12 @@
 
+use std::{fs::File, io::BufWriter, path::PathBuf, sync::Arc};
+
 use reqwest::Error;
 
 use protocol::{CREATE_USER_PATH, GET_USERS, LOGIN_PATH, SERVER_ADDRESS};
+use reqwest_cookie_store::CookieStoreMutex;
+use tauri::Manager;
+use tokio::sync::broadcast::error;
 
 use crate::user::models::{NewUserRequest, User};
 
@@ -64,6 +69,17 @@ impl Client {
             .json::<Vec<User>>()
             .await
     }
+
+    pub fn save_cookies(&self, path: &PathBuf, cookie_store: &CookieStoreMutex) -> Result<(), std::io::Error>{
+
+        let file = File::create(path)?;
+        let mut writer = BufWriter::new(file);
+        let store = cookie_store
+            .lock()
+            .map_err(|error| error.to_string()).unwrap();
+        cookie_store::serde::json::save(&store, &mut writer)
+            .map_err(|error| std::io::Error::other(error))
+    }
 }
 
 #[tauri::command]
@@ -82,14 +98,29 @@ pub async fn create_user(
 #[tauri::command]
 pub async fn login(
     client: tauri::State<'_, Client>,
+    cookies: tauri::State<'_, Arc<CookieStoreMutex>>,
+    app: tauri::AppHandle,
     username: String,
     password: String
 ) -> Result<User, String> {
-    client
+    let res = client
         .inner()
         .login(&username, &password)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| error.to_string());
+
+    let path = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?
+        .join("cookies.json");
+
+    // save cookies
+    let _ = client
+        .inner()
+        .save_cookies(&path, &cookies.inner().as_ref()).map_err(|error| error.to_string())?;
+
+    res
 }
 
 #[tauri::command]
