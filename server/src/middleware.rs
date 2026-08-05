@@ -4,7 +4,7 @@ use tower_sessions::Session;
 pub async fn auth_middleware(
     session: Session,
     request: Request,
-    next: Next
+    next: Next,
 ) -> Result<Response, StatusCode> {
     let user_id: Option<i64> = session
         .get::<i64>("user_id")

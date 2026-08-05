@@ -24,5 +24,5 @@ impl AppState {
 }
 
 struct AuthUser {
-    id: i64
+    id: i64,
 }
