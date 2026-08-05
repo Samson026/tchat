@@ -3,6 +3,9 @@
 		"includes": ["src/**/*.ts", "src/**/*.vue", "!src/vite-env.d.ts"]
 	},
 	"html": {
-		"experimentalFullSupportEnabled": true
+		"experimentalFullSupportEnabled": true,
+		"formatter": {
+			"enabled": true
+		}
 	}
 }

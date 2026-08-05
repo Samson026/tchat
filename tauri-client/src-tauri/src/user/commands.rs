@@ -13,15 +13,15 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new() -> Self {
-        let client = reqwest::Client::new();
+    pub fn new(client: reqwest::Client) -> Self {
 
         Self { client }
     }
 
-    pub async fn create_user(&self, username: &str) -> Result<User, Error> {
+    pub async fn create_user(&self, username: &str, password: &str) -> Result<User, Error> {
         let body = NewUserRequest {
             username: username.to_string(),
+            password: password.to_string()
         };
 
         println!("got here");
@@ -37,9 +37,10 @@ impl Client {
             .await
     }
 
-    pub async fn login(&self, username: &str) -> Result<User, Error> {
+    pub async fn login(&self, username: &str, password: &str) -> Result<User, Error> {
         let body = NewUserRequest {
             username: username.to_string(),
+            password: password.to_string(),
         };
 
         let url = format!("http://{SERVER_ADDRESS}{LOGIN_PATH}");
@@ -68,11 +69,12 @@ impl Client {
 #[tauri::command]
 pub async fn create_user(
     client: tauri::State<'_, Client>,
-    username: String
+    username: String,
+    password: String
 ) -> Result<User, String> {
     client
         .inner()
-        .create_user(&username)
+        .create_user(&username, &password)
         .await
         .map_err(|error| error.to_string())
 }
@@ -80,11 +82,12 @@ pub async fn create_user(
 #[tauri::command]
 pub async fn login(
     client: tauri::State<'_, Client>,
-    username: String
+    username: String,
+    password: String
 ) -> Result<User, String> {
     client
         .inner()
-        .login(&username)
+        .login(&username, &password)
         .await
         .map_err(|error| error.to_string())
 }

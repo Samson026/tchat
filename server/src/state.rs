@@ -22,3 +22,7 @@ impl AppState {
         }
     }
 }
+
+struct AuthUser {
+    id: i64
+}

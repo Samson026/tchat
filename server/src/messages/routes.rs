@@ -1,19 +1,16 @@
 use axum::{
-    Json, Router,
-    extract::{Query, State},
-    http::StatusCode,
-    response::{IntoResponse, Response},
-    routing::get,
+    Json, Router, extract::{Query, State}, http::StatusCode, middleware, response::{IntoResponse, Response}, routing::get,
 };
 use protocol::GET_MESSAGES;
 
 use crate::{
-    messages::models::{ChatHistoryReq, ChatMessage},
-    state::AppState,
+    messages::models::{ChatHistoryReq, ChatMessage}, middleware::auth_middleware, state::AppState,
 };
+
 
 pub fn router() -> Router<AppState> {
     Router::new().route(GET_MESSAGES, get(get_messages))
+    .route_layer(middleware::from_fn(auth_middleware))
 }
 
 pub async fn get_messages(
