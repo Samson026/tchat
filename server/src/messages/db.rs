@@ -1,6 +1,6 @@
 use sqlx::{Row, SqlitePool};
 
-use crate::messages::models::{Chat, ChatDB, Chats, Message};
+use crate::messages::models::{Chat, ChatDB, Message};
 
 #[derive(Clone)]
 pub struct MessagesDB {
