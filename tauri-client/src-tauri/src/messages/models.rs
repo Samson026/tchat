@@ -6,3 +6,8 @@ pub struct ChatMessage {
     pub recv_id: i64,
     pub content: String,
 }
+
+#[derive(Deserialize)]
+pub struct User {
+    pub username: String
+} 

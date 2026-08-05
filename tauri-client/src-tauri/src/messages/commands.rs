@@ -1,8 +1,8 @@
 use reqwest::Error;
 
-use protocol::{GET_MESSAGES, SERVER_ADDRESS};
+use protocol::{CHATS, GET_MESSAGES, SERVER_ADDRESS};
 
-use crate::messages::models::ChatMessage;
+use crate::messages::models::{ChatMessage, User};
 
 #[derive(Debug)]
 pub struct MessageClient {
@@ -28,6 +28,18 @@ impl MessageClient {
             .await?
             .error_for_status()?
             .json::<Vec<ChatMessage>>()
+            .await
+    }
+
+    pub async fn get_chats(&self, user_id: &i64) -> Result<Vec<User>, Error> {
+        let url = format!("httpL//{SERVER_ADDRESS}{GET_MESSAGES}{CHATS}");
+        self.client
+            .get(url)
+            .query(&[("user_id", *user_id)])
+            .send()
+            .await?
+            .error_for_status()?
+            .json::<Vec<User>>()
             .await
     }
 }
