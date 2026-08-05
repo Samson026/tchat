@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import type { User } from "../models/user";
 import { useState } from "../stores/state";
@@ -60,4 +60,13 @@ async function login() {
 		router.push("/home");
 	}
 }
+
+onMounted(async () => {
+	try {
+		await invoke("auth")
+		router.push("/home")
+	} catch (error) {
+		console.log(`Login required : ${error}`)
+	}
+})
 </script>
