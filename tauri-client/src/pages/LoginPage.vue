@@ -63,10 +63,10 @@ async function login() {
 
 onMounted(async () => {
 	try {
-		await invoke("auth")
-		router.push("/home")
+		await invoke("auth");
+		router.push("/home");
 	} catch (error) {
-		console.log(`Login required : ${error}`)
+		console.log(`Login required : ${error}`);
 	}
-})
+});
 </script>
