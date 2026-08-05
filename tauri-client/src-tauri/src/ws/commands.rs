@@ -1,12 +1,14 @@
-
-
-use futures_util::{SinkExt, StreamExt, stream::{SplitSink, SplitStream}};
+use futures_util::{
+    stream::{SplitSink, SplitStream},
+    SinkExt, StreamExt,
+};
 use protocol::{SERVER_ADDRESS, WEBSOCKET_PATH};
 use tauri::Emitter;
 use tokio::{net::TcpStream, sync::Mutex};
 use tokio_tungstenite::{
-    MaybeTlsStream, WebSocketStream, connect_async,
+    connect_async,
     tungstenite::{Message, Result},
+    MaybeTlsStream, WebSocketStream,
 };
 
 use crate::ws::models::ChatMessage;
@@ -38,7 +40,7 @@ pub struct WsState {
 impl WsState {
     pub fn new() -> Self {
         Self {
-            connection: Mutex::new(None)
+            connection: Mutex::new(None),
         }
     }
 }
@@ -47,7 +49,7 @@ impl WsState {
 pub async fn connect_ws(
     app: tauri::AppHandle,
     state: tauri::State<'_, WsState>,
-    user_id: i64
+    user_id: i64,
 ) -> Result<(), String> {
     let url = format!("ws://{SERVER_ADDRESS}{WEBSOCKET_PATH}?user_id={user_id}");
     let ws = WebSocketConnection::connect(&url)
@@ -64,15 +66,15 @@ pub async fn connect_ws(
             match result {
                 Ok(Message::Text(message)) => {
                     let _ = app.emit("ws-message", message.to_string());
-                },
+                }
                 Ok(Message::Close(_)) => {
                     let _ = app.emit("ws-disconnected", ());
                     break;
-                },
+                }
                 Err(error) => {
                     let _ = app.emit("ws-error", error.to_string());
                     break;
-                },
+                }
                 _ => {}
             }
         }
@@ -82,10 +84,7 @@ pub async fn connect_ws(
 }
 
 #[tauri::command]
-pub async fn send(
-    state: tauri::State<'_, WsState>,
-    message: ChatMessage
-) -> Result<(), String> {
+pub async fn send(state: tauri::State<'_, WsState>, message: ChatMessage) -> Result<(), String> {
     let mut connection = state.connection.lock().await;
 
     let ws = connection
@@ -94,8 +93,8 @@ pub async fn send(
 
     let json = serde_json::to_string(&message).map_err(|error| error.to_string())?;
 
-    ws.send(Message::text(json)).await.map_err(|error| error.to_string())?;
+    ws.send(Message::text(json))
+        .await
+        .map_err(|error| error.to_string())?;
     Ok(())
 }
-
-

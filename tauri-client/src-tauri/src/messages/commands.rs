@@ -1,10 +1,8 @@
-
 use reqwest::Error;
 
 use protocol::{GET_MESSAGES, SERVER_ADDRESS};
 
 use crate::messages::models::ChatMessage;
-
 
 #[derive(Debug)]
 pub struct MessageClient {
@@ -13,7 +11,6 @@ pub struct MessageClient {
 
 impl MessageClient {
     pub fn new(client: reqwest::Client) -> Self {
-
         Self { client }
     }
 
@@ -33,16 +30,15 @@ impl MessageClient {
             .json::<Vec<ChatMessage>>()
             .await
     }
-
 }
 
 #[tauri::command]
 pub async fn get_messages(
-    messageClient: tauri::State<'_, MessageClient>,
+    message_client: tauri::State<'_, MessageClient>,
     sender_id: i64,
-    receiver_id: i64
+    receiver_id: i64,
 ) -> Result<Vec<ChatMessage>, String> {
-    messageClient
+    message_client
         .inner()
         .get_messages(&sender_id, &receiver_id)
         .await

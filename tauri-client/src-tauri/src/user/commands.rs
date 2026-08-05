@@ -1,4 +1,3 @@
-
 use std::{fs::File, io::BufWriter, path::PathBuf, sync::Arc};
 
 use reqwest::Error;
@@ -6,11 +5,8 @@ use reqwest::Error;
 use protocol::{CREATE_USER_PATH, GET_USERS, LOGIN_PATH, SERVER_ADDRESS};
 use reqwest_cookie_store::CookieStoreMutex;
 use tauri::Manager;
-use tokio::sync::broadcast::error;
 
 use crate::user::models::{NewUserRequest, User};
-
-
 
 #[derive(Debug)]
 pub struct Client {
@@ -19,14 +15,13 @@ pub struct Client {
 
 impl Client {
     pub fn new(client: reqwest::Client) -> Self {
-
         Self { client }
     }
 
     pub async fn create_user(&self, username: &str, password: &str) -> Result<User, Error> {
         let body = NewUserRequest {
             username: username.to_string(),
-            password: password.to_string()
+            password: password.to_string(),
         };
 
         println!("got here");
@@ -70,15 +65,18 @@ impl Client {
             .await
     }
 
-    pub fn save_cookies(&self, path: &PathBuf, cookie_store: &CookieStoreMutex) -> Result<(), std::io::Error>{
-
+    pub fn save_cookies(
+        &self,
+        path: &PathBuf,
+        cookie_store: &CookieStoreMutex,
+    ) -> Result<(), std::io::Error> {
         let file = File::create(path)?;
         let mut writer = BufWriter::new(file);
         let store = cookie_store
             .lock()
-            .map_err(|error| error.to_string()).unwrap();
-        cookie_store::serde::json::save(&store, &mut writer)
-            .map_err(|error| std::io::Error::other(error))
+            .map_err(|error| error.to_string())
+            .unwrap();
+        cookie_store::serde::json::save(&store, &mut writer).map_err(std::io::Error::other)
     }
 }
 
@@ -86,7 +84,7 @@ impl Client {
 pub async fn create_user(
     client: tauri::State<'_, Client>,
     username: String,
-    password: String
+    password: String,
 ) -> Result<User, String> {
     client
         .inner()
@@ -101,7 +99,7 @@ pub async fn login(
     cookies: tauri::State<'_, Arc<CookieStoreMutex>>,
     app: tauri::AppHandle,
     username: String,
-    password: String
+    password: String,
 ) -> Result<User, String> {
     let res = client
         .inner()
@@ -116,17 +114,16 @@ pub async fn login(
         .join("cookies.json");
 
     // save cookies
-    let _ = client
+    client
         .inner()
-        .save_cookies(&path, &cookies.inner().as_ref()).map_err(|error| error.to_string())?;
+        .save_cookies(&path, cookies.inner())
+        .map_err(|error| error.to_string())?;
 
     res
 }
 
 #[tauri::command]
-pub async fn get_users(
-    client: tauri::State<'_, Client>
-) -> Result<Vec<User>, String> {
+pub async fn get_users(client: tauri::State<'_, Client>) -> Result<Vec<User>, String> {
     client
         .inner()
         .get_users()
