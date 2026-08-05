@@ -6,15 +6,17 @@ use axum::{
     response::{IntoResponse, Response},
     routing::get,
 };
-use protocol::GET_MESSAGES;
+use protocol::{BASE_ROUTE, CHATS};
 
 use crate::{
     messages::models::{ChatHistoryReq, ChatMessage, ChatsReq}, middleware::auth_middleware, state::AppState,
 };
 
 pub fn router() -> Router<AppState> {
+
     Router::new()
-        .route(GET_MESSAGES, get(get_messages))
+        .route(BASE_ROUTE, get(get_messages))
+        .route(CHATS, get(get_chats))
         .route_layer(middleware::from_fn(auth_middleware))
 }
 

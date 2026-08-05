@@ -7,7 +7,7 @@ use axum::{
     response::Response,
     routing::get,
 };
-use protocol::WEBSOCKET_PATH;
+use protocol::{BASE_ROUTE, WEBSOCKET_PATH};
 
 use crate::{
     state::AppState,
@@ -15,7 +15,7 @@ use crate::{
 };
 
 pub fn router() -> Router<AppState> {
-    Router::new().route(WEBSOCKET_PATH, get(upgrade))
+    Router::new().route(BASE_ROUTE, get(upgrade))
 }
 
 pub async fn upgrade(

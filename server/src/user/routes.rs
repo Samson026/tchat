@@ -5,7 +5,7 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use protocol::{CREATE_USER_PATH, GET_USERS, LOGIN_PATH};
+use protocol::{BASE_ROUTE, CREATE_USER_PATH, GET_USERS, LOGIN_PATH};
 use tower_sessions::Session;
 
 use crate::{state::AppState, user::models::LoginRequest};
@@ -14,7 +14,7 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route(CREATE_USER_PATH, post(create_user))
         .route(LOGIN_PATH, post(login))
-        .route(GET_USERS, get(get_users))
+        .route(BASE_ROUTE, get(get_users))
 }
 
 pub async fn create_user(

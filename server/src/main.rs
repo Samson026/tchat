@@ -7,7 +7,7 @@ mod user;
 mod websocket;
 
 use axum::Router;
-use protocol::{SERVER_ADDRESS, WEBSOCKET_PATH};
+use protocol::{AUTH, GET_MESSAGES, GET_USERS, SERVER_ADDRESS, WEBSOCKET_PATH};
 use std::io;
 use tokio::net::TcpListener;
 use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie::time::Duration};
@@ -28,10 +28,10 @@ async fn main() -> io::Result<()> {
         SessionManagerLayer::new(store).with_expiry(Expiry::OnInactivity(Duration::days(30)));
 
     let app = Router::new()
-        .merge(user::router())
-        .merge(messages::router())
-        .merge(websocket::router())
-        .merge(auth::router())
+        .nest(GET_USERS, user::router())
+        .nest(GET_MESSAGES, messages::router())
+        .nest(WEBSOCKET_PATH, websocket::router())
+        .nest(AUTH, auth::router())
         .layer(session)
         .with_state(app_state);
 
