@@ -26,7 +26,7 @@ impl Client {
 
         println!("got here");
 
-        let url = format!("http://{SERVER_ADDRESS}{CREATE_USER_PATH}");
+        let url = format!("http://{SERVER_ADDRESS}{GET_USERS}{CREATE_USER_PATH}");
         println!("{url}");
         self.client
             .post(url)
@@ -43,7 +43,7 @@ impl Client {
             password: password.to_string(),
         };
 
-        let url = format!("http://{SERVER_ADDRESS}{LOGIN_PATH}");
+        let url = format!("http://{SERVER_ADDRESS}{GET_USERS}{LOGIN_PATH}");
         self.client
             .post(url)
             .json(&body)
