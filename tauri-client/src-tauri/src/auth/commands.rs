@@ -8,16 +8,12 @@ pub struct AuthClient {
 
 impl AuthClient {
     pub fn new(client: reqwest::Client) -> Self {
-        Self { client: client }
+        Self { client }
     }
 
     pub async fn auth(&self) -> Result<(), Error> {
         let url = format!("http://{SERVER_ADDRESS}{AUTH}");
-        self.client
-            .post(url)
-            .send()
-            .await?
-            .error_for_status()?;
+        self.client.post(url).send().await?.error_for_status()?;
         Ok(())
     }
 }

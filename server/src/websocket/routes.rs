@@ -55,7 +55,7 @@ pub async fn handle_socket(mut socket: WebSocket, user_id: i64, mut app_state: A
 
                       // add msg to db
 
-                      match app_state.messageDB.add_message(&parsed.content, &parsed.sender_id, &parsed.recv_id).await {
+                      match app_state.message_db.add_message(&parsed.content, &parsed.sender_id, &parsed.recv_id).await {
                         Ok(_) => {
                             println!("saved msg to db");
                         },

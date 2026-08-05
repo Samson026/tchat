@@ -16,28 +16,20 @@ fn greet(name: &str) -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // Load an existing set of cookies, serialized as json, if it is available
-    
 
     tauri::Builder::default()
         .setup(|app| {
-            let cookie_path = app
-                .path()
-                .app_data_dir()?
-                .join("cookies.json");
+            let cookie_path = app.path().app_data_dir()?.join("cookies.json");
 
-            std::fs::create_dir_all(
-            cookie_path.parent().expect("Cookie path has no parent"),
-            )?;
+            std::fs::create_dir_all(cookie_path.parent().expect("Cookie path has no parent"))?;
 
             println!("Cookie path: {}", cookie_path.display());
 
             let cookie_store = {
-            if let Ok(file) = std::fs::File::open(&cookie_path)
-                .map(std::io::BufReader::new) {
-                cookie_store::serde::json::load(file).unwrap()
-                }
-                else {
-                reqwest_cookie_store::CookieStore::new()
+                if let Ok(file) = std::fs::File::open(&cookie_path).map(std::io::BufReader::new) {
+                    cookie_store::serde::json::load(file).unwrap()
+                } else {
+                    reqwest_cookie_store::CookieStore::new()
                 }
             };
             let cookie_store = reqwest_cookie_store::CookieStoreMutex::new(cookie_store);

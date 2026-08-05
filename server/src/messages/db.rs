@@ -9,7 +9,7 @@ pub struct MessagesDB {
 
 impl MessagesDB {
     pub fn new(pool: SqlitePool) -> Self {
-        Self { pool: pool }
+        Self { pool }
     }
     pub async fn add_message(
         &mut self,

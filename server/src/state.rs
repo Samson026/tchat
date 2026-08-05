@@ -8,21 +8,17 @@ type ConnectionRegistry = Arc<RwLock<HashMap<i64, mpsc::UnboundedSender<ChatMess
 
 #[derive(Clone)]
 pub struct AppState {
-    pub userDB: UserDB,
-    pub messageDB: MessagesDB,
+    pub user_db: UserDB,
+    pub message_db: MessagesDB,
     pub connections: ConnectionRegistry,
 }
 
 impl AppState {
-    pub fn new(userDB: UserDB, messageDB: MessagesDB) -> Self {
+    pub fn new(user_db: UserDB, message_db: MessagesDB) -> Self {
         Self {
-            userDB,
-            messageDB,
+            user_db,
+            message_db,
             connections: Arc::new(RwLock::new(HashMap::new())),
         }
     }
-}
-
-struct AuthUser {
-    id: i64
 }

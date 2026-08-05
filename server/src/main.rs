@@ -1,16 +1,16 @@
+mod auth;
 mod db;
 mod messages;
+mod middleware;
 mod state;
 mod user;
 mod websocket;
-mod middleware;
-mod auth;
 
 use axum::Router;
 use protocol::{SERVER_ADDRESS, WEBSOCKET_PATH};
-use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie::time::Duration};
 use std::io;
 use tokio::net::TcpListener;
+use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie::time::Duration};
 
 use crate::{messages::db::MessagesDB, user::db::UserDB};
 
@@ -24,8 +24,8 @@ async fn main() -> io::Result<()> {
     let message_db = MessagesDB::new(db.pool.clone());
     let app_state = state::AppState::new(user_db, message_db);
     let store = MemoryStore::default();
-    let session = SessionManagerLayer::new(store)
-        .with_expiry(Expiry::OnInactivity(Duration::days(30)));
+    let session =
+        SessionManagerLayer::new(store).with_expiry(Expiry::OnInactivity(Duration::days(30)));
 
     let app = Router::new()
         .merge(user::router())
