@@ -32,7 +32,7 @@ pub fn run() {
             println!("Cookie path: {}", cookie_path.display());
 
             let cookie_store = {
-            if let Ok(file) = std::fs::File::open("cookies.json")
+            if let Ok(file) = std::fs::File::open(&cookie_path)
                 .map(std::io::BufReader::new) {
                 cookie_store::serde::json::load(file).unwrap()
                 }
