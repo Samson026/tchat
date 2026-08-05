@@ -5,3 +5,4 @@ pub const LOGIN_PATH: &str = "/user/login";
 pub const CREATE_USER_PATH: &str = "/user/create";
 pub const GET_MESSAGES: &str = "/messages/";
 pub const GET_USERS: &str = "/users";
+pub const GET_AUTH: &str = "/auth";

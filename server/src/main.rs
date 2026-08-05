@@ -4,6 +4,7 @@ mod state;
 mod user;
 mod websocket;
 mod middleware;
+mod auth;
 
 use axum::Router;
 use protocol::{SERVER_ADDRESS, WEBSOCKET_PATH};
@@ -29,6 +30,7 @@ async fn main() -> io::Result<()> {
         .merge(user::router())
         .merge(messages::router())
         .merge(websocket::router())
+        .merge(auth::router())
         .layer(session)
         .with_state(app_state);
 
