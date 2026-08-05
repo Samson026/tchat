@@ -33,13 +33,30 @@ impl Database {
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS messages (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chat_id NOT NULL,
                 sender_id NOT NULL,
                 receiver_id NOT NULL,
                 content TEXT NOT NULL,
                 time DATETIME DEFAULT CURRENT_TIMESTAMP,
 
+                FOREIGN KEY (chat_id) REFERENCES chats(id)
                 FOREIGN KEY (sender_id) REFERENCES users(id),
                 FOREIGN KEY (receiver_id) REFERENCES users(id)
+            )",
+        )
+        .execute(&pool)
+        .await?;
+
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS chats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_1_id NOT NULL,
+                user_2_id NOT NULL,
+
+                CHECK (user_1_id < user_2_id)
+                UNIQUE (user_1_id, user_2_id),
+                FOREIGN KEY (user_1_id) REFERENCES users(id),
+                FOREIGN KEY (user_2_id) REFERENCES users(id)
             )",
         )
         .execute(&pool)

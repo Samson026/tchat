@@ -9,9 +9,7 @@ use axum::{
 use protocol::GET_MESSAGES;
 
 use crate::{
-    messages::models::{ChatHistoryReq, ChatMessage},
-    middleware::auth_middleware,
-    state::AppState,
+    messages::models::{ChatHistoryReq, ChatMessage, ChatsReq}, middleware::auth_middleware, state::AppState,
 };
 
 pub fn router() -> Router<AppState> {
@@ -42,4 +40,21 @@ pub async fn get_messages(
         .into_response(),
         Err(_) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
     }
+}
+
+pub async fn get_chats(
+    State(mut app_state): State<AppState>,
+    Query(params): Query<ChatsReq>
+) -> Response {
+    match app_state
+        .message_db
+        .get_chats(params.user_id)
+        .await {
+            Ok(chats) => {
+                Json(chats).into_response()
+            },
+            Err(error) => {
+                (StatusCode::NOT_FOUND, error.to_string()).into_response()
+            }
+        }
 }
