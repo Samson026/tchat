@@ -9,7 +9,7 @@ pub struct UserDB {
 
 impl UserDB {
     pub fn new(pool: SqlitePool) -> Self {
-        Self { pool: pool }
+        Self { pool }
     }
 
     pub async fn add_user(&mut self, username: &str) -> Result<User, sqlx::Error> {

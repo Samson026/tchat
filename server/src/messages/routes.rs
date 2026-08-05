@@ -25,7 +25,7 @@ pub async fn get_messages(
     Query(params): Query<ChatHistoryReq>,
 ) -> Response {
     match app_state
-        .messageDB
+        .message_db
         .get_messages(&params.sender_id, &params.recv_id)
         .await
     {

@@ -23,14 +23,14 @@ pub async fn create_user(
 ) -> Response {
     println!("create user called");
 
-    match app_state.userDB.add_user(&data.username).await {
+    match app_state.user_db.add_user(&data.username).await {
         Ok(user) => Json(user).into_response(),
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Could not create user").into_response(),
     }
 }
 
 pub async fn get_users(State(mut app_state): State<AppState>) -> Response {
-    match app_state.userDB.get_users().await {
+    match app_state.user_db.get_users().await {
         Ok(users) => Json(users).into_response(),
         Err(_) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
     }
@@ -41,13 +41,13 @@ pub async fn login(
     session: Session,
     Json(data): Json<LoginRequest>,
 ) -> Response {
-    match app_state.userDB.get_user(&data.username).await {
+    match app_state.user_db.get_user(&data.username).await {
         Ok(user) => {
-            if (data.password == user.password) {
-                session.insert("user_id", user.id.clone()).await.unwrap();
-                return Json(user).into_response();
+            if data.password == user.password {
+                session.insert("user_id", user.id).await.unwrap();
+                Json(user).into_response()
             } else {
-                return (StatusCode::UNAUTHORIZED, "Invalid password").into_response();
+                (StatusCode::UNAUTHORIZED, "Invalid password").into_response()
             }
         }
         Err(_) => (StatusCode::NOT_FOUND, "User not found").into_response(),

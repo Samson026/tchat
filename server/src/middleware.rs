@@ -11,7 +11,7 @@ pub async fn auth_middleware(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    if (user_id.is_none()) {
+    if user_id.is_none() {
         return Err(StatusCode::UNAUTHORIZED);
     }
 

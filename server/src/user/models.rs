@@ -13,9 +13,3 @@ pub struct User {
     pub username: String,
     pub password: String,
 }
-
-#[derive(Deserialize, Serialize)]
-pub struct ChatHistoryReq {
-    pub sender_id: i64,
-    pub recv_id: i64,
-}
