@@ -1,9 +1,12 @@
-use crate::{user::Client, ws::WsState, messages::MessageClient};
+use crate::{auth::AuthClient, messages::MessageClient, user::Client, ws::WsState};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+mod auth;
+mod messages;
 mod user;
 mod ws;
-mod messages;
+
+use tauri::Manager;
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -12,23 +15,57 @@ fn greet(name: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let http_client = reqwest::Client::builder()
-        .cookie_store(true)
-        .build()
-        .expect("Failed to build http");
+    // Load an existing set of cookies, serialized as json, if it is available
+    
 
     tauri::Builder::default()
+        .setup(|app| {
+            let cookie_path = app
+                .path()
+                .app_data_dir()?
+                .join("cookies.json");
+
+            std::fs::create_dir_all(
+            cookie_path.parent().expect("Cookie path has no parent"),
+            )?;
+
+            println!("Cookie path: {}", cookie_path.display());
+
+            let cookie_store = {
+            if let Ok(file) = std::fs::File::open(&cookie_path)
+                .map(std::io::BufReader::new) {
+                cookie_store::serde::json::load(file).unwrap()
+                }
+                else {
+                reqwest_cookie_store::CookieStore::new()
+                }
+            };
+            let cookie_store = reqwest_cookie_store::CookieStoreMutex::new(cookie_store);
+            let cookie_store = std::sync::Arc::new(cookie_store);
+
+            let http_client = reqwest::Client::builder()
+                .cookie_provider(std::sync::Arc::clone(&cookie_store))
+                .build()
+                .expect("Failed to build http");
+
+            app.manage(Client::new(http_client.clone()));
+            app.manage(MessageClient::new(http_client.clone()));
+            app.manage(AuthClient::new(http_client));
+            app.manage(cookie_store);
+
+            Ok(())
+        })
         .plugin(tauri_plugin_opener::init())
-        .manage(Client::new(http_client.clone()))
         .manage(WsState::new())
-        .manage(MessageClient::new(http_client.clone()))
-        .invoke_handler(tauri::generate_handler![greet,
+        .invoke_handler(tauri::generate_handler![
+            greet,
             ws::commands::connect_ws,
             ws::commands::send,
             user::commands::create_user,
             user::commands::login,
             user::commands::get_users,
             messages::commands::get_messages,
+            auth::commands::auth
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
