@@ -1,8 +1,6 @@
 use axum::{extract::Request, http::StatusCode, middleware::Next, response::Response};
 use tower_sessions::Session;
 
-use crate::user;
-
 pub async fn auth_middleware(
     session: Session,
     mut request: Request,
@@ -21,7 +19,7 @@ pub async fn auth_middleware(
         }
         None => {
             println!("User aint have shit");
-            return Err(StatusCode::UNAUTHORIZED);
+            Err(StatusCode::UNAUTHORIZED)
         }
     }
 }

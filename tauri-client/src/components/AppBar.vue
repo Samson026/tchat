@@ -12,6 +12,7 @@
 				class="-ml-2"
 			/>
 			<button class="bg-primary text-text rounded-2xl w-25 h-8 self-center mt-5 text-center hover:bg-primary-hover"
+				type="button"
 				@click="newChat"
 			>
 				New Chat

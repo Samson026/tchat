@@ -1,6 +1,6 @@
 interface State {
 	user: User | null;
-	chats_id: Set<Number>;
+	chats_id: Set<number>;
 	chats_data: User[];
 	messages: Message[] | null;
 	chating_with: User | null;
@@ -15,7 +15,7 @@ export const useState = defineStore("stateStore", {
 		return {
 			// all these properties will have their type inferred automatically
 			user: null,
-			chats_id: new Set<Number>,
+			chats_id: new Set<number>,
 			chats_data: [],
 			messages: null,
 			chating_with: null,

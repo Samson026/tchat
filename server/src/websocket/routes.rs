@@ -7,7 +7,7 @@ use axum::{
     response::Response,
     routing::get,
 };
-use protocol::{BASE_ROUTE, WEBSOCKET_PATH};
+use protocol::BASE_ROUTE;
 
 use crate::{
     state::AppState,

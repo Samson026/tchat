@@ -1,6 +1,6 @@
-use sqlx::{Row, SqlitePool};
+use sqlx::SqlitePool;
 
-use crate::{messages::models::{Chat, Message, User}, user};
+use crate::messages::models::{Chat, Message, User};
 
 #[derive(Clone)]
 pub struct MessagesDB {
@@ -16,20 +16,18 @@ impl MessagesDB {
         message: &str,
         sender: &i64,
         receiver: &i64,
-
     ) -> Result<(), sqlx::Error> {
         // add msg to db
         // check if chat exists
         let user_1_id = sender.min(receiver);
         let user_2_id = sender.max(receiver);
-        
+
         let chat_id = match self.is_chat(user_1_id, user_2_id).await {
-            Ok(Some(chat)) => {chat.id},
+            Ok(Some(chat)) => chat.id,
             Ok(None) => {
-                let c = self.create_chat(user_1_id, user_2_id)
-                    .await?;
+                let c = self.create_chat(user_1_id, user_2_id).await?;
                 c.id
-            },
+            }
             Err(error) => {
                 return Err(error);
             }
@@ -85,7 +83,7 @@ impl MessagesDB {
             JOIN users u1 ON chats.user_1_id = u1.id
             JOIN users u2 ON chats.user_2_id = u2.id
             WHERE u1.id = ? OR u2.id = ?
-            "
+            ",
         )
         .bind(user_id)
         .bind(user_id)
@@ -95,12 +93,16 @@ impl MessagesDB {
         .await
     }
 
-    pub async fn is_chat(&self, user_1_id: &i64, user_2_id: &i64) -> Result<Option<Chat>, sqlx::Error> {
+    pub async fn is_chat(
+        &self,
+        user_1_id: &i64,
+        user_2_id: &i64,
+    ) -> Result<Option<Chat>, sqlx::Error> {
         sqlx::query_as::<_, Chat>(
             "
                 SELECT * FROM chats
                 WHERE user_1_id = ? AND user_2_id = ?
-            "
+            ",
         )
         .bind(user_1_id)
         .bind(user_2_id)
@@ -108,13 +110,17 @@ impl MessagesDB {
         .await
     }
 
-    pub async fn create_chat(&mut self, user_id: &i64, receiver_id: &i64) -> Result<Chat, sqlx::Error> {
+    pub async fn create_chat(
+        &mut self,
+        user_id: &i64,
+        receiver_id: &i64,
+    ) -> Result<Chat, sqlx::Error> {
         sqlx::query_as::<_, Chat>(
             "
                 INSERT INTO chats (user_1_id, user_2_id)
                 VALUES (?, ?)
                 RETURNING id, user_1_id, user_2_id
-            "
+            ",
         )
         .bind(user_id)
         .bind(receiver_id)

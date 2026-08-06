@@ -9,11 +9,12 @@ use axum::{
 use protocol::{BASE_ROUTE, CHATS};
 
 use crate::{
-    messages::models::{ChatHistoryReq, ChatMessage, ChatsReq}, middleware::auth_middleware, state::AppState,
+    messages::models::{ChatHistoryReq, ChatMessage, ChatsReq},
+    middleware::auth_middleware,
+    state::AppState,
 };
 
 pub fn router() -> Router<AppState> {
-
     Router::new()
         .route(BASE_ROUTE, get(get_messages))
         .route(CHATS, get(get_chats))
@@ -46,18 +47,11 @@ pub async fn get_messages(
 
 // return users who are being chatted with
 pub async fn get_chats(
-    State(mut app_state): State<AppState>,
-    Query(params): Query<ChatsReq>
+    State(app_state): State<AppState>,
+    Query(params): Query<ChatsReq>,
 ) -> Response {
-    match app_state
-        .message_db
-        .get_chats(params.user_id)
-        .await {
-            Ok(users) => {
-                Json(users).into_response()
-            },
-            Err(error) => {
-                (StatusCode::NOT_FOUND, error.to_string()).into_response()
-            }
-        }
+    match app_state.message_db.get_chats(params.user_id).await {
+        Ok(users) => Json(users).into_response(),
+        Err(error) => (StatusCode::NOT_FOUND, error.to_string()).into_response(),
+    }
 }

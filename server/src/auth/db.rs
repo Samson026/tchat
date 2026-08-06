@@ -2,7 +2,6 @@ use sqlx::SqlitePool;
 
 use crate::auth::models::User;
 
-
 #[derive(Clone)]
 pub struct AuthDB {
     pool: SqlitePool,

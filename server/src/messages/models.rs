@@ -30,7 +30,7 @@ pub struct ChatHistoryReq {
 pub struct Chat {
     pub id: i64,
     pub user_1_id: i64,
-    pub user_2_id: i64
+    pub user_2_id: i64,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -41,5 +41,5 @@ pub struct ChatsReq {
 #[derive(FromRow, Serialize)]
 pub struct User {
     pub id: i64,
-    pub username: String
+    pub username: String,
 }

@@ -10,5 +10,5 @@ pub struct ChatMessage {
 #[derive(Deserialize, Serialize)]
 pub struct User {
     pub id: i64,
-    pub username: String
-} 
+    pub username: String,
+}

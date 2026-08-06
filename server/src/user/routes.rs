@@ -5,7 +5,7 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use protocol::{BASE_ROUTE, CREATE_USER_PATH, GET_USERS, LOGIN_PATH};
+use protocol::{BASE_ROUTE, CREATE_USER_PATH, LOGIN_PATH};
 use tower_sessions::Session;
 
 use crate::{state::AppState, user::models::LoginRequest};
