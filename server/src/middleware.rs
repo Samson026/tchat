@@ -3,7 +3,7 @@ use tower_sessions::Session;
 
 pub async fn auth_middleware(
     session: Session,
-    request: Request,
+    mut request: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
     let user_id: Option<i64> = session
@@ -11,9 +11,15 @@ pub async fn auth_middleware(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    if user_id.is_none() {
-        return Err(StatusCode::UNAUTHORIZED);
+    match user_id {
+        Some(id) => {
+            request.extensions_mut().insert(id);
+            println!("User had the cookie");
+            Ok(next.run(request).await)
+        }
+        None => {
+            println!("User aint have shit");
+            Err(StatusCode::UNAUTHORIZED)
+        }
     }
-
-    Ok(next.run(request).await)
 }

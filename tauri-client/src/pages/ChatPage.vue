@@ -1,10 +1,13 @@
 <template>
-	<main class="h-full">
+	<main class="flex flex-col h-screen">
 		<div clas="px-10 py-10"></div>
-		<div class="flex flex-col h-full justify-end">
+		<h2 class="text-text m-5">
+			Chatting with: {{ username }}
+		</h2>
+		<div class="flex min-h-0 flex-1 flex-col justify-end">
 			<div class="flex flex-col col h-full justify-end px-10 py-10">
 				<ChatMessage
-					v-for="(message, index) in state.chat"
+					v-for="(message, index) in state.messages"
 					:key="index"
 					:message="message"
 					:primary="message.sender_id === state.user?.id"
@@ -35,10 +38,10 @@
 
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
-import type { Message } from "../models/user.ts";
+import type { Message, User } from "../models/user.ts";
 import { useState } from "../stores/state.ts";
 
 const route = useRoute();
@@ -46,9 +49,13 @@ const state = useState();
 
 const inputRef = ref("");
 
-async function getChat(userID: number) {
+const username = computed(() => {
+	return state.getUsername(Number(route.params.id))
+})
+
+async function getMessaess(userID: number) {
 	const recv_id: number = Number(route.params.id);
-	state.chat = await invoke<Message[]>("get_messages", {
+	return await invoke<Message[]>("get_messages", {
 		senderId: userID,
 		receiverId: recv_id,
 	});
@@ -70,13 +77,20 @@ async function sendMessage(message: string) {
 			message: msg,
 		});
 
-		if (state.chat === null) {
-			state.chat = [msg];
+		if (state.messages === null) {
+			state.messages = [msg];
 		}
-		state.chat.push(msg);
+		state.messages.push(msg);
+		console.log("hi")
 	} catch (error) {
 		console.log(error);
 	}
+}
+
+async function getChats(userId: number) {
+	return invoke<User[]>("get_chats", {
+		userId: userId
+	})
 }
 
 async function handleSubmit() {
@@ -91,7 +105,16 @@ onMounted(async () => {
 		await invoke("connect_ws", {
 			userId: state.user.id,
 		});
-		await getChat(state.user.id);
+		state.messages = await getMessaess(state.user.id);
+		const newUsers = await getChats(state.user.id);
+		newUsers.forEach(user => {
+			if (!state.chats_id.has(user.id)) {
+				state.chats_id.add(user.id)
+				state.chats_data.push(user)
+			}
+		})
+		console.log("got message")
+		console.log(state.messages)
 	}
 });
 </script>

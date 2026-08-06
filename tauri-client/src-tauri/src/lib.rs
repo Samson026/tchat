@@ -57,6 +57,7 @@ pub fn run() {
             user::commands::login,
             user::commands::get_users,
             messages::commands::get_messages,
+            messages::commands::get_chats,
             auth::commands::auth
         ])
         .run(tauri::generate_context!())

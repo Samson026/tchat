@@ -13,6 +13,7 @@ pub struct ChatMessage {
 #[derive(FromRow)]
 pub struct Message {
     pub id: i64,
+    pub chat_id: i64,
     pub sender_id: i64,
     pub recv_id: i64,
     pub content: String,
@@ -23,4 +24,22 @@ pub struct Message {
 pub struct ChatHistoryReq {
     pub sender_id: i64,
     pub recv_id: i64,
+}
+
+#[derive(FromRow, Serialize)]
+pub struct Chat {
+    pub id: i64,
+    pub user_1_id: i64,
+    pub user_2_id: i64,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ChatsReq {
+    pub user_id: i64,
+}
+
+#[derive(FromRow, Serialize)]
+pub struct User {
+    pub id: i64,
+    pub username: String,
 }

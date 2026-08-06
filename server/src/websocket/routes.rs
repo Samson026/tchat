@@ -7,7 +7,7 @@ use axum::{
     response::Response,
     routing::get,
 };
-use protocol::WEBSOCKET_PATH;
+use protocol::BASE_ROUTE;
 
 use crate::{
     state::AppState,
@@ -15,7 +15,7 @@ use crate::{
 };
 
 pub fn router() -> Router<AppState> {
-    Router::new().route(WEBSOCKET_PATH, get(upgrade))
+    Router::new().route(BASE_ROUTE, get(upgrade))
 }
 
 pub async fn upgrade(
@@ -52,8 +52,6 @@ pub async fn handle_socket(mut socket: WebSocket, user_id: i64, mut app_state: A
                           "message received: sender_id={}, recv_id={}, content={}",
                           parsed.sender_id, parsed.recv_id, parsed.content
                       );
-
-                      // add msg to db
 
                       match app_state.message_db.add_message(&parsed.content, &parsed.sender_id, &parsed.recv_id).await {
                         Ok(_) => {
