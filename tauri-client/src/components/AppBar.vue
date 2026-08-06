@@ -11,13 +11,15 @@
 				:user="user"
 				class="-ml-2"
 			/>
-			<button class="bg-primary text-text rounded-2xl w-25 h-8 self-center mt-5 text-center hover:bg-primary-hover"
+			<button
+				class="bg-primary text-text rounded-2xl w-25 h-8 self-center mt-5 text-center hover:bg-primary-hover"
 				type="button"
 				@click="newChat"
 			>
 				New Chat
 			</button>
-			<button class="bg-secondary text-text rounded-2xl w-25 h-8 self-center text-center hover:bg-primary-hover mt-auto"
+			<button
+				class="bg-secondary text-text rounded-2xl w-25 h-8 self-center text-center hover:bg-primary-hover mt-auto"
 				type="button"
 				@click="logout"
 			>
@@ -30,40 +32,40 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
 import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 import type { User } from "../models/user.ts";
 import { useState } from "../stores/state.ts";
 import UserBtn from "./UserBtn.vue";
-import { useRouter } from "vue-router";
 
 const state = useState();
-const router = useRouter()
+const router = useRouter();
 
 function newChat() {
-	router.push("/home/search")
+	router.push("/home/search");
 }
 
 async function logout() {
 	try {
-		await invoke("logout")
-		state.$reset()
-		router.push("/")
+		await invoke("logout");
+		state.$reset();
+		router.push("/");
 	} catch (error) {
-		console.log(error)
+		console.log(error);
 	}
 }
 
 onMounted(async () => {
 	if (state.user === null) {
-		console.log("User is not logged in")
-		return
+		console.log("User is not logged in");
+		return;
 	}
 	const newUsers = await invoke<User[]>("get_chats", {
-		userId: state.user.id
+		userId: state.user.id,
 	});
-	newUsers.forEach(user => {
+	newUsers.forEach((user) => {
 		if (!state.chats_id.has(user.id)) {
-			state.chats_id.add(user.id)
-			state.chats_data.push(user)
+			state.chats_id.add(user.id);
+			state.chats_data.push(user);
 		}
 	});
 });

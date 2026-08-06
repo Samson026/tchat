@@ -18,8 +18,8 @@ const routes = [
 			},
 			{
 				path: "search",
-				component: SearchPage
-			}
+				component: SearchPage,
+			},
 		],
 	},
 ];
