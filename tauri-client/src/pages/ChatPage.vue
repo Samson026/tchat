@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
 import type { Message, User } from "../models/user.ts";
@@ -49,7 +49,9 @@ const state = useState();
 
 const inputRef = ref("");
 
-const username = state.getUsername(Number(route.params.id))
+const username = computed(() => {
+	return state.getUsername(Number(route.params.id))
+})
 
 async function getMessaess(userID: number) {
 	const recv_id: number = Number(route.params.id);

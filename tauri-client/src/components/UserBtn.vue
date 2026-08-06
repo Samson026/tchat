@@ -28,13 +28,13 @@ async function setChat(recvID: number) {
 	}
 
 	state.chating_with = props.user;
-	await getChat(state.user.id, recvID);
+	state.messages = await getChat(state.user.id, recvID);
 
 	router.push(`/home/chat/${recvID}`);
 }
 
 async function getChat(userID: number, recvID: number) {
-	state.messages = await invoke<Message[]>("get_messages", {
+	return await invoke<Message[]>("get_messages", {
 		senderId: userID,
 		receiverId: recvID,
 	});
