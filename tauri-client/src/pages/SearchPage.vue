@@ -12,7 +12,7 @@
         </div>
         <div class="flex flex-col bg-surface border border-border mx-5 my-5 h-screen rounded-xl items-center">
             <div class="w-full">
-                <SearchedUser 
+                <SearchedUserBtn 
                     v-for="user in display_users"
                     :key="user.id"
                     :user="user"
@@ -27,14 +27,9 @@ import { invoke } from '@tauri-apps/api/core';
 import { computed, onMounted, ref } from 'vue';
 import type { User } from '../models/user';
 import { useState } from '../stores/state';
-import SearchedUser from '../components/SearchedUser.vue';
+import SearchedUserBtn from '../components/SearchedUserBtn.vue';
 
 const state = useState()
-
-const testUser: User = {
-    id: 34,
-    username: "hi"
-}
 
 const input = ref("")
 const display_users = computed<User[]>(() => {

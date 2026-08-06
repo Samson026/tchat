@@ -36,6 +36,12 @@ function newChat() {
 }
 
 onMounted(async () => {
-	state.chats = await invoke<User[]>("get_chats", {});
+	if (state.user === null) {
+		console.log("User is not logged in")
+		return
+	}
+	state.chats = await invoke<User[]>("get_chats", {
+		userId: state.user.id
+	});
 });
 </script>

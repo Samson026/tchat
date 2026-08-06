@@ -65,7 +65,7 @@ onMounted(async () => {
 	try {
 		// TODO:
 		// remove 
-		await invoke("auth");
+		state.user = await invoke<User>("auth");
 		router.push("/home");
 		// router.push("/home/search")
 	} catch (error) {

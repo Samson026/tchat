@@ -2,7 +2,7 @@
 	<main class="flex flex-col h-screen">
 		<div clas="px-10 py-10"></div>
 		<h2 class="text-text m-5">
-			Chatting with, {{ username }}
+			Chatting with: {{ username }}
 		</h2>
 		<div class="flex min-h-0 flex-1 flex-col justify-end">
 			<div class="flex flex-col col h-full justify-end px-10 py-10">
@@ -79,13 +79,14 @@ async function sendMessage(message: string) {
 			state.messages = [msg];
 		}
 		state.messages.push(msg);
+		console.log("hi")
 	} catch (error) {
 		console.log(error);
 	}
 }
 
 async function getChats(userId: number) {
-	return invoke<User[]>("get_message", {
+	return invoke<User[]>("get_chats", {
 		userId: userId
 	})
 }
@@ -104,6 +105,8 @@ onMounted(async () => {
 		});
 		state.messages = await getMessaess(state.user.id);
 		state.chats = await getChats(state.user.id);
+		console.log("got message")
+		console.log(state.messages)
 	}
 });
 </script>

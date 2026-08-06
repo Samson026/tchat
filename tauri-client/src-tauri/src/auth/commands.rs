@@ -2,6 +2,8 @@ use protocol::{AUTH, SERVER_ADDRESS};
 use reqwest::Error;
 use tauri::State;
 
+use crate::auth::models::User;
+
 pub struct AuthClient {
     client: reqwest::Client,
 }
@@ -11,15 +13,20 @@ impl AuthClient {
         Self { client }
     }
 
-    pub async fn auth(&self) -> Result<(), Error> {
+    pub async fn auth(&self) -> Result<User, Error> {
         let url = format!("http://{SERVER_ADDRESS}{AUTH}");
-        self.client.post(url).send().await?.error_for_status()?;
-        Ok(())
+        self.client
+            .post(url)
+            .send()
+            .await?
+            .error_for_status()?
+            .json::<User>()
+            .await
     }
 }
 
 #[tauri::command]
-pub async fn auth(state: State<'_, AuthClient>) -> Result<(), String> {
+pub async fn auth(state: State<'_, AuthClient>) -> Result<User, String> {
     state
         .inner()
         .auth()

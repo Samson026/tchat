@@ -34,7 +34,7 @@ async function setChat(recvID: number) {
 }
 
 async function getChat(userID: number, recvID: number) {
-	state.chat = await invoke<Message[]>("get_messages", {
+	state.messages = await invoke<Message[]>("get_messages", {
 		senderId: userID,
 		receiverId: recvID,
 	});

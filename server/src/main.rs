@@ -12,7 +12,7 @@ use std::io;
 use tokio::net::TcpListener;
 use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie::time::Duration};
 
-use crate::{messages::db::MessagesDB, user::db::UserDB};
+use crate::{auth::db::AuthDB, messages::db::MessagesDB, user::db::UserDB};
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -22,7 +22,8 @@ async fn main() -> io::Result<()> {
 
     let user_db = UserDB::new(db.pool.clone());
     let message_db = MessagesDB::new(db.pool.clone());
-    let app_state = state::AppState::new(user_db, message_db);
+    let auth_db = AuthDB::new(db.pool.clone());
+    let app_state = state::AppState::new(user_db, message_db, auth_db);
     let store = MemoryStore::default();
     let session =
         SessionManagerLayer::new(store).with_expiry(Expiry::OnInactivity(Duration::days(30)));

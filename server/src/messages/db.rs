@@ -56,7 +56,7 @@ impl MessagesDB {
         receiver_id: &i64,
     ) -> Result<Vec<Message>, sqlx::Error> {
         sqlx::query_as::<_, Message>(
-            "SELECT id, sender_id, receiver_id AS recv_id, content, time FROM messages
+            "SELECT id, chat_id, sender_id, receiver_id AS recv_id, content, time FROM messages
             WHERE (sender_id = ? AND receiver_id = ?)
                 OR (sender_id = ? AND receiver_id = ?)
             ORDER BY time ASC, id ASC",
@@ -111,8 +111,9 @@ impl MessagesDB {
     pub async fn create_chat(&mut self, user_id: &i64, receiver_id: &i64) -> Result<Chat, sqlx::Error> {
         sqlx::query_as::<_, Chat>(
             "
-                INSERT INTO chats (user_id, receiver_id)
+                INSERT INTO chats (user_1_id, user_2_id)
                 VALUES (?, ?)
+                RETURNING id, user_1_id, user_2_id
             "
         )
         .bind(user_id)

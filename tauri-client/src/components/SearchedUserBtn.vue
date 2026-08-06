@@ -20,6 +20,8 @@ const router = useRouter()
 function chatUser(user: User) {
     if (state.chats === null) {
         state.chats = [user]
+        router.push(`/home/chat/${user.id}`)
+        return
     }
     state.chats.push(user)
 

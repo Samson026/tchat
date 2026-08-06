@@ -1,9 +1,11 @@
 use axum::{extract::Request, http::StatusCode, middleware::Next, response::Response};
 use tower_sessions::Session;
 
+use crate::user;
+
 pub async fn auth_middleware(
     session: Session,
-    request: Request,
+    mut request: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
     let user_id: Option<i64> = session
@@ -14,6 +16,8 @@ pub async fn auth_middleware(
     if user_id.is_none() {
         return Err(StatusCode::UNAUTHORIZED);
     }
+
+    request.extensions_mut().insert(user_id);
 
     Ok(next.run(request).await)
 }
