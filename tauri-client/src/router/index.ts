@@ -3,6 +3,7 @@ import App from "../App.vue";
 import ChatPage from "../pages/ChatPage.vue";
 import HomePage from "../pages/HomePage.vue";
 import LoginPage from "../pages/LoginPage.vue";
+import SearchPage from "../pages/SearchPage.vue";
 
 const routes = [
 	{ path: "/", component: LoginPage },
@@ -12,9 +13,13 @@ const routes = [
 		component: HomePage,
 		children: [
 			{
-				path: ":id",
+				path: "chat/:id",
 				component: ChatPage,
 			},
+			{
+				path: "search",
+				component: SearchPage
+			}
 		],
 	},
 ];

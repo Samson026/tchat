@@ -30,7 +30,7 @@ async function setChat(recvID: number) {
 	state.chating_with = props.user;
 	await getChat(state.user.id, recvID);
 
-	router.push(`/home/${recvID}`);
+	router.push(`/home/chat/${recvID}`);
 }
 
 async function getChat(userID: number, recvID: number) {

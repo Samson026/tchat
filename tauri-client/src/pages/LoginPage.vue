@@ -63,8 +63,11 @@ async function login() {
 
 onMounted(async () => {
 	try {
+		// TODO:
+		// remove 
 		await invoke("auth");
 		router.push("/home");
+		// router.push("/home/search")
 	} catch (error) {
 		console.log(`Login required : ${error}`);
 	}

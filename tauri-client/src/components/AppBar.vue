@@ -11,7 +11,9 @@
 				:user="user"
 				class="-ml-2"
 			/>
-			<button class="bg-primary text-text rounded-2xl w-25 h-8 self-center mt-5 text-center hover:bg-primary-hover">
+			<button class="bg-primary text-text rounded-2xl w-25 h-8 self-center mt-5 text-center hover:bg-primary-hover"
+				@click="newChat"
+			>
 				New Chat
 			</button>
 		</div>
@@ -24,10 +26,16 @@ import { onMounted } from "vue";
 import type { User } from "../models/user.ts";
 import { useState } from "../stores/state.ts";
 import UserBtn from "./UserBtn.vue";
+import { useRouter } from "vue-router";
 
 const state = useState();
+const router = useRouter()
+
+function newChat() {
+	router.push("/home/search")
+}
 
 onMounted(async () => {
-	state.users = await invoke<User[]>("get_users", {});
+	state.chats = await invoke<User[]>("get_chats", {});
 });
 </script>
