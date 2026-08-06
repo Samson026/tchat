@@ -149,22 +149,21 @@ impl App {
 
         match cmd {
             Ok(cmd) => match cmd {
-                Command::Chat {
-                    user: username,
-                } => {
+                Command::Chat { user: username } => {
                     if let Some(users) = self.users.as_ref()
-                        && let Some(recv) = users.iter().find(|user| user.username == username) {
-                            self.chatting_user = Some(recv.clone());
-                            match self.client.get_messages(&recv.id).await {
-                                Ok(messages) => {
-                                    self.chat = messages;
-                                    self.screen = Chat;
-                                }
-                                Err(error) => {
-                                    self.output = error.to_string();
-                                }
+                        && let Some(recv) = users.iter().find(|user| user.username == username)
+                    {
+                        self.chatting_user = Some(recv.clone());
+                        match self.client.get_messages(&recv.id).await {
+                            Ok(messages) => {
+                                self.chat = messages;
+                                self.screen = Chat;
+                            }
+                            Err(error) => {
+                                self.output = error.to_string();
                             }
                         }
+                    }
                 }
                 Command::Users => {
                     self.users = self.client.get_users().await.ok();
