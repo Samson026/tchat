@@ -106,7 +106,13 @@ onMounted(async () => {
 			userId: state.user.id,
 		});
 		state.messages = await getMessaess(state.user.id);
-		state.chats = await getChats(state.user.id);
+		const newUsers = await getChats(state.user.id);
+		newUsers.forEach(user => {
+			if (!state.chats_id.has(user.id)) {
+				state.chats_id.add(user.id)
+				state.chats_data.push(user)
+			}
+		})
 		console.log("got message")
 		console.log(state.messages)
 	}

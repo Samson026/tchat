@@ -6,7 +6,7 @@
 		<div class="flex flex-col">
 			<p class="text-text opacity-50 mt-10 text-xl">Chats:</p>
 			<UserBtn
-				v-for="user in state.chats"
+				v-for="user in state.chats_data"
 				:key="user.id"
 				:user="user"
 				class="-ml-2"
@@ -40,8 +40,14 @@ onMounted(async () => {
 		console.log("User is not logged in")
 		return
 	}
-	state.chats = await invoke<User[]>("get_chats", {
+	const newUsers = await invoke<User[]>("get_chats", {
 		userId: state.user.id
+	});
+	newUsers.forEach(user => {
+		if (!state.chats_id.has(user.id)) {
+			state.chats_id.add(user.id)
+			state.chats_data.push(user)
+		}
 	});
 });
 </script>
