@@ -45,6 +45,7 @@ function newChat() {
 async function logout() {
 	try {
 		await invoke("logout")
+		state.$reset()
 		router.push("/")
 	} catch (error) {
 		console.log(error)
