@@ -140,7 +140,7 @@ pub fn logout(
         .inner()
         .lock()
         .map_err(|error| error.to_string())?;
-    
+
     store.clear();
 
     let path = app
@@ -149,11 +149,9 @@ pub fn logout(
         .map_err(|error| error.to_string())?
         .join("cookies.json");
 
-    let file = File::create(&path)
-        .map_err(|error| error.to_string())?;
+    let file = File::create(&path).map_err(|error| error.to_string())?;
     let mut writer = BufWriter::new(file);
-    cookie_store::serde::json::save(&store, &mut writer)
-        .map_err(|error| error.to_string())?;
+    cookie_store::serde::json::save(&store, &mut writer).map_err(|error| error.to_string())?;
 
     Ok(())
 }
