@@ -39,6 +39,7 @@ pub struct ChatsReq {
 }
 
 #[derive(FromRow, Serialize)]
-pub struct ChatDB {
+pub struct User {
+    pub id: i64,
     pub username: String
 }

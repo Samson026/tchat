@@ -6,7 +6,7 @@
 		<div class="flex flex-col">
 			<p class="text-text opacity-50 mt-10 text-xl">Chats:</p>
 			<UserBtn
-				v-for="user in state.users"
+				v-for="user in state.chats"
 				:key="user.id"
 				:user="user"
 				class="-ml-2"

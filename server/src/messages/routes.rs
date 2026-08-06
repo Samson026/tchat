@@ -44,6 +44,7 @@ pub async fn get_messages(
     }
 }
 
+// return users who are being chatted with
 pub async fn get_chats(
     State(mut app_state): State<AppState>,
     Query(params): Query<ChatsReq>
@@ -52,8 +53,8 @@ pub async fn get_chats(
         .message_db
         .get_chats(params.user_id)
         .await {
-            Ok(chats) => {
-                Json(chats).into_response()
+            Ok(users) => {
+                Json(users).into_response()
             },
             Err(error) => {
                 (StatusCode::NOT_FOUND, error.to_string()).into_response()

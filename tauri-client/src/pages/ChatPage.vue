@@ -4,7 +4,7 @@
 		<div class="flex flex-col h-full justify-end">
 			<div class="flex flex-col col h-full justify-end px-10 py-10">
 				<ChatMessage
-					v-for="(message, index) in state.chat"
+					v-for="(message, index) in state.messages"
 					:key="index"
 					:message="message"
 					:primary="message.sender_id === state.user?.id"
@@ -38,7 +38,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
-import type { Message } from "../models/user.ts";
+import type { Message, User } from "../models/user.ts";
 import { useState } from "../stores/state.ts";
 
 const route = useRoute();
@@ -46,9 +46,9 @@ const state = useState();
 
 const inputRef = ref("");
 
-async function getChat(userID: number) {
+async function getMessaess(userID: number) {
 	const recv_id: number = Number(route.params.id);
-	state.chat = await invoke<Message[]>("get_messages", {
+	return await invoke<Message[]>("get_messages", {
 		senderId: userID,
 		receiverId: recv_id,
 	});
@@ -70,13 +70,19 @@ async function sendMessage(message: string) {
 			message: msg,
 		});
 
-		if (state.chat === null) {
-			state.chat = [msg];
+		if (state.messages === null) {
+			state.messages = [msg];
 		}
-		state.chat.push(msg);
+		state.messages.push(msg);
 	} catch (error) {
 		console.log(error);
 	}
+}
+
+async function getChats(userId: number) {
+	return invoke<User[]>("get_message", {
+		userId: userId
+	})
 }
 
 async function handleSubmit() {
@@ -91,7 +97,8 @@ onMounted(async () => {
 		await invoke("connect_ws", {
 			userId: state.user.id,
 		});
-		await getChat(state.user.id);
+		state.messages = await getMessaess(state.user.id);
+		state.chats = await getChats(state.user.id);
 	}
 });
 </script>

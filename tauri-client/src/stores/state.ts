@@ -1,7 +1,7 @@
 interface State {
 	user: User | null;
-	users: User[] | null;
-	chat: Message[] | null;
+	chats: User[] | null;
+	messages: Message[] | null;
 	chating_with: User | null;
 }
 
@@ -13,15 +13,15 @@ export const useState = defineStore("stateStore", {
 		return {
 			// all these properties will have their type inferred automatically
 			user: null,
-			users: null,
-			chat: null,
+			chats: null,
+			messages: null,
 			chating_with: null,
 		};
 	},
 	getters: {
 		getUsername: (state) => {
 			return (userId: number): string => {
-				const user = state.users?.find((user) => user.id === userId);
+				const user = state.chats?.find((user) => user.id === userId);
 				return user?.username ?? "Unknown user";
 			};
 		},
