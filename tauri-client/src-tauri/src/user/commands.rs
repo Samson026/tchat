@@ -134,6 +134,7 @@ pub async fn get_users(client: tauri::State<'_, Client>) -> Result<Vec<User>, St
 #[tauri::command]
 pub fn logout(
     cookie_store: tauri::State<'_, Arc<CookieStoreMutex>>,
+    app: tauri::AppHandle,
 ) -> Result<(), String> {
     let mut store = cookie_store
         .inner()
@@ -141,5 +142,18 @@ pub fn logout(
         .map_err(|error| error.to_string())?;
     
     store.clear();
+
+    let path = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?
+        .join("cookies.json");
+
+    let file = File::create(&path)
+        .map_err(|error| error.to_string())?;
+    let mut writer = BufWriter::new(file);
+    cookie_store::serde::json::save(&store, &mut writer)
+        .map_err(|error| error.to_string())?;
+
     Ok(())
 }
