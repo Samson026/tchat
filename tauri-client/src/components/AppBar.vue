@@ -1,9 +1,9 @@
 <template>
 	<div
-		class="bg-surface w-43 h-screen rounded-lg px-4 py-5 border border-border"
+		class="flex flex-col bg-surface w-43 h-screen rounded-lg px-4 py-5 border border-border"
 	>
 		<h1 class="text-text font-semibold text-3xl tracking-tight">tChat</h1>
-		<div class="flex flex-col">
+		<div class="flex flex-col flex-1 min-h-0">
 			<p class="text-text opacity-50 mt-10 text-xl">Chats:</p>
 			<UserBtn
 				v-for="user in state.chats_data"
@@ -16,6 +16,12 @@
 				@click="newChat"
 			>
 				New Chat
+			</button>
+			<button class="bg-secondary text-text rounded-2xl w-25 h-8 self-center text-center hover:bg-primary-hover mt-auto"
+				type="button"
+				@click="logout"
+			>
+				Logout
 			</button>
 		</div>
 	</div>
@@ -34,6 +40,15 @@ const router = useRouter()
 
 function newChat() {
 	router.push("/home/search")
+}
+
+async function logout() {
+	try {
+		await invoke("logout")
+		router.push("/")
+	} catch (error) {
+		console.log(error)
+	}
 }
 
 onMounted(async () => {
