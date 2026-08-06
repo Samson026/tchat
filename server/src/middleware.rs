@@ -13,11 +13,15 @@ pub async fn auth_middleware(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    if user_id.is_none() {
-        return Err(StatusCode::UNAUTHORIZED);
+    match user_id {
+        Some(id) => {
+            request.extensions_mut().insert(id);
+            println!("User had the cookie");
+            Ok(next.run(request).await)
+        }
+        None => {
+            println!("User aint have shit");
+            return Err(StatusCode::UNAUTHORIZED);
+        }
     }
-
-    request.extensions_mut().insert(user_id);
-
-    Ok(next.run(request).await)
 }

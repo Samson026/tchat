@@ -16,7 +16,7 @@ impl AuthDB {
     pub async fn get_user(&self, user_id: &i64) -> Result<User, sqlx::Error> {
         sqlx::query_as::<_, User>(
             "
-            SELECT (id, username) FROM users
+            SELECT id, username FROM users
             WHERE id == ?
         ",
         )
