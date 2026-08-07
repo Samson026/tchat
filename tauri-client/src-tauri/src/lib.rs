@@ -5,6 +5,7 @@ mod auth;
 mod messages;
 mod user;
 mod ws;
+mod settings;
 
 use tauri::Manager;
 

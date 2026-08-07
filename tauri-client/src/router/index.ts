@@ -4,6 +4,7 @@ import ChatPage from "../pages/ChatPage.vue";
 import HomePage from "../pages/HomePage.vue";
 import LoginPage from "../pages/LoginPage.vue";
 import SearchPage from "../pages/SearchPage.vue";
+import SettingsPage from "../pages/SettingsPage.vue";
 
 const routes = [
 	{ path: "/", component: LoginPage },
@@ -20,8 +21,9 @@ const routes = [
 				path: "search",
 				component: SearchPage,
 			},
-		],
-	},
+    ],
+  },
+  { path: "/settings", component: SettingsPage }
 ];
 
 export const router = createRouter({
