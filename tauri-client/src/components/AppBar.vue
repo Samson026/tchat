@@ -55,13 +55,7 @@ async function logout() {
 }
 
 onMounted(async () => {
-	if (state.user === null) {
-		console.log("User is not logged in");
-		return;
-	}
-	const newUsers = await invoke<User[]>("get_chats", {
-		userId: state.user.id,
-	});
+	const newUsers = await invoke<User[]>("get_chats");
 	newUsers.forEach((user) => {
 		if (!state.chats_id.has(user.id)) {
 			state.chats_id.add(user.id);

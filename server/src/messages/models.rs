@@ -32,11 +32,6 @@ pub struct Chat {
     pub user_2_id: i64,
 }
 
-#[derive(Deserialize, Serialize)]
-pub struct ChatsReq {
-    pub user_id: i64,
-}
-
 #[derive(FromRow, Serialize)]
 pub struct User {
     pub id: i64,

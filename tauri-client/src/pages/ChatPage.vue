@@ -84,10 +84,8 @@ async function sendMessage(message: string) {
 	}
 }
 
-async function getChats(userId: number) {
-	return invoke<User[]>("get_chats", {
-		userId: userId,
-	});
+async function getChats() {
+	return invoke<User[]>("get_chats");
 }
 
 async function handleSubmit() {
@@ -103,7 +101,7 @@ onMounted(async () => {
 			userId: state.user.id,
 		});
 		state.messages = await getMessaess();
-		const newUsers = await getChats(state.user.id);
+		const newUsers = await getChats();
 		newUsers.forEach((user) => {
 			if (!state.chats_id.has(user.id)) {
 				state.chats_id.add(user.id);

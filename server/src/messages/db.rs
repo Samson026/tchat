@@ -67,7 +67,7 @@ impl MessagesDB {
         .await
     }
 
-    pub async fn get_chats(&self, user_id: i64) -> Result<Vec<User>, sqlx::Error> {
+    pub async fn get_chats(&self, user_id: &i64) -> Result<Vec<User>, sqlx::Error> {
         sqlx::query_as::<_, User>(
             "
             SELECT

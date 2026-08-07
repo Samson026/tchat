@@ -9,7 +9,7 @@ use axum::{
 use protocol::{BASE_ROUTE, CHATS};
 
 use crate::{
-    messages::models::{ChatHistoryReq, ChatMessage, ChatsReq},
+    messages::models::{ChatHistoryReq, ChatMessage},
     middleware::auth_middleware,
     state::AppState,
 };
@@ -49,9 +49,9 @@ pub async fn get_messages(
 // return users who are being chatted with
 pub async fn get_chats(
     State(app_state): State<AppState>,
-    Query(params): Query<ChatsReq>,
+    Extension(user_id): Extension<i64>
 ) -> Response {
-    match app_state.message_db.get_chats(params.user_id).await {
+    match app_state.message_db.get_chats(&user_id).await {
         Ok(users) => Json(users).into_response(),
         Err(error) => (StatusCode::NOT_FOUND, error.to_string()).into_response(),
     }
