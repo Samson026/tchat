@@ -49,7 +49,7 @@ pub async fn get_messages(
 // return users who are being chatted with
 pub async fn get_chats(
     State(app_state): State<AppState>,
-    Extension(user_id): Extension<i64>
+    Extension(user_id): Extension<i64>,
 ) -> Response {
     match app_state.message_db.get_chats(&user_id).await {
         Ok(users) => Json(users).into_response(),

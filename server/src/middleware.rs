@@ -16,8 +16,6 @@ pub async fn auth_middleware(
             request.extensions_mut().insert(id);
             Ok(next.run(request).await)
         }
-        None => {
-            Err(StatusCode::UNAUTHORIZED)
-        }
+        None => Err(StatusCode::UNAUTHORIZED),
     }
 }

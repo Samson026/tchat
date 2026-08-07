@@ -15,5 +15,5 @@ pub struct User {
 
 #[derive(Serialize)]
 pub struct GetMessagesReq {
-    pub receiver: i64
+    pub receiver: i64,
 }
