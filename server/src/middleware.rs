@@ -14,11 +14,9 @@ pub async fn auth_middleware(
     match user_id {
         Some(id) => {
             request.extensions_mut().insert(id);
-            println!("User had the cookie");
             Ok(next.run(request).await)
         }
         None => {
-            println!("User aint have shit");
             Err(StatusCode::UNAUTHORIZED)
         }
     }
