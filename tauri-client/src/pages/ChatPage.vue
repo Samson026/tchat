@@ -51,10 +51,9 @@ const username = computed(() => {
 	return state.getUsername(Number(route.params.id));
 });
 
-async function getMessaess(userID: number) {
+async function getMessaess() {
 	const recv_id: number = Number(route.params.id);
 	return await invoke<Message[]>("get_messages", {
-		senderId: userID,
 		receiverId: recv_id,
 	});
 }
@@ -85,10 +84,8 @@ async function sendMessage(message: string) {
 	}
 }
 
-async function getChats(userId: number) {
-	return invoke<User[]>("get_chats", {
-		userId: userId,
-	});
+async function getChats() {
+	return invoke<User[]>("get_chats");
 }
 
 async function handleSubmit() {
@@ -103,8 +100,8 @@ onMounted(async () => {
 		await invoke("connect_ws", {
 			userId: state.user.id,
 		});
-		state.messages = await getMessaess(state.user.id);
-		const newUsers = await getChats(state.user.id);
+		state.messages = await getMessaess();
+		const newUsers = await getChats();
 		newUsers.forEach((user) => {
 			if (!state.chats_id.has(user.id)) {
 				state.chats_id.add(user.id);

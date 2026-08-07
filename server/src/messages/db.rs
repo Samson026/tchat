@@ -50,8 +50,8 @@ impl MessagesDB {
     }
     pub async fn get_messages(
         &mut self,
-        sender_id: &i64,
-        receiver_id: &i64,
+        user_1: &i64,
+        user_2: &i64,
     ) -> Result<Vec<Message>, sqlx::Error> {
         sqlx::query_as::<_, Message>(
             "SELECT id, chat_id, sender_id, receiver_id AS recv_id, content, time FROM messages
@@ -59,15 +59,15 @@ impl MessagesDB {
                 OR (sender_id = ? AND receiver_id = ?)
             ORDER BY time ASC, id ASC",
         )
-        .bind(sender_id)
-        .bind(receiver_id)
-        .bind(receiver_id)
-        .bind(sender_id)
+        .bind(user_1)
+        .bind(user_2)
+        .bind(user_2)
+        .bind(user_1)
         .fetch_all(&self.pool)
         .await
     }
 
-    pub async fn get_chats(&self, user_id: i64) -> Result<Vec<User>, sqlx::Error> {
+    pub async fn get_chats(&self, user_id: &i64) -> Result<Vec<User>, sqlx::Error> {
         sqlx::query_as::<_, User>(
             "
             SELECT

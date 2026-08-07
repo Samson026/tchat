@@ -10,12 +10,18 @@ use axum::Router;
 use protocol::{AUTH, GET_MESSAGES, GET_USERS, SERVER_ADDRESS, WEBSOCKET_PATH};
 use std::io;
 use tokio::net::TcpListener;
+use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie::time::Duration};
+use tracing::Level;
 
 use crate::{auth::db::AuthDB, messages::db::MessagesDB, user::db::UserDB};
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     let db = db::Database::connect("tchat.db")
         .await
         .expect("Could not connect to db");
@@ -34,6 +40,11 @@ async fn main() -> io::Result<()> {
         .nest(WEBSOCKET_PATH, websocket::router())
         .nest(AUTH, auth::router())
         .layer(session)
+        .layer(
+            TraceLayer::new_for_http()
+                .on_request(DefaultOnRequest::new().level(Level::INFO))
+                .on_response(DefaultOnResponse::new().level(Level::INFO)),
+        )
         .with_state(app_state);
 
     let listener = TcpListener::bind(SERVER_ADDRESS).await?;

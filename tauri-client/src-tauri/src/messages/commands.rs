@@ -2,7 +2,7 @@ use reqwest::Error;
 
 use protocol::{CHATS, GET_MESSAGES, SERVER_ADDRESS};
 
-use crate::messages::models::{ChatMessage, User};
+use crate::messages::models::{ChatMessage, GetMessagesReq, User};
 
 #[derive(Debug)]
 pub struct MessageClient {
@@ -14,16 +14,16 @@ impl MessageClient {
         Self { client }
     }
 
-    pub async fn get_messages(
-        &self,
-        sender_id: &i64,
-        receiver_id: &i64,
-    ) -> Result<Vec<ChatMessage>, Error> {
+    pub async fn get_messages(&self, receiver_id: &i64) -> Result<Vec<ChatMessage>, Error> {
         let url = format!("http://{SERVER_ADDRESS}{GET_MESSAGES}");
+
+        let params = GetMessagesReq {
+            receiver: *receiver_id,
+        };
 
         self.client
             .get(url)
-            .query(&[("sender_id", *sender_id), ("recv_id", *receiver_id)])
+            .query(&params)
             .send()
             .await?
             .error_for_status()?
@@ -31,11 +31,10 @@ impl MessageClient {
             .await
     }
 
-    pub async fn get_chats(&self, user_id: &i64) -> Result<Vec<User>, Error> {
+    pub async fn get_chats(&self) -> Result<Vec<User>, Error> {
         let url = format!("http://{SERVER_ADDRESS}{GET_MESSAGES}{CHATS}");
         self.client
             .get(url)
-            .query(&[("user_id", *user_id)])
             .send()
             .await?
             .error_for_status()?
@@ -47,12 +46,11 @@ impl MessageClient {
 #[tauri::command]
 pub async fn get_messages(
     message_client: tauri::State<'_, MessageClient>,
-    sender_id: i64,
     receiver_id: i64,
 ) -> Result<Vec<ChatMessage>, String> {
     message_client
         .inner()
-        .get_messages(&sender_id, &receiver_id)
+        .get_messages(&receiver_id)
         .await
         .map_err(|error| error.to_string())
 }
@@ -60,11 +58,10 @@ pub async fn get_messages(
 #[tauri::command]
 pub async fn get_chats(
     message_client: tauri::State<'_, MessageClient>,
-    user_id: i64,
 ) -> Result<Vec<User>, String> {
     message_client
         .inner()
-        .get_chats(&user_id)
+        .get_chats()
         .await
         .map_err(|error| error.to_string())
 }
