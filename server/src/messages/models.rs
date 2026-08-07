@@ -22,8 +22,7 @@ pub struct Message {
 
 #[derive(Deserialize, Serialize)]
 pub struct ChatHistoryReq {
-    pub sender_id: i64,
-    pub recv_id: i64,
+    pub receiver: i64,
 }
 
 #[derive(FromRow, Serialize)]

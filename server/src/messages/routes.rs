@@ -1,5 +1,5 @@
 use axum::{
-    Json, Router,
+    Extension, Json, Router,
     extract::{Query, State},
     http::StatusCode,
     middleware,
@@ -24,10 +24,11 @@ pub fn router() -> Router<AppState> {
 pub async fn get_messages(
     State(mut app_state): State<AppState>,
     Query(params): Query<ChatHistoryReq>,
+    Extension(user_id): Extension<i64>,
 ) -> Response {
     match app_state
         .message_db
-        .get_messages(&params.sender_id, &params.recv_id)
+        .get_messages(&user_id, &params.receiver)
         .await
     {
         Ok(message) => Json(
