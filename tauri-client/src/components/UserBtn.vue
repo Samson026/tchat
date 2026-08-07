@@ -22,20 +22,14 @@ const props = defineProps<{
 }>();
 
 async function setChat(recvID: number) {
-	if (state.user === null) {
-		console.log("Error user not logged in");
-		return;
-	}
-
 	state.chating_with = props.user;
-	state.messages = await getChat(state.user.id, recvID);
+	state.messages = await getChat(recvID);
 
 	router.push(`/home/chat/${recvID}`);
 }
 
-async function getChat(userID: number, recvID: number) {
+async function getChat(recvID: number) {
 	return await invoke<Message[]>("get_messages", {
-		senderId: userID,
 		receiverId: recvID,
 	});
 }

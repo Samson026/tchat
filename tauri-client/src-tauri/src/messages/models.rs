@@ -12,3 +12,8 @@ pub struct User {
     pub id: i64,
     pub username: String,
 }
+
+#[derive(Serialize)]
+pub struct GetMessagesReq {
+    pub receiver: i64
+}
