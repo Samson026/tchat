@@ -1,9 +1,7 @@
 <template>
 	<main class="flex flex-col h-screen">
 		<div clas="px-10 py-10"></div>
-		<h2 class="text-text m-5">
-			Chatting with: {{ username }}
-		</h2>
+		<h2 class="text-text m-5">Chatting with: {{ username }}</h2>
 		<div class="flex min-h-0 flex-1 flex-col justify-end">
 			<div class="flex flex-col col h-full justify-end px-10 py-10">
 				<ChatMessage
@@ -50,8 +48,8 @@ const state = useState();
 const inputRef = ref("");
 
 const username = computed(() => {
-	return state.getUsername(Number(route.params.id))
-})
+	return state.getUsername(Number(route.params.id));
+});
 
 async function getMessaess(userID: number) {
 	const recv_id: number = Number(route.params.id);
@@ -81,7 +79,7 @@ async function sendMessage(message: string) {
 			state.messages = [msg];
 		}
 		state.messages.push(msg);
-		console.log("hi")
+		console.log("hi");
 	} catch (error) {
 		console.log(error);
 	}
@@ -89,8 +87,8 @@ async function sendMessage(message: string) {
 
 async function getChats(userId: number) {
 	return invoke<User[]>("get_chats", {
-		userId: userId
-	})
+		userId: userId,
+	});
 }
 
 async function handleSubmit() {
@@ -107,14 +105,14 @@ onMounted(async () => {
 		});
 		state.messages = await getMessaess(state.user.id);
 		const newUsers = await getChats(state.user.id);
-		newUsers.forEach(user => {
+		newUsers.forEach((user) => {
 			if (!state.chats_id.has(user.id)) {
-				state.chats_id.add(user.id)
-				state.chats_data.push(user)
+				state.chats_id.add(user.id);
+				state.chats_data.push(user);
 			}
-		})
-		console.log("got message")
-		console.log(state.messages)
+		});
+		console.log("got message");
+		console.log(state.messages);
 	}
 });
 </script>

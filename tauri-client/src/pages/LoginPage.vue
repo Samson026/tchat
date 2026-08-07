@@ -64,7 +64,7 @@ async function login() {
 onMounted(async () => {
 	try {
 		// TODO:
-		// remove 
+		// remove
 		state.user = await invoke<User>("auth");
 		router.push("/home");
 		// router.push("/home/search")

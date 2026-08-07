@@ -1,15 +1,13 @@
-use std::io::{self, Error};
+use std::io::{self};
 
-use crossterm::event::{self, Event, EventStream, KeyCode, KeyEvent, KeyEventKind};
+use crossterm::event::{Event, EventStream, KeyCode, KeyEvent};
 use futures_util::StreamExt;
 use ratatui::{
     DefaultTerminal, Frame,
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
-    macros::constraint,
     widgets::{Block, Borders, Paragraph, Widget},
 };
-use tokio_tungstenite::tungstenite::client;
 
 use self::Screen::{Chat, Login, Users};
 use crate::{
@@ -26,9 +24,9 @@ enum Screen {
 }
 
 enum Command {
-    Chat { User: String },
+    Chat { user: String },
     Users,
-    Message { Content: String },
+    Message { content: String },
 }
 
 pub struct App {
@@ -47,12 +45,12 @@ fn parse_cmd(cmd: &str) -> Result<Command, String> {
 
     match args.as_slice() {
         [command, username] if command == "/chat" => Ok(Command::Chat {
-            User: username.to_string(),
+            user: username.to_string(),
         }),
         [command] if command == "/users" => Ok(Command::Users),
         [command, content @ ..] if command == "/msg" && !content.is_empty() => {
             Ok(Command::Message {
-                Content: content.join(" "),
+                content: content.join(" "),
             })
         }
         [] => Err("Enter a command".to_string()),
@@ -80,11 +78,8 @@ impl App {
             let mut events = EventStream::new();
             tokio::select! {
                 event = events.next() => {
-                    match event {
-                        Some(Ok(Event::Key(key_event))) => {
-                            self.handle_key_event(key_event).await
-                        }
-                        _ => {}
+                    if let Some(Ok(Event::Key(key_event))) = event {
+                        self.handle_key_event(key_event).await
                     }
                 },
 
@@ -154,37 +149,34 @@ impl App {
 
         match cmd {
             Ok(cmd) => match cmd {
-                Command::Chat { User: username } => {
-                    if let Some(users) = self.users.as_ref() {
-                        if let Some(recv) = users.iter().find(|user| user.username == username) {
-                            self.chatting_user = Some(recv.clone());
-                            match self.client.get_messages(&recv.id).await {
-                                Ok(messages) => {
-                                    self.chat = messages;
-                                    self.screen = Chat;
-                                }
-                                Err(error) => {
-                                    self.output = error.to_string();
-                                }
+                Command::Chat { user: username } => {
+                    if let Some(users) = self.users.as_ref()
+                        && let Some(recv) = users.iter().find(|user| user.username == username)
+                    {
+                        self.chatting_user = Some(recv.clone());
+                        match self.client.get_messages(&recv.id).await {
+                            Ok(messages) => {
+                                self.chat = messages;
+                                self.screen = Chat;
+                            }
+                            Err(error) => {
+                                self.output = error.to_string();
                             }
                         }
                     }
                 }
                 Command::Users => {
-                    self.users = match self.client.get_users().await {
-                        Ok(users) => Some(users),
-                        Err(_) => None,
-                    };
+                    self.users = self.client.get_users().await.ok();
                     self.screen = Users;
                 }
-                Command::Message { Content } => match self.chatting_user.as_ref() {
-                    Some(recv) => match self.client.send_message(&recv.id, &Content).await {
+                Command::Message { content } => match self.chatting_user.as_ref() {
+                    Some(recv) => match self.client.send_message(&recv.id, &content).await {
                         Ok(_) => {
                             if let Some(user) = self.client.user.as_ref() {
                                 self.chat.push(ChatMessage {
                                     sender_id: user.id,
                                     recv_id: recv.id,
-                                    content: Content,
+                                    content,
                                 })
                             }
                         }
@@ -194,7 +186,6 @@ impl App {
                         self.output = String::from("Not currently chatting");
                     }
                 },
-                _ => todo!(),
             },
             Err(error) => {
                 self.output = error;

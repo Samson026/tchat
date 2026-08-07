@@ -96,7 +96,7 @@ pub async fn create_user(
 #[tauri::command]
 pub async fn login(
     client: tauri::State<'_, Client>,
-    cookies: tauri::State<'_, Arc<CookieStoreMutex>>,
+    cookie_store: tauri::State<'_, Arc<CookieStoreMutex>>,
     app: tauri::AppHandle,
     username: String,
     password: String,
@@ -116,7 +116,7 @@ pub async fn login(
     // save cookies
     client
         .inner()
-        .save_cookies(&path, cookies.inner())
+        .save_cookies(&path, cookie_store.inner())
         .map_err(|error| error.to_string())?;
 
     res
@@ -129,4 +129,29 @@ pub async fn get_users(client: tauri::State<'_, Client>) -> Result<Vec<User>, St
         .get_users()
         .await
         .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+pub fn logout(
+    cookie_store: tauri::State<'_, Arc<CookieStoreMutex>>,
+    app: tauri::AppHandle,
+) -> Result<(), String> {
+    let mut store = cookie_store
+        .inner()
+        .lock()
+        .map_err(|error| error.to_string())?;
+
+    store.clear();
+
+    let path = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?
+        .join("cookies.json");
+
+    let file = File::create(&path).map_err(|error| error.to_string())?;
+    let mut writer = BufWriter::new(file);
+    cookie_store::serde::json::save(&store, &mut writer).map_err(|error| error.to_string())?;
+
+    Ok(())
 }

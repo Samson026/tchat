@@ -15,11 +15,11 @@ export const useState = defineStore("stateStore", {
 		return {
 			// all these properties will have their type inferred automatically
 			user: null,
-			chats_id: new Set<number>,
+			chats_id: new Set<number>(),
 			chats_data: [],
 			messages: null,
 			chating_with: null,
-			all_users: null
+			all_users: null,
 		};
 	},
 	getters: {
