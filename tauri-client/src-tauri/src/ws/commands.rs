@@ -9,7 +9,7 @@ use tauri::Emitter;
 use tokio::{net::TcpStream, sync::Mutex as TokioMutex};
 use tokio_tungstenite::{
     connect_async,
-    tungstenite::{error, Message, Result},
+    tungstenite::{Message, Result},
     MaybeTlsStream, WebSocketStream,
 };
 
@@ -52,14 +52,13 @@ pub async fn connect_ws(
     app: tauri::AppHandle,
     state: tauri::State<'_, WsState>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
-    user_id: i64,
 ) -> Result<(), String> {
     let server_addr = settings_writer
         .lock()
         .map_err(|error| error.to_string())?
         .server_address();
 
-    let url = format!("ws://{server_addr}{WEBSOCKET_PATH}?user_id={user_id}");
+    let url = format!("ws://{server_addr}{WEBSOCKET_PATH}");
     let ws = WebSocketConnection::connect(&url)
         .await
         .map_err(|error| error.to_string())?;
