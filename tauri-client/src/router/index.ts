@@ -21,9 +21,9 @@ const routes = [
 				path: "search",
 				component: SearchPage,
 			},
-    ],
-  },
-  { path: "/settings", component: SettingsPage }
+		],
+	},
+	{ path: "/settings", component: SettingsPage },
 ];
 
 export const router = createRouter({

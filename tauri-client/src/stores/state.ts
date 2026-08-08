@@ -4,8 +4,8 @@ interface State {
 	chats_data: User[];
 	messages: Message[] | null;
 	chating_with: User | null;
-  all_users: User[] | null;
-  settings: Settings | null;
+	all_users: User[] | null;
+	settings: Settings | null;
 }
 
 import { defineStore } from "pinia";
@@ -20,8 +20,8 @@ export const useState = defineStore("stateStore", {
 			chats_data: [],
 			messages: null,
 			chating_with: null,
-      all_users: null,
-			settings: null
+			all_users: null,
+			settings: null,
 		};
 	},
 	getters: {

@@ -2,7 +2,7 @@ use futures_util::{
     stream::{SplitSink, SplitStream},
     SinkExt, StreamExt,
 };
-use protocol::{SERVER_ADDRESS, WEBSOCKET_PATH};
+use protocol::WEBSOCKET_PATH;
 use tauri::Emitter;
 use tokio::{net::TcpStream, sync::Mutex};
 use tokio_tungstenite::{
@@ -52,9 +52,7 @@ pub async fn connect_ws(
     settings: tauri::State<'_, SettingsWriter>,
     user_id: i64,
 ) -> Result<(), String> {
-    let addr = &settings
-        .inner()
-        .settings.server_address;
+    let addr = &settings.inner().settings.server_address;
     let url = format!("ws://{addr}{WEBSOCKET_PATH}?user_id={user_id}");
     let ws = WebSocketConnection::connect(&url)
         .await

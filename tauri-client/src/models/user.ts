@@ -10,5 +10,5 @@ export interface Message {
 }
 
 export interface Settings {
-  server_address: string
+	server_address: string;
 }

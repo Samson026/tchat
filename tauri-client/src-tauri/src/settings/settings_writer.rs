@@ -1,7 +1,7 @@
 use std::{
     fs::{self, File},
     io::{BufWriter, Error},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use protocol::SERVER_ADDRESS;
@@ -13,7 +13,7 @@ pub struct SettingsWriter {
 }
 
 impl SettingsWriter {
-    pub fn new(data_dir: &PathBuf) -> Result<Self, Error> {
+    pub fn new(data_dir: &Path) -> Result<Self, Error> {
         // create file if not exist
         let path = data_dir.join("settings.json");
 
@@ -34,10 +34,10 @@ impl SettingsWriter {
         let json = fs::read_to_string(&path)?;
         let settings: Settings = serde_json::from_str(&json)?;
 
-        return Ok(Self {
+        Ok(Self {
             settings,
             file_location: path,
-        });
+        })
     }
 
     pub fn update_settings(&mut self, settings: Settings) -> Result<(), Error> {
