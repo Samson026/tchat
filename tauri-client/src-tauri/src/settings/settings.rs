@@ -3,7 +3,7 @@ use std::{fs::{self, File}, io::{BufWriter, Error}, path::PathBuf};
 use protocol::SERVER_ADDRESS;
 use serde::{Deserialize, Serialize};
 
-struct SettingsWriter {
+pub struct SettingsWriter {
     file_location: PathBuf,
     pub settings: Settings
 }
@@ -36,6 +36,14 @@ impl SettingsWriter {
             settings,
             file_location: path
         })
+    }
+
+    pub fn update_settings(&self, settings: &Settings) -> Result<(), Error> {
+        let file = File::create(&self.file_location)?;
+        let writer = BufWriter::new(file);
+
+        serde_json::to_writer_pretty(writer, &settings)?;
+        Ok(())
     }
 }
 
