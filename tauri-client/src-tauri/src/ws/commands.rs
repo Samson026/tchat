@@ -11,7 +11,7 @@ use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream,
 };
 
-use crate::ws::models::ChatMessage;
+use crate::{settings::SettingsWriter, ws::models::ChatMessage};
 
 type Socket = WebSocketStream<MaybeTlsStream<TcpStream>>;
 type Writer = SplitSink<Socket, Message>;
@@ -49,9 +49,13 @@ impl WsState {
 pub async fn connect_ws(
     app: tauri::AppHandle,
     state: tauri::State<'_, WsState>,
+    settings: tauri::State<'_, SettingsWriter>,
     user_id: i64,
 ) -> Result<(), String> {
-    let url = format!("ws://{SERVER_ADDRESS}{WEBSOCKET_PATH}?user_id={user_id}");
+    let addr = &settings
+        .inner()
+        .settings.server_address;
+    let url = format!("ws://{addr}{WEBSOCKET_PATH}?user_id={user_id}");
     let ws = WebSocketConnection::connect(&url)
         .await
         .map_err(|error| error.to_string())?;

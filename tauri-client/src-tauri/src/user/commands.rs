@@ -18,7 +18,7 @@ impl Client {
         Self { client }
     }
 
-    pub async fn create_user(&self, username: &str, password: &str) -> Result<User, Error> {
+    pub async fn create_user(&self, username: &str, password: &str, server_addr: &str) -> Result<User, Error> {
         let body = NewUserRequest {
             username: username.to_string(),
             password: password.to_string(),
@@ -26,7 +26,7 @@ impl Client {
 
         println!("got here");
 
-        let url = format!("http://{SERVER_ADDRESS}{GET_USERS}{CREATE_USER_PATH}");
+        let url = format!("http://{server_addr}{GET_USERS}{CREATE_USER_PATH}");
         println!("{url}");
         self.client
             .post(url)

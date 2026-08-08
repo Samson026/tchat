@@ -1,4 +1,4 @@
-use crate::{auth::AuthClient, messages::MessageClient, user::Client, ws::WsState};
+use crate::{auth::AuthClient, messages::MessageClient, settings::SettingsWriter, user::Client, ws::WsState};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 mod auth;
@@ -20,7 +20,9 @@ pub fn run() {
 
     tauri::Builder::default()
         .setup(|app| {
-            let cookie_path = app.path().app_data_dir()?.join("cookies.json");
+
+            let data_path = app.path().app_data_dir()?;
+            let cookie_path = data_path.join("cookies.json");
 
             std::fs::create_dir_all(cookie_path.parent().expect("Cookie path has no parent"))?;
 
@@ -41,10 +43,13 @@ pub fn run() {
                 .build()
                 .expect("Failed to build http");
 
+            let settings_writer = SettingsWriter::new(&data_path)?;
+
             app.manage(Client::new(http_client.clone()));
             app.manage(MessageClient::new(http_client.clone()));
             app.manage(AuthClient::new(http_client));
             app.manage(cookie_store);
+            app.manage(settings_writer);
 
             Ok(())
         })

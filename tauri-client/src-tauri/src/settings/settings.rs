@@ -1,19 +1,21 @@
-use std::{fs::{self, File}, io::{BufWriter, Error}, path::PathBuf};
+use std::{
+    fs::{self, File},
+    io::{BufWriter, Error},
+    path::PathBuf,
+};
 
 use protocol::SERVER_ADDRESS;
 use serde::{Deserialize, Serialize};
 
 pub struct SettingsWriter {
     file_location: PathBuf,
-    pub settings: Settings
+    pub settings: Settings,
 }
 
 impl SettingsWriter {
     pub fn new(data_dir: &PathBuf) -> Result<Self, Error> {
         // create file if not exist
-        let path = data_dir
-            .join("settings.json");
-
+        let path = data_dir.join("settings.json");
 
         if !path.exists() {
             let file = File::create(&path)?;
@@ -24,7 +26,7 @@ impl SettingsWriter {
 
             return Ok(Self {
                 file_location: path,
-                settings
+                settings,
             });
         }
 
@@ -34,8 +36,8 @@ impl SettingsWriter {
 
         return Ok(Self {
             settings,
-            file_location: path
-        })
+            file_location: path,
+        });
     }
 
     pub fn update_settings(&self, settings: &Settings) -> Result<(), Error> {
