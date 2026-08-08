@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schema.tauri.app/config/2",
-	"productName": "tauri-client",
+	"productName": "tChat",
 	"version": "0.1.0",
 	"identifier": "com.samdietz.tauri-client",
 	"build": {
@@ -12,7 +12,7 @@
 	"app": {
 		"windows": [
 			{
-				"title": "tauri-client",
+				"title": "tChat",
 				"width": 800,
 				"height": 600
 			}
