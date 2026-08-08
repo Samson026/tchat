@@ -69,7 +69,8 @@ pub fn run() {
             messages::commands::get_messages,
             messages::commands::get_chats,
             auth::commands::auth,
-            settings::commands::update_settings
+            settings::commands::update_settings,
+            settings::commands::get_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -8,3 +8,7 @@ export interface Message {
 	recv_id: number;
 	content: string;
 }
+
+export interface Settings {
+  server_address: string
+}

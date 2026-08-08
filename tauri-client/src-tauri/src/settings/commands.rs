@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 
-use crate::settings::settings::{Settings, SettingsWriter};
+use crate::settings::settings::{self, Settings, SettingsWriter};
 
 #[tauri::command]
 pub async fn update_settings(
@@ -13,4 +13,16 @@ pub async fn update_settings(
         Ok(_) => Ok(settings_w.settings.clone()),
         Err(error) => Err(error.to_string()),
     }
+}
+
+#[tauri::command]
+pub async fn get_settings(
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>
+) -> Result<Settings, String> {
+    let settings = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .get_settings();
+
+    Ok(settings)
 }

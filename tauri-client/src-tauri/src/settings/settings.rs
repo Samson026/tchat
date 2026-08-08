@@ -50,6 +50,10 @@ impl SettingsWriter {
         Ok(())
     }
 
+    pub fn get_settings(&self) -> Settings {
+        self.settings.clone()
+    }
+
     pub fn server_address(&self) -> String {
         self.settings.server_address.clone()
     }
