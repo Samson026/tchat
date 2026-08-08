@@ -31,8 +31,9 @@ async fn main() -> io::Result<()> {
     let auth_db = AuthDB::new(db.pool.clone());
     let app_state = state::AppState::new(user_db, message_db, auth_db);
     let store = MemoryStore::default();
-    let session =
-        SessionManagerLayer::new(store).with_expiry(Expiry::OnInactivity(Duration::days(30)));
+    let session = SessionManagerLayer::new(store)
+        .with_secure(false)
+        .with_expiry(Expiry::OnInactivity(Duration::days(30)));
 
     let app = Router::new()
         .nest(GET_USERS, user::router())
