@@ -23,9 +23,16 @@ pub async fn create_user(
 ) -> Response {
     println!("create user called");
 
-    match app_state.user_db.add_user(&data.username).await {
+    match app_state
+        .user_db
+        .add_user(&data.username, &data.password)
+        .await
+    {
         Ok(user) => Json(user).into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Could not create user").into_response(),
+        Err(error) => {
+            println!("error {error}");
+            (StatusCode::INTERNAL_SERVER_ERROR, "Could not create user").into_response()
+        }
     }
 }
 

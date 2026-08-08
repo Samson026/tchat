@@ -12,13 +12,16 @@ impl UserDB {
         Self { pool }
     }
 
-    pub async fn add_user(&mut self, username: &str) -> Result<User, sqlx::Error> {
+    pub async fn add_user(&mut self, username: &str, password: &str) -> Result<User, sqlx::Error> {
         sqlx::query_as::<_, User>(
-            "INSERT INTO users (username)
-                    VALUES(?)
+            "
+            INSERT INTO users (username, password)
+            VALUES(?, ?)
+            RETURNING id, username, password
             ",
         )
         .bind(username)
+        .bind(password)
         .fetch_one(&self.pool)
         .await
     }
