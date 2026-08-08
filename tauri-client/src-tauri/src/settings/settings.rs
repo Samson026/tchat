@@ -49,6 +49,10 @@ impl SettingsWriter {
         self.settings = settings;
         Ok(())
     }
+
+    pub fn server_address(&self) -> String {
+        self.settings.server_address.clone()
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone)]

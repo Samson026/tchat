@@ -1,13 +1,15 @@
 use std::sync::Mutex;
 
-use crate::{auth::AuthClient, messages::MessageClient, settings::SettingsWriter, user::Client, ws::WsState};
+use crate::{
+    auth::AuthClient, messages::MessageClient, settings::SettingsWriter, user::Client, ws::WsState,
+};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 mod auth;
 mod messages;
+mod settings;
 mod user;
 mod ws;
-mod settings;
 
 use tauri::Manager;
 
@@ -22,7 +24,6 @@ pub fn run() {
 
     tauri::Builder::default()
         .setup(|app| {
-
             let data_path = app.path().app_data_dir()?;
             let cookie_path = data_path.join("cookies.json");
 
@@ -67,7 +68,8 @@ pub fn run() {
             user::commands::logout,
             messages::commands::get_messages,
             messages::commands::get_chats,
-            auth::commands::auth
+            auth::commands::auth,
+            settings::commands::update_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
