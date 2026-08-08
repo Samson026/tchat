@@ -1,11 +1,11 @@
 import { createMemoryHistory, createRouter } from "vue-router";
 import App from "../App.vue";
 import ChatPage from "../pages/ChatPage.vue";
+import CreateUser from "../pages/CreateUser.vue";
 import HomePage from "../pages/HomePage.vue";
 import LoginPage from "../pages/LoginPage.vue";
 import SearchPage from "../pages/SearchPage.vue";
 import SettingsPage from "../pages/SettingsPage.vue";
-import CreateUser from "../pages/CreateUser.vue";
 
 const routes = [
 	{ path: "/", component: LoginPage },
@@ -24,8 +24,8 @@ const routes = [
 			},
 		],
 	},
-  { path: "/settings", component: SettingsPage },
-	{path: "/create_user", component: CreateUser}
+	{ path: "/settings", component: SettingsPage },
+	{ path: "/create_user", component: CreateUser },
 ];
 
 export const router = createRouter({

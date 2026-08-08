@@ -33,11 +33,11 @@
 					</button>
 				</form>
 				<button
-				    class="bg-secondary w-30 self-center rounded-lg hover:bg-secondary-hover my-2"
+					class="bg-secondary w-30 self-center rounded-lg hover:bg-secondary-hover my-2"
 					type="button"
 					@click="openCreateUser"
 				>
-				Create Account
+					Create Account
 				</button>
 			</div>
 		</div>
@@ -71,7 +71,7 @@ async function login() {
 }
 
 function openCreateUser() {
-  router.push("/create_user")
+	router.push("/create_user");
 }
 
 onMounted(async () => {

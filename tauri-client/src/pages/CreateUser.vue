@@ -2,8 +2,7 @@
 	<main
 		class="relative grid min-h-screen place-items-center bg-background p-6 text-text"
 	>
-
-		<BackBtn class="absolute left-6 top-6"/>
+		<BackBtn class="absolute left-6 top-6" />
 
 		<h1 class="text-center text-5xl font-semibold">tChat</h1>
 		<div class="h-64 flex w-full max-w-sm rounded-xl bg-surface shadow-2xl">
@@ -41,11 +40,11 @@
 
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
+import BackBtn from "../components/BackBtn.vue";
 import type { User } from "../models/user";
 import { useState } from "../stores/state";
-import { ref } from "vue";
-import BackBtn from "../components/BackBtn.vue";
 
 const username = ref("");
 const password = ref("");
