@@ -41,7 +41,7 @@ lint-protocol:
 	cargo clippy -p protocol --all-targets --all-features -- -D warnings
 
 lint-tauri-rust:
-	cargo clippy -p tauri-client --all-targets --all-features -- -D warnings
+	cargo clippy -p tChat --all-targets --all-features -- -D warnings
 
 lint-tauri-client:
 	cd tauri-client && bun run check
@@ -66,7 +66,7 @@ fix-protocol:
 	cargo clippy -p protocol --all-targets --all-features --fix --allow-dirty --allow-staged
 
 fix-tauri-rust:
-	cargo clippy -p tauri-client --all-targets --all-features --fix --allow-dirty --allow-staged
+	cargo clippy -p tChat --all-targets --all-features --fix --allow-dirty --allow-staged
 
 fix-tauri-client:
 	cd tauri-client && bun run fix
