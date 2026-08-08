@@ -1,7 +1,8 @@
 <template>
 	<main
-		class="grid min-h-screen place-items-center bg-background p-6 text-text"
+		class="relative grid min-h-screen place-items-center bg-background p-6 text-text"
 	>
+		<SettingsBtn class="absolute top-6 left-6" />
 		<h1 class="text-center text-5xl font-semibold">tChat</h1>
 		<div class="h-64 flex w-full max-w-sm rounded-xl bg-surface shadow-2xl">
 			<div class="flex w-full flex-col px-20 py-4">
@@ -40,6 +41,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import SettingsBtn from "../components/SettingsBtn.vue";
 import type { User } from "../models/user";
 import { useState } from "../stores/state";
 

@@ -1,12 +1,20 @@
-use std::{fs::File, io::BufWriter, path::PathBuf, sync::Arc};
+use std::{
+    fs::File,
+    io::BufWriter,
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 
 use reqwest::Error;
 
-use protocol::{CREATE_USER_PATH, GET_USERS, LOGIN_PATH, SERVER_ADDRESS};
+use protocol::{CREATE_USER_PATH, GET_USERS, LOGIN_PATH};
 use reqwest_cookie_store::CookieStoreMutex;
 use tauri::Manager;
 
-use crate::user::models::{NewUserRequest, User};
+use crate::{
+    settings::SettingsWriter,
+    user::models::{NewUserRequest, User},
+};
 
 #[derive(Debug)]
 pub struct Client {
@@ -18,7 +26,12 @@ impl Client {
         Self { client }
     }
 
-    pub async fn create_user(&self, username: &str, password: &str) -> Result<User, Error> {
+    pub async fn create_user(
+        &self,
+        username: &str,
+        password: &str,
+        server_addr: &str,
+    ) -> Result<User, Error> {
         let body = NewUserRequest {
             username: username.to_string(),
             password: password.to_string(),
@@ -26,7 +39,7 @@ impl Client {
 
         println!("got here");
 
-        let url = format!("http://{SERVER_ADDRESS}{GET_USERS}{CREATE_USER_PATH}");
+        let url = format!("http://{server_addr}{GET_USERS}{CREATE_USER_PATH}");
         println!("{url}");
         self.client
             .post(url)
@@ -37,13 +50,18 @@ impl Client {
             .await
     }
 
-    pub async fn login(&self, username: &str, password: &str) -> Result<User, Error> {
+    pub async fn login(
+        &self,
+        username: &str,
+        password: &str,
+        server_addr: &str,
+    ) -> Result<User, Error> {
         let body = NewUserRequest {
             username: username.to_string(),
             password: password.to_string(),
         };
 
-        let url = format!("http://{SERVER_ADDRESS}{GET_USERS}{LOGIN_PATH}");
+        let url = format!("http://{server_addr}{GET_USERS}{LOGIN_PATH}");
         self.client
             .post(url)
             .json(&body)
@@ -53,8 +71,8 @@ impl Client {
             .await
     }
 
-    pub async fn get_users(&self) -> Result<Vec<User>, Error> {
-        let url = format!("http://{SERVER_ADDRESS}{GET_USERS}");
+    pub async fn get_users(&self, server_addr: &str) -> Result<Vec<User>, Error> {
+        let url = format!("http://{server_addr}{GET_USERS}");
 
         self.client
             .get(url)
@@ -83,12 +101,18 @@ impl Client {
 #[tauri::command]
 pub async fn create_user(
     client: tauri::State<'_, Client>,
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
     username: String,
     password: String,
 ) -> Result<User, String> {
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
     client
         .inner()
-        .create_user(&username, &password)
+        .create_user(&username, &password, &server_addr)
         .await
         .map_err(|error| error.to_string())
 }
@@ -96,14 +120,20 @@ pub async fn create_user(
 #[tauri::command]
 pub async fn login(
     client: tauri::State<'_, Client>,
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
     cookie_store: tauri::State<'_, Arc<CookieStoreMutex>>,
     app: tauri::AppHandle,
     username: String,
     password: String,
 ) -> Result<User, String> {
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
     let res = client
         .inner()
-        .login(&username, &password)
+        .login(&username, &password, &server_addr)
         .await
         .map_err(|error| error.to_string());
 
@@ -123,10 +153,18 @@ pub async fn login(
 }
 
 #[tauri::command]
-pub async fn get_users(client: tauri::State<'_, Client>) -> Result<Vec<User>, String> {
+pub async fn get_users(
+    client: tauri::State<'_, Client>,
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
+) -> Result<Vec<User>, String> {
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
     client
         .inner()
-        .get_users()
+        .get_users(&server_addr)
         .await
         .map_err(|error| error.to_string())
 }

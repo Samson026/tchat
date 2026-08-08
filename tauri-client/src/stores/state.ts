@@ -5,10 +5,11 @@ interface State {
 	messages: Message[] | null;
 	chating_with: User | null;
 	all_users: User[] | null;
+	settings: Settings | null;
 }
 
 import { defineStore } from "pinia";
-import type { Message, User } from "../models/user";
+import type { Message, Settings, User } from "../models/user";
 export const useState = defineStore("stateStore", {
 	// arrow function recommended for full type inference
 	state: (): State => {
@@ -20,6 +21,7 @@ export const useState = defineStore("stateStore", {
 			messages: null,
 			chating_with: null,
 			all_users: null,
+			settings: null,
 		};
 	},
 	getters: {
