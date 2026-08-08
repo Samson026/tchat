@@ -1,15 +1,21 @@
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use futures_util::{
     stream::{SplitSink, SplitStream},
     SinkExt, StreamExt,
 };
 use protocol::WEBSOCKET_PATH;
+use reqwest::Url;
+use reqwest_cookie_store::CookieStoreMutex;
 use tauri::Emitter;
 use tokio::{net::TcpStream, sync::Mutex as TokioMutex};
 use tokio_tungstenite::{
     connect_async,
-    tungstenite::{Message, Result},
+    tungstenite::{
+        client::IntoClientRequest,
+        http::{header::COOKIE, HeaderValue},
+        Message, Result,
+    },
     MaybeTlsStream, WebSocketStream,
 };
 
@@ -52,16 +58,49 @@ pub async fn connect_ws(
     app: tauri::AppHandle,
     state: tauri::State<'_, WsState>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
+    cookie_store: tauri::State<'_, Arc<CookieStoreMutex>>,
 ) -> Result<(), String> {
     let server_addr = settings_writer
         .lock()
         .map_err(|error| error.to_string())?
         .server_address();
-
     let url = format!("ws://{server_addr}{WEBSOCKET_PATH}");
-    let ws = WebSocketConnection::connect(&url)
+    let cookie_url = Url::parse(&format!("http://{server_addr}{WEBSOCKET_PATH}"))
+        .map_err(|error| error.to_string())?;
+
+    let cookie_header = {
+        let store = cookie_store.lock().map_err(|error| error.to_string())?;
+
+        let header = store
+            .get_request_values(&cookie_url)
+            .map(|(name, value)| format!("{name}={value}"))
+            .collect::<Vec<_>>()
+            .join("; ");
+
+        if header.is_empty() {
+            None
+        } else {
+            Some(header)
+        }
+    };
+
+    let mut request = url
+        .as_str()
+        .into_client_request()
+        .map_err(|error| error.to_string())?;
+
+    if let Some(cookie_header) = cookie_header {
+        request.headers_mut().insert(
+            COOKIE,
+            HeaderValue::from_str(&cookie_header).map_err(|error| error.to_string())?,
+        );
+    }
+
+    let (socket, _) = connect_async(request)
         .await
         .map_err(|error| error.to_string())?;
+
+    let ws = WebSocketConnection { socket };
 
     let (writer, mut reader) = ws.split();
 

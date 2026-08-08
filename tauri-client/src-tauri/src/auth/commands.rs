@@ -1,8 +1,10 @@
-use protocol::{AUTH, SERVER_ADDRESS};
+use std::sync::Mutex;
+
+use protocol::AUTH;
 use reqwest::Error;
 use tauri::State;
 
-use crate::auth::models::User;
+use crate::{auth::models::User, settings::SettingsWriter};
 
 pub struct AuthClient {
     client: reqwest::Client,
@@ -13,8 +15,8 @@ impl AuthClient {
         Self { client }
     }
 
-    pub async fn auth(&self) -> Result<User, Error> {
-        let url = format!("http://{SERVER_ADDRESS}{AUTH}");
+    pub async fn auth(&self, server_addr: &str) -> Result<User, Error> {
+        let url = format!("http://{server_addr}{AUTH}");
         self.client
             .post(url)
             .send()
@@ -26,10 +28,18 @@ impl AuthClient {
 }
 
 #[tauri::command]
-pub async fn auth(state: State<'_, AuthClient>) -> Result<User, String> {
+pub async fn auth(
+    state: State<'_, AuthClient>,
+    settings_writer: State<'_, Mutex<SettingsWriter>>,
+) -> Result<User, String> {
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
     state
         .inner()
-        .auth()
+        .auth(&server_addr)
         .await
         .map_err(|error| error.to_string())
 }

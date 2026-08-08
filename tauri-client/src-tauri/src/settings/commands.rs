@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 
-use crate::settings::settings_writer::{Settings, SettingsWriter};
+use crate::settings::{Settings, SettingsWriter};
 
 #[tauri::command]
 pub async fn update_settings(
