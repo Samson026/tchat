@@ -1,17 +1,20 @@
 use axum::{
-    Extension, Router, extract::{
+    Extension, Router,
+    extract::{
         State, WebSocketUpgrade,
         ws::{Message, WebSocket},
-    }, middleware, response::Response, routing::get,
+    },
+    middleware,
+    response::Response,
+    routing::get,
 };
 use protocol::BASE_ROUTE;
 
-use crate::{
-    middleware::auth_middleware, state::AppState, websocket::models::{ChatMessage},
-};
+use crate::{middleware::auth_middleware, state::AppState, websocket::models::ChatMessage};
 
 pub fn router() -> Router<AppState> {
-    Router::new().route(BASE_ROUTE, get(upgrade))
+    Router::new()
+        .route(BASE_ROUTE, get(upgrade))
         .route_layer(middleware::from_fn(auth_middleware))
 }
 

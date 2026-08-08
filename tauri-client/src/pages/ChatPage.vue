@@ -96,12 +96,12 @@ async function handleSubmit() {
 }
 
 onMounted(async () => {
-  if (state.user) {
-    try {
-        await invoke("connect_ws");
-    } catch (error) {
-      throw new Error(`error connecting ws: ${error}`);
-    }
+	if (state.user) {
+		try {
+			await invoke("connect_ws");
+		} catch (error) {
+			throw new Error(`error connecting ws: ${error}`);
+		}
 
 		state.messages = await getMessaess();
 		const newUsers = await getChats();

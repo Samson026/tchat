@@ -31,11 +31,6 @@ pub struct WebSocketConnection {
 }
 
 impl WebSocketConnection {
-    pub async fn connect(url: &str) -> Result<Self> {
-        let (socket, _) = connect_async(url).await?;
-        Ok(Self { socket })
-    }
-
     pub fn split(self) -> (Writer, Reader) {
         self.socket.split()
     }
