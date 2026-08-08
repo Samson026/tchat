@@ -1,4 +1,4 @@
 pub mod commands;
 mod settings_writer;
 
-pub use settings_writer::SettingsWriter;
+pub use settings_writer::{Settings, SettingsWriter};

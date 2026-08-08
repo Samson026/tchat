@@ -1,29 +1,29 @@
 use axum::{
-    Router,
+    Extension, Router,
     extract::{
-        Query, State, WebSocketUpgrade,
+        State, WebSocketUpgrade,
         ws::{Message, WebSocket},
     },
+    middleware,
     response::Response,
     routing::get,
 };
 use protocol::BASE_ROUTE;
 
-use crate::{
-    state::AppState,
-    websocket::models::{ChatMessage, WebSocketParams},
-};
+use crate::{middleware::auth_middleware, state::AppState, websocket::models::ChatMessage};
 
 pub fn router() -> Router<AppState> {
-    Router::new().route(BASE_ROUTE, get(upgrade))
+    Router::new()
+        .route(BASE_ROUTE, get(upgrade))
+        .route_layer(middleware::from_fn(auth_middleware))
 }
 
 pub async fn upgrade(
     State(app_state): State<AppState>,
-    Query(params): Query<WebSocketParams>,
+    Extension(user_id): Extension<i64>,
     ws: WebSocketUpgrade,
 ) -> Response {
-    ws.on_upgrade(move |socket| handle_socket(socket, params.user_id, app_state))
+    ws.on_upgrade(move |socket| handle_socket(socket, user_id, app_state))
 }
 
 pub async fn handle_socket(mut socket: WebSocket, user_id: i64, mut app_state: AppState) {

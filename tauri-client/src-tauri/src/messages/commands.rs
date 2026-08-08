@@ -1,8 +1,13 @@
+use std::sync::Mutex;
+
 use reqwest::Error;
 
-use protocol::{CHATS, GET_MESSAGES, SERVER_ADDRESS};
+use protocol::{CHATS, GET_MESSAGES};
 
-use crate::messages::models::{ChatMessage, GetMessagesReq, User};
+use crate::{
+    messages::models::{ChatMessage, GetMessagesReq, User},
+    settings::SettingsWriter,
+};
 
 #[derive(Debug)]
 pub struct MessageClient {
@@ -14,8 +19,12 @@ impl MessageClient {
         Self { client }
     }
 
-    pub async fn get_messages(&self, receiver_id: &i64) -> Result<Vec<ChatMessage>, Error> {
-        let url = format!("http://{SERVER_ADDRESS}{GET_MESSAGES}");
+    pub async fn get_messages(
+        &self,
+        receiver_id: &i64,
+        server_addr: &str,
+    ) -> Result<Vec<ChatMessage>, Error> {
+        let url = format!("http://{server_addr}{GET_MESSAGES}");
 
         let params = GetMessagesReq {
             receiver: *receiver_id,
@@ -31,8 +40,8 @@ impl MessageClient {
             .await
     }
 
-    pub async fn get_chats(&self) -> Result<Vec<User>, Error> {
-        let url = format!("http://{SERVER_ADDRESS}{GET_MESSAGES}{CHATS}");
+    pub async fn get_chats(&self, server_addr: &str) -> Result<Vec<User>, Error> {
+        let url = format!("http://{server_addr}{GET_MESSAGES}{CHATS}");
         self.client
             .get(url)
             .send()
@@ -46,11 +55,17 @@ impl MessageClient {
 #[tauri::command]
 pub async fn get_messages(
     message_client: tauri::State<'_, MessageClient>,
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
     receiver_id: i64,
 ) -> Result<Vec<ChatMessage>, String> {
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
     message_client
         .inner()
-        .get_messages(&receiver_id)
+        .get_messages(&receiver_id, &server_addr)
         .await
         .map_err(|error| error.to_string())
 }
@@ -58,10 +73,16 @@ pub async fn get_messages(
 #[tauri::command]
 pub async fn get_chats(
     message_client: tauri::State<'_, MessageClient>,
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
 ) -> Result<Vec<User>, String> {
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
     message_client
         .inner()
-        .get_chats()
+        .get_chats(&server_addr)
         .await
         .map_err(|error| error.to_string())
 }
