@@ -9,10 +9,10 @@ export function setupListeners() {
 		const message = JSON.parse(event.payload) as Message;
 		console.log(`got message ${event.payload}`);
 		if (state.chating_with?.id === message.sender_id) {
-			if (state.chat === null) {
-				state.chat = [message];
+			if (state.messages === null) {
+				state.messages = [message];
 			}
-			state.chat.push(message);
+			state.messages.push(message);
 		}
 	});
 }
