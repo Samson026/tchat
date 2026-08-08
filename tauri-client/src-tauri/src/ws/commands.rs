@@ -1,13 +1,15 @@
+use std::sync::Mutex;
+
 use futures_util::{
     stream::{SplitSink, SplitStream},
     SinkExt, StreamExt,
 };
 use protocol::WEBSOCKET_PATH;
 use tauri::Emitter;
-use tokio::{net::TcpStream, sync::Mutex};
+use tokio::{net::TcpStream, sync::Mutex as TokioMutex};
 use tokio_tungstenite::{
     connect_async,
-    tungstenite::{Message, Result},
+    tungstenite::{error, Message, Result},
     MaybeTlsStream, WebSocketStream,
 };
 
@@ -34,13 +36,13 @@ impl WebSocketConnection {
 }
 
 pub struct WsState {
-    pub connection: Mutex<Option<Writer>>,
+    pub connection: TokioMutex<Option<Writer>>,
 }
 
 impl WsState {
     pub fn new() -> Self {
         Self {
-            connection: Mutex::new(None),
+            connection: TokioMutex::new(None),
         }
     }
 }
@@ -49,11 +51,15 @@ impl WsState {
 pub async fn connect_ws(
     app: tauri::AppHandle,
     state: tauri::State<'_, WsState>,
-    settings: tauri::State<'_, SettingsWriter>,
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
     user_id: i64,
 ) -> Result<(), String> {
-    let addr = &settings.inner().settings.server_address;
-    let url = format!("ws://{addr}{WEBSOCKET_PATH}?user_id={user_id}");
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
+    let url = format!("ws://{server_addr}{WEBSOCKET_PATH}?user_id={user_id}");
     let ws = WebSocketConnection::connect(&url)
         .await
         .map_err(|error| error.to_string())?;

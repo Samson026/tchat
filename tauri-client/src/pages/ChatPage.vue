@@ -96,10 +96,15 @@ async function handleSubmit() {
 }
 
 onMounted(async () => {
-	if (state.user) {
-		await invoke("connect_ws", {
-			userId: state.user.id,
-		});
+  if (state.user) {
+    try {
+        await invoke("connect_ws", {
+            userId: state.user.id,
+        });
+    } catch (error) {
+          console.log(`error connecting ws: ${error}`)
+        }
+
 		state.messages = await getMessaess();
 		const newUsers = await getChats();
 		newUsers.forEach((user) => {
