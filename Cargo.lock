@@ -4991,6 +4991,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "tChat"
+version = "0.1.0"
+dependencies = [
+ "cookie_store",
+ "futures-util",
+ "protocol",
+ "reqwest",
+ "reqwest_cookie_store",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-opener",
+ "tokio",
+ "tokio-tungstenite 0.30.0",
+]
+
+[[package]]
 name = "tao"
 version = "0.35.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5117,24 +5135,6 @@ dependencies = [
  "tauri-utils",
  "tauri-winres",
  "walkdir",
-]
-
-[[package]]
-name = "tauri-client"
-version = "0.1.0"
-dependencies = [
- "cookie_store",
- "futures-util",
- "protocol",
- "reqwest",
- "reqwest_cookie_store",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-opener",
- "tokio",
- "tokio-tungstenite 0.30.0",
 ]
 
 [[package]]
