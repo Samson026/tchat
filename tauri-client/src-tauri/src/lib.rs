@@ -59,7 +59,6 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(WsState::new())
         .invoke_handler(tauri::generate_handler![
-            greet,
             ws::commands::connect_ws,
             ws::commands::send,
             user::commands::create_user,
