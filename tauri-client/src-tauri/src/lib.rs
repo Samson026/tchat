@@ -1,3 +1,5 @@
+use std::sync::Mutex;
+
 use crate::{auth::AuthClient, messages::MessageClient, settings::SettingsWriter, user::Client, ws::WsState};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -49,7 +51,7 @@ pub fn run() {
             app.manage(MessageClient::new(http_client.clone()));
             app.manage(AuthClient::new(http_client));
             app.manage(cookie_store);
-            app.manage(settings_writer);
+            app.manage(Mutex::new(settings_writer));
 
             Ok(())
         })

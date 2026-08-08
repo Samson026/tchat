@@ -40,16 +40,18 @@ impl SettingsWriter {
         });
     }
 
-    pub fn update_settings(&self, settings: &Settings) -> Result<(), Error> {
+    pub fn update_settings(&mut self, settings: Settings) -> Result<(), Error> {
         let file = File::create(&self.file_location)?;
         let writer = BufWriter::new(file);
 
         serde_json::to_writer_pretty(writer, &settings)?;
+
+        self.settings = settings;
         Ok(())
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Settings {
     pub server_address: String,
 }
