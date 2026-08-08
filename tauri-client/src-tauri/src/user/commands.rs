@@ -37,8 +37,6 @@ impl Client {
             password: password.to_string(),
         };
 
-        println!("got here");
-
         let url = format!("http://{server_addr}{GET_USERS}{CREATE_USER_PATH}");
         println!("{url}");
         self.client
@@ -102,6 +100,8 @@ impl Client {
 pub async fn create_user(
     client: tauri::State<'_, Client>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
+    cookie_store: tauri::State<'_, Arc<CookieStoreMutex>>,
+    app: tauri::AppHandle,
     username: String,
     password: String,
 ) -> Result<User, String> {
@@ -110,11 +110,25 @@ pub async fn create_user(
         .map_err(|error| error.to_string())?
         .server_address();
 
-    client
+    let res = client
         .inner()
         .create_user(&username, &password, &server_addr)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| error.to_string());
+
+    let path = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?
+        .join("cookies.json");
+
+    // save cookies
+    client
+        .inner()
+        .save_cookies(&path, cookie_store.inner())
+        .map_err(|error| error.to_string())?;
+
+    res
 }
 
 #[tauri::command]

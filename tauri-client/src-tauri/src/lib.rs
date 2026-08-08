@@ -13,11 +13,6 @@ mod ws;
 
 use tauri::Manager;
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // Load an existing set of cookies, serialized as json, if it is available
@@ -59,7 +54,6 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(WsState::new())
         .invoke_handler(tauri::generate_handler![
-            greet,
             ws::commands::connect_ws,
             ws::commands::send,
             user::commands::create_user,
