@@ -21,7 +21,7 @@
 						v-model="username"
 					>
 					<p v-if="errors.username" class="text-error text-sm">
-					    {{ errors.username }}
+						{{ errors.username }}
 					</p>
 					<input
 						type="password"
@@ -30,7 +30,7 @@
 						v-model="password"
 					>
 					<p v-if="errors.password" class="text-error text-sm">
-					    {{ errors.password }}
+						{{ errors.password }}
 					</p>
 					<button
 						class="bg-primary w-30 self-center rounded-lg hover:bg-primary-hover my-2"
@@ -46,37 +46,35 @@
 
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import BackBtn from "../components/BackBtn.vue";
 import type { User } from "../models/user";
-import { useState } from "../stores/state";
-import { useForm } from "vee-validate";
 import { NewUser } from "../models/validation";
-import { toTypedSchema } from "@vee-validate/zod";
-
+import { useState } from "../stores/state";
 
 const user = ref<User | null>(null);
 const state = useState();
 const router = useRouter();
 
 const { defineField, handleSubmit, errors } = useForm({
-  validationSchema: toTypedSchema(NewUser)
-})
+	validationSchema: toTypedSchema(NewUser),
+});
 
-const [username] = defineField("username")
-const [password] = defineField("password")
+const [username] = defineField("username");
+const [password] = defineField("password");
 
-
-const submitForm = handleSubmit(async values => {
-  user.value = await invoke<User>("create_user", {
+const submitForm = handleSubmit(async (values) => {
+	user.value = await invoke<User>("create_user", {
 		username: values.username,
 		password: values.password,
 	});
- 
+
 	if (user.value.username) {
 		state.user = user.value;
 		router.push("/home");
 	}
-})
+});
 </script>

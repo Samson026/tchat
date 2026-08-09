@@ -23,7 +23,7 @@
 						v-model="input"
 					>
 					<p v-if="errors.input" class="text-error text-sm">
-					    {{ errors.input }}
+						{{ errors.input }}
 					</p>
 					<button
 						class="text-text bg-primary rounded-2xl min-w-15"
@@ -39,21 +39,21 @@
 
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
-import { computed, onMounted, ref } from "vue";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
+import { computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
 import type { Message, User } from "../models/user.ts";
-import { useState } from "../stores/state.ts";
-import { useForm } from "vee-validate";
-import { toTypedSchema } from "@vee-validate/zod";
 import { NewMessage } from "../models/validation.ts";
+import { useState } from "../stores/state.ts";
 
 const route = useRoute();
 const state = useState();
 
 const { defineField, handleSubmit, errors } = useForm({
-  validationSchema: toTypedSchema(NewMessage)
-})
+	validationSchema: toTypedSchema(NewMessage),
+});
 
 const [input] = defineField("input");
 
@@ -98,9 +98,9 @@ async function getChats() {
 	return invoke<User[]>("get_chats");
 }
 
-const submitForm = handleSubmit(async values => {
-  await sendMessage(values.input)
-})
+const submitForm = handleSubmit(async (values) => {
+	await sendMessage(values.input);
+});
 
 // async function handleSubmit() {
 // 	if (inputRef.value === null) return;
