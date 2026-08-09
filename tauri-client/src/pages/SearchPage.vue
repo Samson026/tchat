@@ -19,7 +19,6 @@
 </template>
 
 <script setup lang="ts">
-import { invoke } from "@tauri-apps/api/core";
 import { computed, onMounted, ref } from "vue";
 import SearchedUserBtn from "../components/SearchedUserBtn.vue";
 import type { User } from "../models/user";
@@ -31,16 +30,14 @@ const input = ref("");
 const display_users = computed<User[]>(() => {
 	const i = input.value.toLowerCase().trim();
 	if (i === "") return [];
-	return state.all_users?.filter((user) => user.username.includes(i)) ?? [];
+	return [...state.all_users.values()].filter((user) =>
+		user.username.toLowerCase().includes(i),
+	);
 });
 
-async function loadUsers() {
-	return await invoke<User[]>("get_users");
-}
-
 onMounted(async () => {
-	if (state.all_users === null) {
-		state.all_users = await loadUsers();
+	if (state.all_users.size === 0) {
+		await state.ensureAllUsersLoaded();
 	}
 });
 </script>

@@ -53,7 +53,7 @@ const route = useRoute();
 const state = useState();
 const notificationStore = useNotification();
 
-const { defineField, handleSubmit, errors } = useForm({
+const { defineField, handleSubmit, errors, resetForm } = useForm({
 	validationSchema: toTypedSchema(NewMessage),
 });
 
@@ -81,19 +81,14 @@ async function sendMessage(message: string) {
 		content: message,
 	};
 
-	try {
-		await invoke("send", {
-			message: msg,
-		});
+	await invoke("send", {
+		message: msg,
+	});
 
-		if (state.messages === null) {
-			state.messages = [msg];
-		}
-		state.messages.push(msg);
-		console.log("hi");
-	} catch (error) {
-		console.log(error);
+	if (state.messages === null) {
+		state.messages = [msg];
 	}
+	state.messages.push(msg);
 }
 
 async function getChats() {
@@ -101,7 +96,12 @@ async function getChats() {
 }
 
 const submitForm = handleSubmit(async (values) => {
-	await sendMessage(values.input);
+	try {
+		await sendMessage(values.input);
+		resetForm();
+	} catch (error) {
+		notificationStore.pushError(String(error));
+	}
 });
 
 // async function handleSubmit() {
@@ -113,12 +113,6 @@ const submitForm = handleSubmit(async (values) => {
 
 onMounted(async () => {
 	if (state.user) {
-		try {
-			await invoke("connect_ws");
-		} catch (error) {
-			notificationStore.pushError(String(error));
-		}
-
 		state.messages = await getMessaess();
 		const newUsers = await getChats();
 		newUsers.forEach((user) => {
