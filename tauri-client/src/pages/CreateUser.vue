@@ -53,11 +53,13 @@ import { useRouter } from "vue-router";
 import BackBtn from "../components/BackBtn.vue";
 import type { User } from "../models/user";
 import { NewUser } from "../models/validation";
+import { useNotification } from "../stores/notifications";
 import { useState } from "../stores/state";
 
 const user = ref<User | null>(null);
 const state = useState();
 const router = useRouter();
+const notificationStore = useNotification();
 
 const { defineField, handleSubmit, errors } = useForm({
 	validationSchema: toTypedSchema(NewUser),
@@ -67,12 +69,18 @@ const [username] = defineField("username");
 const [password] = defineField("password");
 
 const submitForm = handleSubmit(async (values) => {
-	user.value = await invoke<User>("create_user", {
-		username: values.username,
-		password: values.password,
-	});
+	try {
+		user.value = await invoke<User>("create_user", {
+			username: values.username,
+			password: values.password,
+		});
+	} catch (error) {
+		notificationStore.pushError(`Could not create user, ${String(error)}`);
+		return;
+	}
 
 	if (user.value.username) {
+		notificationStore.pushSuccess(`Account, ${user.value.username} created...`);
 		state.user = user.value;
 		router.push("/home");
 	}
