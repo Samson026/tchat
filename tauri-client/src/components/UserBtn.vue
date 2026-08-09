@@ -1,11 +1,17 @@
 <template>
-	<button
-		class="mt-2 mr-0 block w-full text-text h-8 rounded-xl opacity-70 hover:bg-primary-hover px-2.5 text-left active:bg-primary-active"
-		type="button"
-		@click="setChat(user.id)"
-	>
-		{{ user.username }}
-	</button>
+    <button
+  		class="flex items-center mt-2 mr-0 w-full text-text h-8 rounded-xl opacity-70 hover:bg-primary-hover px-2.5 text-left active:bg-primary-active whitespace-nowrap"
+  		:class="{
+		  'bg-primary-hover': user.id === state.chating_with?.id
+  		}"
+  		type="button"
+  		@click="setChat(user.id)"
+   	>
+  		<span>{{ user.username }}</span>
+        <span class="ml-auto"> {{ state.chats_data.get(user.id)?.unread }} </span>
+   	</button>
+
+
 </template>
 
 <script setup lang="ts">

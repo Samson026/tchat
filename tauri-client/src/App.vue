@@ -1,8 +1,8 @@
 <template>
-    <NotificationManager />
+	<NotificationManager />
 	<RouterView />
 </template>
 
 <script setup lang="ts">
-import NotificationManager from './components/NotificationManager.vue';
+import NotificationManager from "./components/NotificationManager.vue";
 </script>

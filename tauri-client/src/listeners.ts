@@ -12,7 +12,9 @@ export function setupListeners() {
 			if (state.messages === null) {
 				state.messages = [message];
 			}
-			state.messages.push(message);
-		}
-  });
+      state.messages.push(message);
+			return
+    }
+    state.addNotification(message.sender_id)
+	});
 }

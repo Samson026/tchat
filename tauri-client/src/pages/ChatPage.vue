@@ -46,12 +46,12 @@ import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
 import type { Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
-import { useState } from "../stores/state.ts";
 import { useNotification } from "../stores/notifications.ts";
+import { useState } from "../stores/state.ts";
 
 const route = useRoute();
 const state = useState();
-const notificationStore = useNotification()
+const notificationStore = useNotification();
 
 const { defineField, handleSubmit, errors } = useForm({
 	validationSchema: toTypedSchema(NewMessage),
@@ -60,7 +60,7 @@ const { defineField, handleSubmit, errors } = useForm({
 const [input] = defineField("input");
 
 const username = computed(() => {
-	return state.getUsername(Number(route.params.id));
+	return state.chats_data.get(Number(route.params.id));
 });
 
 async function getMessaess() {
@@ -116,15 +116,14 @@ onMounted(async () => {
 		try {
 			await invoke("connect_ws");
 		} catch (error) {
-		    notificationStore.pushError(String(error))
+			notificationStore.pushError(String(error));
 		}
 
 		state.messages = await getMessaess();
 		const newUsers = await getChats();
 		newUsers.forEach((user) => {
-			if (!state.chats_id.has(user.id)) {
-				state.chats_id.add(user.id);
-				state.chats_data.push(user);
+			if (!state.chats_data.has(user.id)) {
+				state.chats_data.set(user.id, user);
 			}
 		});
 		console.log("got message");
