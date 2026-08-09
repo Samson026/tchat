@@ -1,9 +1,11 @@
 <template>
 	<div
-		class="flex w-min rounded-2xl my-0.5"
+		class="my-0.5 w-fit max-w-[40%] rounded-2xl"
 		:class="primary ? 'bg-primary' : 'bg-secondary'"
 	>
-		<p class="text-text px-3 ml-1 w-fit whitespace-nowrap min-w-5">
+		<p
+			class="whitespace-pre-wrap break-word text-text px-3 py-2 text-left w-fit"
+		>
 			{{ message.content }}
 		</p>
 	</div>
