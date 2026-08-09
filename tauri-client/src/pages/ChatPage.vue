@@ -15,13 +15,16 @@
 			<div
 				class="bg-surface w-full h-20 border border-border rounded-xl px-2 py-2"
 			>
-				<form class="flex h-full items-center" @submit.prevent="handleSubmit">
+				<form class="flex h-full items-center" @submit="submitForm">
 					<input
 						type="text"
 						placeholder="Message"
 						class="text-text w-full h-full mx-2"
-						v-model="inputRef"
+						v-model="input"
 					>
+					<p v-if="errors.input" class="text-error text-sm">
+						{{ errors.input }}
+					</p>
 					<button
 						class="text-text bg-primary rounded-2xl min-w-15"
 						type="submit"
@@ -36,16 +39,23 @@
 
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
-import { computed, onMounted, ref } from "vue";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
+import { computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
 import type { Message, User } from "../models/user.ts";
+import { NewMessage } from "../models/validation.ts";
 import { useState } from "../stores/state.ts";
 
 const route = useRoute();
 const state = useState();
 
-const inputRef = ref("");
+const { defineField, handleSubmit, errors } = useForm({
+	validationSchema: toTypedSchema(NewMessage),
+});
+
+const [input] = defineField("input");
 
 const username = computed(() => {
 	return state.getUsername(Number(route.params.id));
@@ -88,12 +98,16 @@ async function getChats() {
 	return invoke<User[]>("get_chats");
 }
 
-async function handleSubmit() {
-	if (inputRef.value === null) return;
+const submitForm = handleSubmit(async (values) => {
+	await sendMessage(values.input);
+});
 
-	await sendMessage(inputRef.value);
-	inputRef.value = "";
-}
+// async function handleSubmit() {
+// 	if (inputRef.value === null) return;
+
+// 	await sendMessage(inputRef.value);
+// 	inputRef.value = "";
+// }
 
 onMounted(async () => {
 	if (state.user) {
