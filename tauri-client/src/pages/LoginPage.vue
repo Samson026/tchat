@@ -50,28 +50,27 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import SettingsBtn from "../components/SettingsBtn.vue";
 import type { User } from "../models/user";
-import { useState } from "../stores/state";
 import { useNotification } from "../stores/notifications";
+import { useState } from "../stores/state";
 
 const username = ref("");
 const password = ref("");
 const user = ref<User | null>(null);
 const state = useState();
 const router = useRouter();
-const notificationStore = useNotification()
+const notificationStore = useNotification();
 
 async function login() {
-  try {
-    user.value = await invoke<User>("login", {
-		username: username.value,
-		password: password.value,
-	});
-  } catch (error) {
-    console.log(error)
-    notificationStore.pushError(String(error))
-    return
-  }
-	
+	try {
+		user.value = await invoke<User>("login", {
+			username: username.value,
+			password: password.value,
+		});
+	} catch (error) {
+		console.log(error);
+		notificationStore.pushError(String(error));
+		return;
+	}
 
 	if (user.value.username) {
 		state.user = user.value;

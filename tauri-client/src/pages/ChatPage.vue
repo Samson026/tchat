@@ -46,12 +46,12 @@ import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
 import type { Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
-import { useState } from "../stores/state.ts";
 import { useNotification } from "../stores/notifications.ts";
+import { useState } from "../stores/state.ts";
 
 const route = useRoute();
 const state = useState();
-const notificationStore = useNotification()
+const notificationStore = useNotification();
 
 const { defineField, handleSubmit, errors } = useForm({
 	validationSchema: toTypedSchema(NewMessage),
@@ -116,7 +116,7 @@ onMounted(async () => {
 		try {
 			await invoke("connect_ws");
 		} catch (error) {
-		    notificationStore.pushError(String(error))
+			notificationStore.pushError(String(error));
 		}
 
 		state.messages = await getMessaess();
