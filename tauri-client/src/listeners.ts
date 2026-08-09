@@ -13,8 +13,6 @@ export function setupListeners() {
 				state.messages = [message];
 			}
 			state.messages.push(message);
-			return;
 		}
-		state.addNotification(message.sender_id);
 	});
 }
