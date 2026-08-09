@@ -12,7 +12,20 @@ export function setupListeners() {
 			if (state.messages === null) {
 				state.messages = [message];
 			}
-			state.messages.push(message);
-		}
-	});
+      state.messages.push(message);
+			return
+    }
+    if (state.chats_data.has(message.sender_id)) {
+      state.addNotification(message.sender_id)
+      return
+    }
+    const user = state.all_users.get(message.sender_id)
+    console.log(user)
+    if (user) {
+      console.log("adding user " + user)
+      user.unread = 1
+      state.chats_data.set(message.sender_id, user)
+    }
+
+  });
 }

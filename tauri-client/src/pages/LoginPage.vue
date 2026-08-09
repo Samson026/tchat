@@ -66,6 +66,11 @@ async function login() {
 			username: username.value,
 			password: password.value,
 		});
+		try {
+			await invoke("connect_ws");
+		} catch (error) {
+			notificationStore.pushError(String(error));
+		}
 	} catch (error) {
 		console.log(error);
 		notificationStore.pushError(String(error));

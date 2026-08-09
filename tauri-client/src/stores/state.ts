@@ -3,12 +3,16 @@ interface State {
 	chats_data: Map<number, User>;
 	messages: Message[] | null;
 	chating_with: User | null;
-	all_users: User[] | null;
+	all_users: Map<number, User>;
 	settings: Settings | null;
 }
 
+import { invoke } from "@tauri-apps/api/core";
 import { defineStore } from "pinia";
 import type { Message, Settings, User } from "../models/user";
+
+let allUsersRequest: Promise<User[]> | null = null;
+
 export const useState = defineStore("stateStore", {
 	// arrow function recommended for full type inference
 	state: (): State => {
@@ -18,11 +22,28 @@ export const useState = defineStore("stateStore", {
 			chats_data: new Map<number, User>(),
 			messages: null,
 			chating_with: null,
-			all_users: null,
+			all_users: new Map<number, User>(),
 			settings: null,
 		};
 	},
 	actions: {
+		async ensureAllUsersLoaded() {
+			if (this.all_users.size > 0) return;
+
+			if (allUsersRequest === null) {
+				allUsersRequest = invoke<User[]>("get_users");
+			}
+
+			try {
+				const users = await allUsersRequest;
+
+				if (this.all_users.size === 0) {
+					this.all_users = new Map(users.map((user) => [user.id, user]));
+				}
+			} finally {
+				allUsersRequest = null;
+			}
+		},
 		addNotification(userId: number) {
 			const user = this.chats_data.get(userId);
 
