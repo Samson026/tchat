@@ -8,7 +8,7 @@
   		@click="setChat(user.id)"
    	>
   		<span>{{ user.username }}</span>
-        <span class="ml-auto"> {{ state.chats_data.get(user.id)?.unread }} </span>
+        <span v-if="unread > 0" class="ml-auto"> {{ state.chats_data.get(user.id)?.unread }} </span>
    	</button>
 
 
@@ -19,6 +19,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { useRouter } from "vue-router";
 import type { Message, User } from "../models/user";
 import { useState } from "../stores/state";
+import { computed } from "vue";
 
 const router = useRouter();
 const state = useState();
@@ -27,9 +28,15 @@ const props = defineProps<{
 	user: User;
 }>();
 
+const unread = computed(() => {
+  return state.chats_data.get(props.user.id)?.unread ?? 0
+})
+
 async function setChat(recvID: number) {
 	state.chating_with = props.user;
-	state.messages = await getChat(recvID);
+  state.messages = await getChat(recvID);
+  const chatData = state.chats_data.get(recvID);
+  if (chatData) chatData.unread = 0;
 
 	router.push(`/home/chat/${recvID}`);
 }

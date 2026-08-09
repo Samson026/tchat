@@ -60,7 +60,7 @@ const { defineField, handleSubmit, errors } = useForm({
 const [input] = defineField("input");
 
 const username = computed(() => {
-	return state.chats_data.get(Number(route.params.id));
+	return state.chats_data.get(Number(route.params.id))?.username;
 });
 
 async function getMessaess() {
@@ -128,6 +128,7 @@ onMounted(async () => {
 		});
 		console.log("got message");
 		console.log(state.messages);
-	}
+  }
+	state.addNotification(3)
 });
 </script>

@@ -26,8 +26,14 @@ export const useState = defineStore("stateStore", {
     addNotification(userId: number) {
       const user = this.chats_data.get(userId)
 
-      if (user)
-        user.unread += 1
+      if (user) {
+        if (user.unread) {
+          user.unread += 1
+        }
+        else {
+          user.unread = 1
+        }
+      }
     }
   },
 });
