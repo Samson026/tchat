@@ -1,7 +1,6 @@
 interface State {
 	user: User | null;
-	chats_id: Set<number>;
-	chats_data: User[];
+	chats_data: Map<number, User>;
 	messages: Message[] | null;
 	chating_with: User | null;
 	all_users: User[] | null;
@@ -16,20 +15,24 @@ export const useState = defineStore("stateStore", {
 		return {
 			// all these properties will have their type inferred automatically
 			user: null,
-			chats_id: new Set<number>(),
-			chats_data: [],
+			chats_data: new Map<number, User>(),
 			messages: null,
 			chating_with: null,
 			all_users: null,
 			settings: null,
 		};
 	},
-	getters: {
-		getUsername: (state) => {
-			return (userId: number): string => {
-				const user = state.chats_data.find((user) => user.id === userId);
-				return user?.username ?? "Unknown user";
-			};
+	actions: {
+		addNotification(userId: number) {
+			const user = this.chats_data.get(userId);
+
+			if (user) {
+				if (user.unread) {
+					user.unread += 1;
+				} else {
+					user.unread = 1;
+				}
+			}
 		},
 	},
 });

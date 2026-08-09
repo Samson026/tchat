@@ -7,8 +7,8 @@
 			<p class="text-text opacity-50 mt-10 text-xl">Chats:</p>
 			<UserBtn
 				v-for="user in state.chats_data"
-				:key="user.id"
-				:user="user"
+				:key="user[0]"
+				:user="user[1]"
 				class="-ml-2"
 			/>
 			<button
@@ -57,9 +57,8 @@ async function logout() {
 onMounted(async () => {
 	const newUsers = await invoke<User[]>("get_chats");
 	newUsers.forEach((user) => {
-		if (!state.chats_id.has(user.id)) {
-			state.chats_id.add(user.id);
-			state.chats_data.push(user);
+		if (!state.chats_data.has(user.id)) {
+			state.chats_data.set(user.id, user);
 		}
 	});
 });

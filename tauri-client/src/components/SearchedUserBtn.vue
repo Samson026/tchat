@@ -19,8 +19,7 @@ const state = useState();
 const router = useRouter();
 
 function chatUser(user: User) {
-	state.chats_id.add(user.id);
-	state.chats_data.push(user);
+	state.chats_data.set(user.id, user);
 
 	router.push(`/home/chat/${user.id}`);
 }

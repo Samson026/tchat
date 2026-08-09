@@ -1,6 +1,7 @@
 export interface User {
 	id: number;
 	username: string;
+	unread: number;
 }
 
 export interface Message {

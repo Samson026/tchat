@@ -60,7 +60,7 @@ const { defineField, handleSubmit, errors } = useForm({
 const [input] = defineField("input");
 
 const username = computed(() => {
-	return state.getUsername(Number(route.params.id));
+	return state.chats_data.get(Number(route.params.id))?.username;
 });
 
 async function getMessaess() {
@@ -122,9 +122,8 @@ onMounted(async () => {
 		state.messages = await getMessaess();
 		const newUsers = await getChats();
 		newUsers.forEach((user) => {
-			if (!state.chats_id.has(user.id)) {
-				state.chats_id.add(user.id);
-				state.chats_data.push(user);
+			if (!state.chats_data.has(user.id)) {
+				state.chats_data.set(user.id, user);
 			}
 		});
 		console.log("got message");
