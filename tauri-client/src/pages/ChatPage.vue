@@ -128,7 +128,6 @@ onMounted(async () => {
 		});
 		console.log("got message");
 		console.log(state.messages);
-  }
-	state.addNotification(3)
+	}
 });
 </script>
