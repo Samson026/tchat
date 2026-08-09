@@ -1,12 +1,12 @@
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { Message } from "./models/user";
-import { useState } from "./stores/state";
-import { invoke } from "@tauri-apps/api/core";
 import { useNotification } from "./stores/notifications";
+import { useState } from "./stores/state";
 
 export function setupListeners() {
-  const state = useState();
-	const notificationStore = useNotification()
+	const state = useState();
+	const notificationStore = useNotification();
 
 	listen<string>("ws-message", (event) => {
 		const message = JSON.parse(event.payload) as Message;
@@ -29,15 +29,15 @@ export function setupListeners() {
 			user.unread = 1;
 			state.chats_data.set(message.sender_id, user);
 		}
-  });
+	});
 
-  listen<string>("ws-disconnected", async () => {
-    await invoke("connect_ws");
-  })
+	listen<string>("ws-disconnected", async () => {
+		await invoke("connect_ws");
+	});
 
-  listen<string>("ws-error", async (error) => {
-    notificationStore.pushError(String(error))
+	listen<string>("ws-error", async (error) => {
+		notificationStore.pushError(String(error));
 
-    await invoke("connect_ws");
-  })
+		await invoke("connect_ws");
+	});
 }

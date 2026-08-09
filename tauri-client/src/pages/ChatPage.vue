@@ -3,7 +3,9 @@
 		<div clas="px-10 py-10"></div>
 		<h2 class="text-text m-5">Chatting with: {{ username }}</h2>
 		<div class="flex min-h-0 flex-1 flex-col justify-end">
-			<div class="flex flex-col col h-full justify-end px-10 py-10 overflow-y-auto">
+			<div
+				class="flex flex-col col h-full justify-end px-10 py-10 overflow-y-auto"
+			>
 				<ChatMessage
 					v-for="(message, index) in state.messages"
 					:key="index"
