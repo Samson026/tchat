@@ -54,10 +54,12 @@ import BackBtn from "../components/BackBtn.vue";
 import type { User } from "../models/user";
 import { NewUser } from "../models/validation";
 import { useState } from "../stores/state";
+import { useNotification } from "../stores/notifications";
 
 const user = ref<User | null>(null);
 const state = useState();
 const router = useRouter();
+const notificationStore = useNotification()
 
 const { defineField, handleSubmit, errors } = useForm({
 	validationSchema: toTypedSchema(NewUser),
@@ -72,7 +74,8 @@ const submitForm = handleSubmit(async (values) => {
 		password: values.password,
 	});
 
-	if (user.value.username) {
+  if (user.value.username) {
+    notificationStore.pushSuccess(`Account, ${user.value.username} created...`)
 		state.user = user.value;
 		router.push("/home");
 	}

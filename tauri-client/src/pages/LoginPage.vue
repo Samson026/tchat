@@ -51,8 +51,6 @@ import { useRouter } from "vue-router";
 import SettingsBtn from "../components/SettingsBtn.vue";
 import type { User } from "../models/user";
 import { useState } from "../stores/state";
-import NotificationBox from "../components/NotificationBox.vue";
-import NotificationManager from "../components/NotificationManager.vue";
 
 const username = ref("");
 const password = ref("");
