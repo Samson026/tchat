@@ -14,5 +14,5 @@ export function setupListeners() {
 			}
 			state.messages.push(message);
 		}
-	});
+  });
 }

@@ -53,20 +53,34 @@ impl Client {
         username: &str,
         password: &str,
         server_addr: &str,
-    ) -> Result<User, Error> {
+    ) -> Result<User, String> {
         let body = NewUserRequest {
             username: username.to_string(),
             password: password.to_string(),
         };
 
         let url = format!("http://{server_addr}{GET_USERS}{LOGIN_PATH}");
-        self.client
+        let response = self
+            .client
             .post(url)
             .json(&body)
             .send()
-            .await?
-            .json::<User>()
             .await
+            .map_err(|error| error.to_string())?;
+
+        if response.status().is_success() {
+            response
+                .json::<User>()
+                .await
+                .map_err(|error| error.to_string())
+        } else {
+            let message = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Login failed".to_string());
+
+            Err(message)
+        }
     }
 
     pub async fn get_users(&self, server_addr: &str) -> Result<Vec<User>, Error> {

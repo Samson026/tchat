@@ -69,15 +69,22 @@ const [username] = defineField("username");
 const [password] = defineField("password");
 
 const submitForm = handleSubmit(async (values) => {
-	user.value = await invoke<User>("create_user", {
+  try {
+    user.value = await invoke<User>("create_user", {
 		username: values.username,
 		password: values.password,
 	});
+  } catch (error) {
+    notificationStore.pushError("Could not create user, " + String(error))
+    return
+  }
+
 
   if (user.value.username) {
     notificationStore.pushSuccess(`Account, ${user.value.username} created...`)
 		state.user = user.value;
 		router.push("/home");
-	}
+  }
+
 });
 </script>
