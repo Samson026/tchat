@@ -96,12 +96,12 @@ async function getChats() {
 }
 
 const submitForm = handleSubmit(async (values) => {
-  try {
-    await sendMessage(values.input);
-    resetForm()
-  } catch (error) {
-    notificationStore.pushError(String(error))
-  }
+	try {
+		await sendMessage(values.input);
+		resetForm();
+	} catch (error) {
+		notificationStore.pushError(String(error));
+	}
 });
 
 // async function handleSubmit() {
