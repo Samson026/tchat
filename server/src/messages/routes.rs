@@ -1,19 +1,35 @@
-use std::{fs::{OpenOptions, read_dir}, io::{Error, Write}, path::PathBuf};
+use std::{
+    fs::OpenOptions,
+    io::{Error, Write},
+    path::PathBuf,
+};
 
 use axum::{
-    Extension, Json, Router, extract::{Multipart, Query, State}, http::StatusCode, middleware, response::{IntoResponse, Response}, routing::get,
+    Extension, Json, Router,
+    extract::{Multipart, Query, State},
+    http::StatusCode,
+    middleware,
+    response::{IntoResponse, Response},
+    routing::{get, post},
 };
-use protocol::{BASE_ROUTE, CHATS};
-use tokio::{fs::{self, File, create_dir_all}, io::AsyncWriteExt};
+use protocol::{BASE_ROUTE, CHATS, UPLOAD};
+use tokio::{
+    fs::{self, File, create_dir_all},
+    io::AsyncWriteExt,
+};
 
 use crate::{
-    messages::models::{ChatHistoryReq, ChatMessage}, middleware::auth_middleware, path::get_app_dir, state::AppState,
+    messages::models::{ChatHistoryReq, ChatMessage},
+    middleware::auth_middleware,
+    path::get_app_dir,
+    state::AppState,
 };
 
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(BASE_ROUTE, get(get_messages))
         .route(CHATS, get(get_chats))
+        .route(UPLOAD, post(upload_image))
         .route_layer(middleware::from_fn(auth_middleware))
 }
 
@@ -53,16 +69,12 @@ pub async fn get_chats(
     }
 }
 
-pub async fn upload_image(
-    State(app_state): State<AppState>,
-    mut mutlipart: Multipart
-) -> Response {
-    let file_name = String::new();
+pub async fn upload_image(mut mutlipart: Multipart) -> Response {
     let mut file_name = String::new();
     let mut chunk_number = 0;
     let mut total_chunks = 0;
     let mut chunk_data = Vec::new();
-    
+
     while let Some(field) = match mutlipart.next_field().await {
         Ok(f) => f,
         Err(error) => {
@@ -71,16 +83,20 @@ pub async fn upload_image(
         }
     } {
         let field_name = field.name().unwrap_or_default().to_string();
-            match field_name.as_str() {
+        match field_name.as_str() {
             "fileName" => file_name = field.text().await.unwrap_or_default(),
-            "chunkNumber" => chunk_number = field.text().await.unwrap_or_default().parse().unwrap_or(0),
-            "totalChunks" => total_chunks = field.text().await.unwrap_or_default().parse().unwrap_or(0),
+            "chunkNumber" => {
+                chunk_number = field.text().await.unwrap_or_default().parse().unwrap_or(0)
+            }
+            "totalChunks" => {
+                total_chunks = field.text().await.unwrap_or_default().parse().unwrap_or(0)
+            }
             "chunk" => chunk_data = field.bytes().await.unwrap_or_default().to_vec(),
             _ => {}
         }
     }
     if file_name.is_empty() || chunk_data.is_empty() {
-        return StatusCode::BAD_REQUEST.into_response()
+        return StatusCode::BAD_REQUEST.into_response();
     }
 
     let temp_dir = match get_app_dir().await {
@@ -90,7 +106,8 @@ pub async fn upload_image(
         }
     };
     let temp_dir = temp_dir.join(&file_name);
-    create_dir_all(&temp_dir).await
+    create_dir_all(&temp_dir)
+        .await
         .map_err(|_| return StatusCode::INTERNAL_SERVER_ERROR.into_response());
     let chunk_path = temp_dir.join(chunk_number.to_string());
     let mut file = match File::create(&chunk_path).await {
@@ -99,7 +116,7 @@ pub async fn upload_image(
     };
 
     if file.write_all(&chunk_data).await.is_err() {
-        return StatusCode::INTERNAL_SERVER_ERROR.into_response()
+        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
     }
 
     if is_upload_complete(&temp_dir, total_chunks) {
@@ -110,24 +127,30 @@ pub async fn upload_image(
 
 fn is_upload_complete(temp_dir: &PathBuf, total_chunks: usize) -> bool {
     match std::fs::read_dir(temp_dir) {
-        Ok(entries) =>  entries.count() == total_chunks,
-        Err(_) => false
+        Ok(entries) => entries.count() == total_chunks,
+        Err(_) => false,
     }
 }
 
-async fn assemble_file(temp_dir: &PathBuf, file_name: &str, total__chunks: usize) -> Result<(), Error> {
-    let output_path = match get_app_dir().await {
+async fn assemble_file(
+    temp_dir: &PathBuf,
+    file_name: &str,
+    total_chunks: usize,
+) -> Result<(), Error> {
+    let mut output_path = match get_app_dir().await {
         Ok(path) => path,
         Err(error) => {
             return Err(error);
         }
     };
+    output_path = output_path.join(&file_name);
+
     let mut output_file = OpenOptions::new()
         .create(true)
         .write(true)
         .open(&output_path)?;
 
-    for chunk_number in 0..total__chunks {
+    for chunk_number in 0..total_chunks {
         let chunk_path = temp_dir.join(chunk_number.to_string());
         let chunk_data = std::fs::read(&chunk_path)?;
         output_file.write_all(&chunk_data)?;
