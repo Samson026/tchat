@@ -1,1 +1,1 @@
-pub fn save_image()
+pub fn save_image() {}

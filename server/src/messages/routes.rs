@@ -120,7 +120,7 @@ pub async fn upload_image(mut mutlipart: Multipart) -> Response {
     }
 
     if is_upload_complete(&temp_dir, total_chunks) {
-        assemble_file(&temp_dir, &file_name, total_chunks).await;
+        let _ = assemble_file(&temp_dir, &file_name, total_chunks).await;
     }
     StatusCode::OK.into_response()
 }
@@ -140,15 +140,17 @@ async fn assemble_file(
     let mut output_path = match get_app_dir().await {
         Ok(path) => path,
         Err(error) => {
+            println!("error");
             return Err(error);
         }
     };
-    output_path = output_path.join(&file_name);
+    output_path = output_path.join("output");
+    create_dir_all(&output_path).await?;
 
     let mut output_file = OpenOptions::new()
         .create(true)
         .write(true)
-        .open(&output_path)?;
+        .open(&output_path.join(file_name))?;
 
     for chunk_number in 0..total_chunks {
         let chunk_path = temp_dir.join(chunk_number.to_string());
