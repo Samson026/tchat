@@ -5,6 +5,7 @@ mod middleware;
 mod state;
 mod user;
 mod websocket;
+mod path;
 
 use axum::Router;
 use protocol::{AUTH, GET_MESSAGES, GET_USERS, SERVER_ADDRESS, WEBSOCKET_PATH};
