@@ -7,19 +7,19 @@ use std::{
 use axum::{
     Extension, Json, Router,
     extract::{Multipart, Query, State},
-    http::StatusCode,
+    http::{StatusCode, header},
     middleware,
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use protocol::{BASE_ROUTE, CHATS, UPLOAD};
+use protocol::{BASE_ROUTE, CHATS, DOWNLOAD, UPLOAD};
 use tokio::{
     fs::{self, File, create_dir_all},
     io::AsyncWriteExt,
 };
 
 use crate::{
-    messages::models::{ChatHistoryReq, ChatMessage},
+    messages::models::{ChatHistoryReq, ChatMessage, DownloadReq},
     middleware::auth_middleware,
     path::get_app_dir,
     state::AppState,
@@ -30,6 +30,7 @@ pub fn router() -> Router<AppState> {
         .route(BASE_ROUTE, get(get_messages))
         .route(CHATS, get(get_chats))
         .route(UPLOAD, post(upload_image))
+        .route(DOWNLOAD, get(download_image))
         .route_layer(middleware::from_fn(auth_middleware))
 }
 
@@ -159,4 +160,39 @@ async fn assemble_file(
     }
     fs::remove_dir_all(temp_dir).await?;
     Ok(())
+}
+
+pub async fn download_image(Query(params): Query<DownloadReq>) -> Response {
+    let mut file_path = match get_app_dir().await {
+        Ok(path) => path,
+        Err(error) => {
+            eprintln!("Error: {error}");
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        }
+    };
+
+    file_path = file_path.join(&params.fileName);
+    let file = match fs::read(&file_path).await {
+        Ok(file) => file,
+        Err(error) => {
+            eprintln!("Error: {error}");
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        }
+    };
+
+    let extension = file_path
+        .extension()
+        .and_then(|extension| extension.to_str())
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+
+    let content_type = match extension.as_str() {
+        "png" => "image/png",
+        "jpg" | "jpeg" => "image/jpeg",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        _ => "application/octet-stream",
+    };
+
+    ([(header::CONTENT_TYPE, content_type)], file).into_response()
 }

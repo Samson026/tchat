@@ -37,3 +37,8 @@ pub struct User {
     pub id: i64,
     pub username: String,
 }
+
+#[derive(Deserialize)]
+pub struct DownloadReq {
+    pub fileName: String,
+}
