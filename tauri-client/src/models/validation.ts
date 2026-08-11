@@ -7,5 +7,5 @@ export const NewUser = z.object({
 
 export const NewMessage = z.object({
 	input: z.string().min(1).max(250).optional(),
-	image: z.instanceof(File).optional()
+	image: z.instanceof(File).optional(),
 });

@@ -16,7 +16,7 @@ impl MessagesDB {
         message: &str,
         sender: &i64,
         receiver: &i64,
-        attachment: Option<&str>
+        attachment: Option<&str>,
     ) -> Result<(), sqlx::Error> {
         // add msg to db
         // check if chat exists

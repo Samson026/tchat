@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { Message } from "./models/user";
 import { useNotification } from "./stores/notifications";
@@ -33,7 +32,7 @@ export function setupListeners() {
 
 	listen<string>("ws-disconnected", async () => {
 		// await invoke("connect_ws");
-		notificationStore.pushError("ws disconnected")
+		notificationStore.pushError("ws disconnected");
 	});
 
 	listen<string>("ws-error", async (error) => {

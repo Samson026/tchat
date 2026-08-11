@@ -1,5 +1,5 @@
 use std::{
-    fs::{File, OpenOptions},
+    fs::OpenOptions,
     io::{Error, Write},
     path::PathBuf,
 };
@@ -28,6 +28,10 @@ use crate::{
     state::AppState,
 };
 
+#[cfg(test)]
+#[path = "../../tests/upload_image/mod.rs"]
+mod tests;
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(BASE_ROUTE, get(get_messages))
@@ -55,7 +59,7 @@ pub async fn get_messages(
                     sender_id: msg.sender_id,
                     recv_id: msg.recv_id,
                     content: msg.content,
-                    attachment: msg.attachment
+                    attachment: msg.attachment,
                 })
                 .collect::<Vec<_>>(),
         )
@@ -112,9 +116,9 @@ pub async fn upload_image(State(app_state): State<AppState>, mut mutlipart: Mult
         }
     };
     let temp_dir = temp_dir.join(&file_name);
-    create_dir_all(&temp_dir)
+    let _ = create_dir_all(&temp_dir)
         .await
-        .map_err(|_| return StatusCode::INTERNAL_SERVER_ERROR.into_response());
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response());
     let chunk_path = temp_dir.join(chunk_number.to_string());
     let mut file = match AsyncFile::create(&chunk_path).await {
         Ok(file) => file,
@@ -125,18 +129,18 @@ pub async fn upload_image(State(app_state): State<AppState>, mut mutlipart: Mult
         return StatusCode::INTERNAL_SERVER_ERROR.into_response();
     }
 
-    if is_upload_complete(&temp_dir, total_chunks) {
-        if let Ok(file) = assemble_file(&temp_dir, &file_name, total_chunks).await {
-            match save_image(&file, &app_state.message_db).await {
-                Ok(attachment) => {
-                    return Json(AttachmentUser::from(attachment)).into_response();
-                }
-                Err(error) => {
-                    eprintln!("error {error}");
-                    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-                }
-            };
-        }
+    if is_upload_complete(&temp_dir, total_chunks)
+        && let Ok(file) = assemble_file(&temp_dir, &file_name, total_chunks).await
+    {
+        match save_image(&file, &app_state.message_db).await {
+            Ok(attachment) => {
+                return Json(AttachmentUser::from(attachment)).into_response();
+            }
+            Err(error) => {
+                eprintln!("error {error}");
+                return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+            }
+        };
     }
     StatusCode::OK.into_response()
 }
@@ -163,7 +167,8 @@ async fn assemble_file(
     let mut output_file = OpenOptions::new()
         .create(true)
         .write(true)
-        .open(&output_path.join(file_name))?;
+        .truncate(true)
+        .open(output_path.join(file_name))?;
 
     for chunk_number in 0..total_chunks {
         let chunk_path = temp_dir.join(chunk_number.to_string());
@@ -183,7 +188,7 @@ pub async fn download_image(Query(params): Query<DownloadReq>) -> Response {
         }
     };
 
-    file_path = file_path.join(&params.fileName);
+    file_path = file_path.join(&params.file_name);
     let file = match fs::read(&file_path).await {
         Ok(file) => file,
         Err(error) => {

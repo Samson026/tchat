@@ -16,5 +16,5 @@ export interface Settings {
 }
 
 export interface Attachment {
-  id: string
+	id: string;
 }

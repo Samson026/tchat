@@ -7,7 +7,7 @@ pub struct ChatMessage {
     pub sender_id: i64,
     pub recv_id: i64,
     pub content: String,
-    pub attachment: Option<String>
+    pub attachment: Option<String>,
 }
 
 #[allow(dead_code)]
@@ -42,7 +42,7 @@ pub struct User {
 
 #[derive(Deserialize)]
 pub struct DownloadReq {
-    pub fileName: String,
+    pub file_name: String,
 }
 
 #[derive(FromRow, Deserialize)]

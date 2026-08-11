@@ -85,6 +85,7 @@ impl MessageClient {
             .map_err(|error| error.to_string())
     }
 
+    #[allow(dead_code)]
     pub async fn download_image(
         &self,
         file_name: &str,
@@ -92,7 +93,7 @@ impl MessageClient {
         image_dir: &PathBuf,
     ) -> Result<PathBuf, String> {
         let params = DownloadReq {
-            fileName: file_name.to_string(),
+            file_name: file_name.to_string(),
         };
 
         let url = format!("{server_addr}{GET_MESSAGES}{DOWNLOAD}");
