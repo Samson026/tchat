@@ -13,3 +13,7 @@ export interface Message {
 export interface Settings {
 	server_address: string;
 }
+
+export interface Attachment {
+  id: string
+}

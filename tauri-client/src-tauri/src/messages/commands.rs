@@ -9,7 +9,7 @@ use protocol::{CHATS, DOWNLOAD, GET_MESSAGES, UPLOAD};
 use tokio::fs::{create_dir_all, write};
 
 use crate::{
-    messages::models::{ChatMessage, DownloadReq, GetMessagesReq, User},
+    messages::models::{Attachment, ChatMessage, DownloadReq, GetMessagesReq, User},
     settings::SettingsWriter,
 };
 
@@ -60,7 +60,7 @@ impl MessageClient {
         file_name: &str,
         file: Vec<u8>,
         server_addr: &str,
-    ) -> Result<(), String> {
+    ) -> Result<Attachment, String> {
         let part = Part::bytes(file)
             .file_name(file_name.to_owned())
             .mime_str("image/png")
@@ -79,8 +79,10 @@ impl MessageClient {
             .await
             .map_err(|error| error.to_string())?
             .error_for_status()
-            .map_err(|error| error.to_string())?;
-        Ok(())
+            .map_err(|error| error.to_string())?
+            .json::<Attachment>()
+            .await
+            .map_err(|error| error.to_string())
     }
 
     pub async fn download_image(
@@ -159,7 +161,7 @@ pub async fn upload_image(
     request: tauri::ipc::Request<'_>,
     message_client: tauri::State<'_, MessageClient>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
-) -> Result<(), String> {
+) -> Result<Attachment, String> {
     let server_addr = settings_writer
         .lock()
         .map_err(|error| error.to_string())?

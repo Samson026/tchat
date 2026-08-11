@@ -32,7 +32,7 @@ impl Database {
 
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS attachments (
-                id INTEGER PRIMARY KEY NOT NULL UNIQUE,
+                id TEXT PRIMARY KEY NOT NULL UNIQUE,
                 filelocation TEXT NOT NULL UNIQUE
             )",
         )
@@ -46,13 +46,13 @@ impl Database {
                 sender_id NOT NULL,
                 receiver_id NOT NULL,
                 content TEXT NOT NULL,
-                attachment_id INTEGER,
+                attachment_id TEXT,
                 time DATETIME DEFAULT CURRENT_TIMESTAMP,
 
                 FOREIGN KEY (chat_id) REFERENCES chats(id)
                 FOREIGN KEY (sender_id) REFERENCES users(id),
                 FOREIGN KEY (receiver_id) REFERENCES users(id),
-                FOREIGN KEY (attachment_id) REFERENCES attachments(id),
+                FOREIGN KEY (attachment_id) REFERENCES attachments(id)
             )",
         )
         .execute(&pool)

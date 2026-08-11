@@ -58,7 +58,7 @@ import { useForm } from "vee-validate";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
-import type { Message, User } from "../models/user.ts";
+import type { Attachment, Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
@@ -85,7 +85,7 @@ function onImageSelected(event: Event) {
   console.log("inside on image select")
   const input = event.target as HTMLInputElement;
   selectedFile.value = input.files?.[0] ?? null;
-  
+
 }
 
 async function getMessaess() {
@@ -120,12 +120,13 @@ async function uploadImage(file: File) {
   console.log("inside upload image")
   try {
     const bytes = new Uint8Array(await file.arrayBuffer())
-    await invoke("upload_image", bytes, {
+    const attachment = await invoke<Attachment>("upload_image", bytes, {
       headers: {
         "x-file-name": file.name,
         "context-type": file.type
       }
     })
+    console.log(attachment)
   } catch (error) {
     notificationStore.pushError(String(error))
   }

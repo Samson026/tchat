@@ -22,3 +22,8 @@ pub struct GetMessagesReq {
 pub struct DownloadReq {
     pub fileName: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct Attachment {
+    pub id: String,
+}
