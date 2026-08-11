@@ -17,11 +17,23 @@
 			<div
 				class="bg-surface w-full h-20 border border-border rounded-xl px-2 py-2"
 			>
-				<form class="flex h-full items-center" @submit="submitForm">
+				<form class="flex h-full w-full items-center gap-2" @submit="submitForm">
+					<label
+						class="flex h-full w-14 shrink-0 cursor-pointer items-center justify-center rounded-2xl bg-secondary"
+					>
+						<CameraIcon class="h-6 w-6 text-text" />
+						<input
+							type="file"
+							class="hidden"
+							accept="image/*"
+							v-on="onImageSelected"
+						>
+					</label>
+
 					<input
 						type="text"
 						placeholder="Message"
-						class="text-text w-full h-full mx-2"
+						class="h-full min-w-0 flex-1 text-text"
 						v-model="input"
 					>
 					<p v-if="errors.input" class="text-error text-sm">
@@ -43,13 +55,15 @@
 import { invoke } from "@tauri-apps/api/core";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
 import type { Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
+import { CameraIcon } from "lucide-vue-next";
+import { P } from "vue-router/dist/index-BN0B0y8a.js";
 
 const route = useRoute();
 const state = useState();
@@ -61,9 +75,17 @@ const { defineField, handleSubmit, errors, resetForm } = useForm({
 
 const [input] = defineField("input");
 
+const selectedFile = ref<File | null>(null);
+
 const username = computed(() => {
 	return state.chats_data.get(Number(route.params.id))?.username;
 });
+
+function onImageSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  selectedFile.value = input.files?.[0] ?? null;
+  
+}
 
 async function getMessaess() {
 	const recv_id: number = Number(route.params.id);
@@ -93,17 +115,38 @@ async function sendMessage(message: string) {
 	state.messages.push(msg);
 }
 
+async function uploadImage(file: File) {
+  console.log("inside upload image")
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer())
+    await invoke("upload_image", bytes, {
+      headers: {
+        "x-file-name": file.name,
+        "context-type": file.type
+      }
+    })
+  } catch (error) {
+    notificationStore.pushError(String(error))
+  }
+}
+
 async function getChats() {
 	return invoke<User[]>("get_chats");
 }
 
 const submitForm = handleSubmit(async (values) => {
-	try {
+  console.log("inside handlesubmt")
+  if (selectedFile.value) {
+      await uploadImage(selectedFile.value)
+  }
+  if (values.input) {
+    try {
 		await sendMessage(values.input);
 		resetForm();
 	} catch (error) {
 		notificationStore.pushError(String(error));
 	}
+  }
 });
 
 // async function handleSubmit() {

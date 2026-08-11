@@ -17,3 +17,8 @@ pub struct User {
 pub struct GetMessagesReq {
     pub receiver: i64,
 }
+
+#[derive(Serialize)]
+pub struct DownloadReq {
+    pub fileName: String,
+}
