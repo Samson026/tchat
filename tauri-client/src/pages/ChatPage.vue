@@ -15,8 +15,21 @@
 				/>
 			</div>
 			<div
-				class="bg-surface w-full h-20 border border-border rounded-xl px-2 py-2"
-			>
+				class="bg-surface w-full h-30 border border-border rounded-xl px-2 py-2 flex place-items-center"
+			>   
+					<img 
+    					v-if="imagePreview"
+    					:src="imagePreview"
+    					class="rounded"
+					>
+					</img>
+					<button
+	                    @click="removeAttach"
+					>
+					    <X/>
+					</button>
+				</div>
+			    
 				<form
 					class="flex h-full w-full items-center gap-2"
 					@submit="submitForm"
@@ -58,7 +71,7 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
 import { toTypedSchema } from "@vee-validate/zod";
-import { CameraIcon } from "lucide-vue-next";
+import { CameraIcon, X } from "lucide-vue-next";
 import { useForm } from "vee-validate";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
@@ -67,6 +80,7 @@ import type { Attachment, Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
+import { P } from "vue-router/dist/index-BN0B0y8a.js";
 
 const route = useRoute();
 const state = useState();
@@ -79,15 +93,29 @@ const { defineField, handleSubmit, errors, resetForm } = useForm({
 const [input] = defineField("input");
 
 const selectedFile = ref<File | null>(null);
+const imagePreview = ref<string | null>(null)
 
 const username = computed(() => {
 	return state.chats_data.get(Number(route.params.id))?.username;
 });
 
+function removeAttach() {
+  selectedFile.value = null;
+  imagePreview.value =  null
+}
+
 function onImageSelected(event: Event) {
 	console.log("inside on image select");
 	const input = event.target as HTMLInputElement;
 	selectedFile.value = input.files?.[0] ?? null;
+	if (selectedFile.value === null)
+      return
+
+	if (imagePreview.value) {
+	  URL.revokeObjectURL(imagePreview.value)
+	}
+
+	imagePreview.value = URL.createObjectURL(selectedFile.value)
 }
 
 async function getMessaess() {
@@ -150,6 +178,8 @@ const submitForm = handleSubmit(async (values) => {
 		try {
 			await sendMessage(values.input, attachment);
 			resetForm();
+			selectedFile.value = null;
+			imagePreview.value = null;
 		} catch (error) {
 			notificationStore.pushError(String(error));
 		}
