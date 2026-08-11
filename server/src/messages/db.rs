@@ -1,4 +1,4 @@
-use sqlx::SqlitePool;
+use sqlx::{Error, SqlitePool};
 
 use crate::messages::models::{Attachment, Chat, Message, User};
 
@@ -144,6 +144,17 @@ impl MessagesDB {
         )
         .bind(attachment_id)
         .bind(file_location)
+        .fetch_one(&self.pool)
+        .await
+    }
+
+    pub async fn get_attachment(&self, file_id: &str) -> Result<Attachment, Error> {
+        sqlx::query_as::<_, Attachment>(
+            "SELECT * FROM attachments
+            WHERE id = ? 
+            ",
+        )
+        .bind(file_id)
         .fetch_one(&self.pool)
         .await
     }

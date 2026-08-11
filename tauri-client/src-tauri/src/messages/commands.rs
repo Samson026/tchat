@@ -1,9 +1,12 @@
 use std::{path::PathBuf, sync::Mutex};
 
+use futures_util::TryFutureExt;
 use reqwest::{
     multipart::{Form, Part},
     Error,
 };
+
+use tauri::Manager;
 
 use protocol::{CHATS, DOWNLOAD, GET_MESSAGES, UPLOAD};
 use tokio::fs::{create_dir_all, write};
@@ -88,15 +91,15 @@ impl MessageClient {
     #[allow(dead_code)]
     pub async fn download_image(
         &self,
-        file_name: &str,
+        file_id: &str,
         server_addr: &str,
         image_dir: &PathBuf,
-    ) -> Result<PathBuf, String> {
+    ) -> Result<Attachment, String> {
         let params = DownloadReq {
-            file_name: file_name.to_string(),
+            file_id: file_id.to_string(),
         };
 
-        let url = format!("{server_addr}{GET_MESSAGES}{DOWNLOAD}");
+        let url = format!("http://{server_addr}{GET_MESSAGES}{DOWNLOAD}");
 
         let resp = self
             .client
@@ -112,13 +115,15 @@ impl MessageClient {
             .await
             .map_err(|error| error.to_string())?;
 
-        let image = image_dir.join(file_name);
+        let image = image_dir.join(file_id);
 
         write(&image, &file_data)
             .await
             .map_err(|error| error.to_string())?;
 
-        Ok(image)
+        Ok(Attachment {
+            id: file_id.to_string(),
+        })
     }
 }
 
@@ -182,5 +187,32 @@ pub async fn upload_image(
     message_client
         .inner()
         .upload_image(&file_name, image_data.clone(), &server_addr)
+        .await
+}
+
+#[tauri::command]
+pub async fn download_image(
+    app: tauri::AppHandle,
+    message_client: tauri::State<'_, MessageClient>,
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
+    file_id: String,
+) -> Result<Attachment, String> {
+    let image_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?
+        .join("attachments");
+
+    let _ = create_dir_all(&image_dir).map_err(|error| error.to_string());
+
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
+    println!("got here");
+    message_client
+        .inner()
+        .download_image(&file_id, &server_addr, &image_dir)
         .await
 }
