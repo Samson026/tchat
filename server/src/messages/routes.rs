@@ -55,6 +55,7 @@ pub async fn get_messages(
                     sender_id: msg.sender_id,
                     recv_id: msg.recv_id,
                     content: msg.content,
+                    attachment: msg.attachment
                 })
                 .collect::<Vec<_>>(),
         )

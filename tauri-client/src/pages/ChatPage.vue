@@ -63,7 +63,6 @@ import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
 import { CameraIcon } from "lucide-vue-next";
-import { P } from "vue-router/dist/index-BN0B0y8a.js";
 
 const route = useRoute();
 const state = useState();

@@ -7,6 +7,7 @@ pub struct ChatMessage {
     pub sender_id: i64,
     pub recv_id: i64,
     pub content: String,
+    pub attachment: Option<String>
 }
 
 #[allow(dead_code)]
@@ -17,6 +18,7 @@ pub struct Message {
     pub sender_id: i64,
     pub recv_id: i64,
     pub content: String,
+    pub attachment: Option<String>,
     pub time: DateTime<Utc>,
 }
 

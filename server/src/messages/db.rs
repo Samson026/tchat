@@ -16,6 +16,7 @@ impl MessagesDB {
         message: &str,
         sender: &i64,
         receiver: &i64,
+        attachment: Option<&str>
     ) -> Result<(), sqlx::Error> {
         // add msg to db
         // check if chat exists
@@ -36,13 +37,14 @@ impl MessagesDB {
         sqlx::query(
             "
             INSERT INTO messages (chat_id, sender_id, receiver_id, content)
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
         ",
         )
         .bind(chat_id)
         .bind(sender)
         .bind(receiver)
         .bind(message)
+        .bind(attachment)
         .execute(&self.pool)
         .await?;
 
