@@ -21,8 +21,6 @@ pub async fn create_user(
     State(mut app_state): State<AppState>,
     Json(data): Json<LoginRequest>,
 ) -> Response {
-    println!("create user called");
-
     match app_state
         .user_db
         .add_user(&data.username, &data.password)
@@ -30,7 +28,7 @@ pub async fn create_user(
     {
         Ok(user) => Json(user).into_response(),
         Err(error) => {
-            println!("error {error}");
+            eprintln!("Error creating user: {error}");
             (StatusCode::INTERNAL_SERVER_ERROR, "Could not create user").into_response()
         }
     }

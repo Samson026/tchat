@@ -61,12 +61,10 @@ impl MessageClient {
         file: Vec<u8>,
         server_addr: &str,
     ) -> Result<(), String> {
-        println!("in upload 2");
         let part = Part::bytes(file)
             .file_name(file_name.to_owned())
             .mime_str("image/png")
             .map_err(|error| error.to_string())?;
-        println!("got here 1");
         let form = Form::new()
             .text("fileName", file_name.to_owned())
             .text("chunkNumber", "0")
@@ -74,7 +72,6 @@ impl MessageClient {
             .part("chunk", part);
 
         let url = format!("http://{server_addr}{GET_MESSAGES}{UPLOAD}");
-        println!("got here 2");
         self.client
             .post(url)
             .multipart(form)
@@ -163,7 +160,6 @@ pub async fn upload_image(
     message_client: tauri::State<'_, MessageClient>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
 ) -> Result<(), String> {
-    println!("in upload image");
     let server_addr = settings_writer
         .lock()
         .map_err(|error| error.to_string())?

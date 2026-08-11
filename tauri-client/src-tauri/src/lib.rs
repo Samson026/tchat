@@ -24,8 +24,6 @@ pub fn run() {
 
             std::fs::create_dir_all(cookie_path.parent().expect("Cookie path has no parent"))?;
 
-            println!("Cookie path: {}", cookie_path.display());
-
             let cookie_store = {
                 if let Ok(file) = std::fs::File::open(&cookie_path).map(std::io::BufReader::new) {
                     cookie_store::serde::json::load(file).unwrap()

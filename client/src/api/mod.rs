@@ -24,10 +24,7 @@ impl Client {
             username: username.to_string(),
         };
 
-        println!("got here");
-
         let url = format!("http://{SERVER_ADDRESS}{CREATE_USER_PATH}");
-        println!("{url}");
         self.client
             .post(url)
             .json(&body)

@@ -141,10 +141,7 @@ async fn assemble_file(
 ) -> Result<(), Error> {
     let mut output_path = match get_app_dir().await {
         Ok(path) => path,
-        Err(error) => {
-            println!("error");
-            return Err(error);
-        }
+        Err(error) => return Err(error),
     };
     output_path = output_path.join("output");
     create_dir_all(&output_path).await?;
