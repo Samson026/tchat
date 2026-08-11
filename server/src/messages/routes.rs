@@ -64,7 +64,10 @@ pub async fn get_messages(
                 .collect::<Vec<_>>(),
         )
         .into_response(),
-        Err(_) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
+        Err(error) => {
+            eprintln!("Error: {error}");
+            (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response()
+        }
     }
 }
 
