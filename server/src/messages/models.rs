@@ -42,3 +42,9 @@ pub struct User {
 pub struct DownloadReq {
     pub fileName: String,
 }
+
+#[derive(FromRow)]
+pub struct Attachment {
+    pub id: i64,
+    pub file_location: String
+}

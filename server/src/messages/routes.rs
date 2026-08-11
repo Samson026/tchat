@@ -1,5 +1,5 @@
 use std::{
-    fs::OpenOptions,
+    fs::{File, OpenOptions},
     io::{Error, Write},
     path::PathBuf,
 };
@@ -19,7 +19,10 @@ use tokio::{
 };
 
 use crate::{
-    messages::models::{ChatHistoryReq, ChatMessage, DownloadReq},
+    messages::{
+        models::{ChatHistoryReq, ChatMessage, DownloadReq},
+        service::save_image,
+    },
     middleware::auth_middleware,
     path::get_app_dir,
     state::AppState,
@@ -32,7 +35,7 @@ pub fn router() -> Router<AppState> {
         .route(UPLOAD, post(upload_image))
         .route(DOWNLOAD, get(download_image))
         .route_layer(middleware::from_fn(auth_middleware))
-    .layer(DefaultBodyLimit::max(10 * 1024 * 1024))
+        .layer(DefaultBodyLimit::max(10 * 1024 * 1024))
 }
 
 pub async fn get_messages(
@@ -71,7 +74,10 @@ pub async fn get_chats(
     }
 }
 
-pub async fn upload_image(mut mutlipart: Multipart) -> Response {
+pub async fn upload_image(
+    mut mutlipart: Multipart, 
+    State(app_state): State<AppState>
+) -> Response {
     let mut file_name = String::new();
     let mut chunk_number = 0;
     let mut total_chunks = 0;
@@ -122,7 +128,9 @@ pub async fn upload_image(mut mutlipart: Multipart) -> Response {
     }
 
     if is_upload_complete(&temp_dir, total_chunks) {
-        let _ = assemble_file(&temp_dir, &file_name, total_chunks).await;
+        if let Ok(file) = assemble_file(&temp_dir, &file_name, total_chunks).await {
+            save_image(&file, &app_state.message_db).await;
+        }
     }
     StatusCode::OK.into_response()
 }
@@ -138,7 +146,7 @@ async fn assemble_file(
     temp_dir: &PathBuf,
     file_name: &str,
     total_chunks: usize,
-) -> Result<(), Error> {
+) -> Result<PathBuf, Error> {
     let mut output_path = match get_app_dir().await {
         Ok(path) => path,
         Err(error) => return Err(error),
@@ -157,7 +165,7 @@ async fn assemble_file(
         output_file.write_all(&chunk_data)?;
     }
     fs::remove_dir_all(temp_dir).await?;
-    Ok(())
+    Ok(output_path.join(file_name))
 }
 
 pub async fn download_image(Query(params): Query<DownloadReq>) -> Response {

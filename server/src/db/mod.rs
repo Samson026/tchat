@@ -31,17 +31,28 @@ impl Database {
         .await?;
 
         sqlx::query(
+            "CREATE TABLE IF NOT EXISTS attachments (
+                id INTEGER PRIMARY KEY NOT NULL UNIQUE,
+                filelocation TEXT NOT NULL UNIQUE
+            )",
+        )
+        .execute(&pool)
+        .await?;
+
+        sqlx::query(
             "CREATE TABLE IF NOT EXISTS messages (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 chat_id NOT NULL,
                 sender_id NOT NULL,
                 receiver_id NOT NULL,
                 content TEXT NOT NULL,
+                attachment_id INTEGER,
                 time DATETIME DEFAULT CURRENT_TIMESTAMP,
 
                 FOREIGN KEY (chat_id) REFERENCES chats(id)
                 FOREIGN KEY (sender_id) REFERENCES users(id),
-                FOREIGN KEY (receiver_id) REFERENCES users(id)
+                FOREIGN KEY (receiver_id) REFERENCES users(id),
+                FOREIGN KEY (attachment_id) REFERENCES attachments(id),
             )",
         )
         .execute(&pool)
