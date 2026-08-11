@@ -22,6 +22,9 @@ pub fn run() {
             let data_path = app.path().app_data_dir()?;
             let cookie_path = data_path.join("cookies.json");
 
+            if let Some(str) = data_path.to_str() {
+                println!("data path {str}");
+            }
             std::fs::create_dir_all(cookie_path.parent().expect("Cookie path has no parent"))?;
 
             let cookie_store = {
@@ -61,6 +64,7 @@ pub fn run() {
             messages::commands::get_messages,
             messages::commands::get_chats,
             messages::commands::upload_image,
+            messages::commands::download_image,
             auth::commands::auth,
             settings::commands::update_settings,
             settings::commands::get_settings

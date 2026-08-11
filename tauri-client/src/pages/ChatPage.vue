@@ -15,8 +15,24 @@
 				/>
 			</div>
 			<div
-				class="bg-surface w-full h-20 border border-border rounded-xl px-2 py-2"
+				class="bg-surface w-full h-30 border border-border rounded-xl px-2 py-2 flex place-items-center"
 			>
+				<div v-if="imagePreview" class="relative m-2 h-10 w-10 shrink-0">
+					<img
+						:src="imagePreview"
+						alt="Attachment preview"
+						class="h-full w-full rounded object-cover"
+					>
+					<button
+						type="button"
+						aria-label="Remove attachment"
+						class="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-error text-white"
+						@click="removeAttach"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</div>
+
 				<form
 					class="flex h-full w-full items-center gap-2"
 					@submit="submitForm"
@@ -58,7 +74,7 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
 import { toTypedSchema } from "@vee-validate/zod";
-import { CameraIcon } from "lucide-vue-next";
+import { CameraIcon, X } from "lucide-vue-next";
 import { useForm } from "vee-validate";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
@@ -79,15 +95,28 @@ const { defineField, handleSubmit, errors, resetForm } = useForm({
 const [input] = defineField("input");
 
 const selectedFile = ref<File | null>(null);
+const imagePreview = ref<string | null>(null);
 
 const username = computed(() => {
 	return state.chats_data.get(Number(route.params.id))?.username;
 });
 
+function removeAttach() {
+	selectedFile.value = null;
+	imagePreview.value = null;
+}
+
 function onImageSelected(event: Event) {
 	console.log("inside on image select");
 	const input = event.target as HTMLInputElement;
 	selectedFile.value = input.files?.[0] ?? null;
+	if (selectedFile.value === null) return;
+
+	if (imagePreview.value) {
+		URL.revokeObjectURL(imagePreview.value);
+	}
+
+	imagePreview.value = URL.createObjectURL(selectedFile.value);
 }
 
 async function getMessaess() {
@@ -150,6 +179,8 @@ const submitForm = handleSubmit(async (values) => {
 		try {
 			await sendMessage(values.input, attachment);
 			resetForm();
+			selectedFile.value = null;
+			imagePreview.value = null;
 		} catch (error) {
 			notificationStore.pushError(String(error));
 		}

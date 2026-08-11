@@ -64,7 +64,10 @@ pub async fn get_messages(
                 .collect::<Vec<_>>(),
         )
         .into_response(),
-        Err(_) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
+        Err(error) => {
+            eprintln!("Error: {error}");
+            (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response()
+        }
     }
 }
 
@@ -179,19 +182,23 @@ async fn assemble_file(
     Ok(output_path.join(file_name))
 }
 
-pub async fn download_image(Query(params): Query<DownloadReq>) -> Response {
-    let mut file_path = match get_app_dir().await {
-        Ok(path) => path,
-        Err(error) => {
-            eprintln!("Error: {error}");
-            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+pub async fn download_image(
+    State(app_state): State<AppState>,
+    Query(params): Query<DownloadReq>,
+) -> Response {
+    let attachment = match app_state.message_db.get_attachment(&params.file_id).await {
+        Ok(attachment) => attachment,
+        Err(_) => {
+            return StatusCode::BAD_REQUEST.into_response();
         }
     };
 
-    file_path = file_path.join(&params.file_name);
+    let file_path = PathBuf::from(attachment.filelocation);
+
     let file = match fs::read(&file_path).await {
         Ok(file) => file,
         Err(error) => {
+            println!("this error");
             eprintln!("Error: {error}");
             return StatusCode::INTERNAL_SERVER_ERROR.into_response();
         }

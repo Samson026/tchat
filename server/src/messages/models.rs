@@ -42,7 +42,7 @@ pub struct User {
 
 #[derive(Deserialize)]
 pub struct DownloadReq {
-    pub file_name: String,
+    pub file_id: String,
 }
 
 #[derive(FromRow, Deserialize)]

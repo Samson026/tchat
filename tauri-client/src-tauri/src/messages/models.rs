@@ -22,7 +22,7 @@ pub struct GetMessagesReq {
 #[allow(dead_code)]
 #[derive(Serialize)]
 pub struct DownloadReq {
-    pub file_name: String,
+    pub file_id: String,
 }
 
 #[derive(Deserialize, Serialize)]

@@ -1,4 +1,4 @@
-use sqlx::SqlitePool;
+use sqlx::{Error, SqlitePool};
 
 use crate::messages::models::{Attachment, Chat, Message, User};
 
@@ -36,7 +36,7 @@ impl MessagesDB {
 
         sqlx::query(
             "
-            INSERT INTO messages (chat_id, sender_id, receiver_id, content)
+            INSERT INTO messages (chat_id, sender_id, receiver_id, content, attachment_id)
             VALUES (?, ?, ?, ?, ?)
         ",
         )
@@ -56,7 +56,7 @@ impl MessagesDB {
         user_2: &i64,
     ) -> Result<Vec<Message>, sqlx::Error> {
         sqlx::query_as::<_, Message>(
-            "SELECT id, chat_id, sender_id, receiver_id AS recv_id, content, time FROM messages
+            "SELECT id, chat_id, sender_id, receiver_id AS recv_id, content, attachment_id AS attachment, time FROM messages
             WHERE (sender_id = ? AND receiver_id = ?)
                 OR (sender_id = ? AND receiver_id = ?)
             ORDER BY time ASC, id ASC",
@@ -144,6 +144,17 @@ impl MessagesDB {
         )
         .bind(attachment_id)
         .bind(file_location)
+        .fetch_one(&self.pool)
+        .await
+    }
+
+    pub async fn get_attachment(&self, file_id: &str) -> Result<Attachment, Error> {
+        sqlx::query_as::<_, Attachment>(
+            "SELECT * FROM attachments
+            WHERE id = ? 
+            ",
+        )
+        .bind(file_id)
         .fetch_one(&self.pool)
         .await
     }
