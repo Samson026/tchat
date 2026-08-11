@@ -16,20 +16,23 @@
 			</div>
 			<div
 				class="bg-surface w-full h-30 border border-border rounded-xl px-2 py-2 flex place-items-center"
-			>   
-					<img 
-    					v-if="imagePreview"
-    					:src="imagePreview"
-    					class="rounded"
+			>
+				<div v-if="imagePreview" class="relative m-2 h-10 w-10 shrink-0">
+					<img
+						:src="imagePreview"
+						alt="Attachment preview"
+						class="h-full w-full rounded object-cover"
 					>
-					</img>
 					<button
-	                    @click="removeAttach"
+						type="button"
+						aria-label="Remove attachment"
+						class="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-error text-white"
+						@click="removeAttach"
 					>
-					    <X/>
+						<X class="h-3 w-3" />
 					</button>
 				</div>
-			    
+
 				<form
 					class="flex h-full w-full items-center gap-2"
 					@submit="submitForm"
