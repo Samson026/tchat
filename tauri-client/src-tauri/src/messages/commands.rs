@@ -203,7 +203,9 @@ pub async fn download_image(
         .map_err(|error| error.to_string())?
         .join("attachments");
 
-    let _ = create_dir_all(&image_dir).map_err(|error| error.to_string());
+    create_dir_all(&image_dir)
+        .map_err(|error| error.to_string())
+        .await?;
 
     let server_addr = settings_writer
         .lock()

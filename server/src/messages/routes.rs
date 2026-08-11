@@ -184,18 +184,14 @@ async fn assemble_file(
 
 pub async fn download_image(
     State(app_state): State<AppState>,
-    Query(params): Query<DownloadReq>
+    Query(params): Query<DownloadReq>,
 ) -> Response {
-    
-    let attachment = match app_state
-        .message_db
-        .get_attachment(&params.file_id)
-        .await {
-            Ok(attachment) => attachment,
-            Err(_) => {
-                return StatusCode::BAD_REQUEST.into_response();
-            }
-        };
+    let attachment = match app_state.message_db.get_attachment(&params.file_id).await {
+        Ok(attachment) => attachment,
+        Err(_) => {
+            return StatusCode::BAD_REQUEST.into_response();
+        }
+    };
 
     let file_path = PathBuf::from(attachment.filelocation);
 

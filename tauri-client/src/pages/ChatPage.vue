@@ -83,7 +83,6 @@ import type { Attachment, Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
-import { P } from "vue-router/dist/index-BN0B0y8a.js";
 
 const route = useRoute();
 const state = useState();
@@ -96,29 +95,28 @@ const { defineField, handleSubmit, errors, resetForm } = useForm({
 const [input] = defineField("input");
 
 const selectedFile = ref<File | null>(null);
-const imagePreview = ref<string | null>(null)
+const imagePreview = ref<string | null>(null);
 
 const username = computed(() => {
 	return state.chats_data.get(Number(route.params.id))?.username;
 });
 
 function removeAttach() {
-  selectedFile.value = null;
-  imagePreview.value =  null
+	selectedFile.value = null;
+	imagePreview.value = null;
 }
 
 function onImageSelected(event: Event) {
 	console.log("inside on image select");
 	const input = event.target as HTMLInputElement;
 	selectedFile.value = input.files?.[0] ?? null;
-	if (selectedFile.value === null)
-      return
+	if (selectedFile.value === null) return;
 
 	if (imagePreview.value) {
-	  URL.revokeObjectURL(imagePreview.value)
+		URL.revokeObjectURL(imagePreview.value);
 	}
 
-	imagePreview.value = URL.createObjectURL(selectedFile.value)
+	imagePreview.value = URL.createObjectURL(selectedFile.value);
 }
 
 async function getMessaess() {
