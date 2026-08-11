@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::messages::models::{Chat, Message, User};
+use crate::messages::models::{Attachment, Chat, Message, User};
 
 #[derive(Clone)]
 pub struct MessagesDB {
@@ -16,6 +16,7 @@ impl MessagesDB {
         message: &str,
         sender: &i64,
         receiver: &i64,
+        attachment: Option<&str>,
     ) -> Result<(), sqlx::Error> {
         // add msg to db
         // check if chat exists
@@ -36,13 +37,14 @@ impl MessagesDB {
         sqlx::query(
             "
             INSERT INTO messages (chat_id, sender_id, receiver_id, content)
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
         ",
         )
         .bind(chat_id)
         .bind(sender)
         .bind(receiver)
         .bind(message)
+        .bind(attachment)
         .execute(&self.pool)
         .await?;
 
@@ -124,6 +126,24 @@ impl MessagesDB {
         )
         .bind(user_id)
         .bind(receiver_id)
+        .fetch_one(&self.pool)
+        .await
+    }
+
+    pub async fn create_attachment(
+        &self,
+        attachment_id: &str,
+        file_location: &str,
+    ) -> Result<Attachment, sqlx::Error> {
+        sqlx::query_as::<_, Attachment>(
+            "
+                INSERT INTO attachments (id, filelocation)
+                VALUES (?, ?)
+                RETURNING id, filelocation
+            ",
+        )
+        .bind(attachment_id)
+        .bind(file_location)
         .fetch_one(&self.pool)
         .await
     }

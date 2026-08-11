@@ -1,5 +1,6 @@
 pub mod db;
 mod models;
 mod routes;
+mod service;
 
-pub use routes::router;
+pub use routes::{router, upload_image};

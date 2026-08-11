@@ -3,3 +3,6 @@ set -e
 
 echo "Running lint before commit..."
 make lint
+
+echo "Running tests before commit..."
+cargo test

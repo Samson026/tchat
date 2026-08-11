@@ -7,6 +7,7 @@ pub struct ChatMessage {
     pub sender_id: i64,
     pub recv_id: i64,
     pub content: String,
+    pub attachment: Option<String>,
 }
 
 #[allow(dead_code)]
@@ -17,6 +18,7 @@ pub struct Message {
     pub sender_id: i64,
     pub recv_id: i64,
     pub content: String,
+    pub attachment: Option<String>,
     pub time: DateTime<Utc>,
 }
 
@@ -36,4 +38,26 @@ pub struct Chat {
 pub struct User {
     pub id: i64,
     pub username: String,
+}
+
+#[derive(Deserialize)]
+pub struct DownloadReq {
+    pub file_name: String,
+}
+
+#[derive(FromRow, Deserialize)]
+pub struct Attachment {
+    pub id: String,
+    pub filelocation: String,
+}
+
+#[derive(Serialize)]
+pub struct AttachmentUser {
+    pub id: String,
+}
+
+impl From<Attachment> for AttachmentUser {
+    fn from(attachment: Attachment) -> Self {
+        Self { id: attachment.id }
+    }
 }

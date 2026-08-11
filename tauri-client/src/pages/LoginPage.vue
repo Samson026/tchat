@@ -92,6 +92,7 @@ onMounted(async () => {
 		// TODO:
 		// remove
 		state.user = await invoke<User>("auth");
+		await invoke("connect_ws");
 		router.push("/home");
 		// router.push("/home/search")
 	} catch (error) {

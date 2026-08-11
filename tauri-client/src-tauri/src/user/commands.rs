@@ -38,7 +38,6 @@ impl Client {
         };
 
         let url = format!("http://{server_addr}{GET_USERS}{CREATE_USER_PATH}");
-        println!("{url}");
         self.client
             .post(url)
             .json(&body)

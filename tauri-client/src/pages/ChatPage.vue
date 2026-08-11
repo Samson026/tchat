@@ -17,11 +17,27 @@
 			<div
 				class="bg-surface w-full h-20 border border-border rounded-xl px-2 py-2"
 			>
-				<form class="flex h-full items-center" @submit="submitForm">
+				<form
+					class="flex h-full w-full items-center gap-2"
+					@submit="submitForm"
+				>
+					<label
+						class="flex h-full w-14 shrink-0 cursor-pointer items-center justify-center rounded-2xl bg-secondary"
+					>
+						<span class="sr-only">Upload image</span>
+						<CameraIcon class="h-6 w-6 text-text" />
+						<input
+							type="file"
+							class="hidden"
+							accept="image/*"
+							@change="onImageSelected"
+						>
+					</label>
+
 					<input
 						type="text"
 						placeholder="Message"
-						class="text-text w-full h-full mx-2"
+						class="h-full min-w-0 flex-1 text-text"
 						v-model="input"
 					>
 					<p v-if="errors.input" class="text-error text-sm">
@@ -42,11 +58,12 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
 import { toTypedSchema } from "@vee-validate/zod";
+import { CameraIcon } from "lucide-vue-next";
 import { useForm } from "vee-validate";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
-import type { Message, User } from "../models/user.ts";
+import type { Attachment, Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
@@ -61,9 +78,17 @@ const { defineField, handleSubmit, errors, resetForm } = useForm({
 
 const [input] = defineField("input");
 
+const selectedFile = ref<File | null>(null);
+
 const username = computed(() => {
 	return state.chats_data.get(Number(route.params.id))?.username;
 });
+
+function onImageSelected(event: Event) {
+	console.log("inside on image select");
+	const input = event.target as HTMLInputElement;
+	selectedFile.value = input.files?.[0] ?? null;
+}
 
 async function getMessaess() {
 	const recv_id: number = Number(route.params.id);
@@ -72,7 +97,7 @@ async function getMessaess() {
 	});
 }
 
-async function sendMessage(message: string) {
+async function sendMessage(message: string, attachment: Attachment | null) {
 	if (!state.user) return;
 
 	const recv_id = Number(route.params.id);
@@ -81,6 +106,7 @@ async function sendMessage(message: string) {
 		sender_id: state.user.id,
 		recv_id: recv_id,
 		content: message,
+		attachment: attachment?.id ?? null,
 	};
 
 	await invoke("send", {
@@ -93,16 +119,40 @@ async function sendMessage(message: string) {
 	state.messages.push(msg);
 }
 
+async function uploadImage(file: File) {
+	console.log("inside upload image");
+	try {
+		const bytes = new Uint8Array(await file.arrayBuffer());
+		const attachment = await invoke<Attachment>("upload_image", bytes, {
+			headers: {
+				"x-file-name": file.name,
+				"context-type": file.type,
+			},
+		});
+		return attachment;
+	} catch (error) {
+		notificationStore.pushError(String(error));
+		return null;
+	}
+}
+
 async function getChats() {
 	return invoke<User[]>("get_chats");
 }
 
 const submitForm = handleSubmit(async (values) => {
-	try {
-		await sendMessage(values.input);
-		resetForm();
-	} catch (error) {
-		notificationStore.pushError(String(error));
+	console.log("inside handlesubmt");
+	var attachment: Attachment | null = null;
+	if (selectedFile.value) {
+		attachment = await uploadImage(selectedFile.value);
+	}
+	if (values.input) {
+		try {
+			await sendMessage(values.input, attachment);
+			resetForm();
+		} catch (error) {
+			notificationStore.pushError(String(error));
+		}
 	}
 });
 

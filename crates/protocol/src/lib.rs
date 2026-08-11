@@ -8,3 +8,5 @@ pub const GET_MESSAGES: &str = "/messages";
 pub const GET_USERS: &str = "/user";
 pub const AUTH: &str = "/auth";
 pub const CHATS: &str = "/chats";
+pub const UPLOAD: &str = "/upload";
+pub const DOWNLOAD: &str = "/download";

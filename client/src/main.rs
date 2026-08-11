@@ -13,10 +13,6 @@ async fn main() -> Result<()> {
 
     // client.login("Sammi").await?;
 
-    // let user = client.user.as_ref().unwrap();
-    // println!("{}", user.id);
-    // println!("{}", user.username);
-
     // client.connect_ws().await?;
 
     let mut tui = App::new(client);
