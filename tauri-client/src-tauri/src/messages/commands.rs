@@ -61,24 +61,27 @@ impl MessageClient {
         file: Vec<u8>,
         server_addr: &str,
     ) -> Result<(), String> {
+        println!("in upload 2");
         let part = Part::bytes(file)
             .file_name(file_name.to_owned())
             .mime_str("image/png")
             .map_err(|error| error.to_string())?;
-
+        println!("got here 1");
         let form = Form::new()
             .text("fileName", file_name.to_owned())
             .text("chunkNumber", "0")
             .text("totalChunks", "1")
             .part("chunk", part);
 
-        let url = format!("{server_addr}{GET_MESSAGES}{UPLOAD}");
-
+        let url = format!("http://{server_addr}{GET_MESSAGES}{UPLOAD}");
+        println!("got here 2");
         self.client
             .post(url)
             .multipart(form)
             .send()
             .await
+            .map_err(|error| error.to_string())?
+            .error_for_status()
             .map_err(|error| error.to_string())?;
         Ok(())
     }

@@ -26,7 +26,7 @@
 							type="file"
 							class="hidden"
 							accept="image/*"
-							v-on="onImageSelected"
+							v-on:change="onImageSelected"
 						>
 					</label>
 
@@ -82,6 +82,7 @@ const username = computed(() => {
 });
 
 function onImageSelected(event: Event) {
+  console.log("inside on image select")
   const input = event.target as HTMLInputElement;
   selectedFile.value = input.files?.[0] ?? null;
   

@@ -6,7 +6,7 @@ use std::{
 
 use axum::{
     Extension, Json, Router,
-    extract::{Multipart, Query, State},
+    extract::{DefaultBodyLimit, Multipart, Query, State},
     http::{StatusCode, header},
     middleware,
     response::{IntoResponse, Response},
@@ -32,6 +32,7 @@ pub fn router() -> Router<AppState> {
         .route(UPLOAD, post(upload_image))
         .route(DOWNLOAD, get(download_image))
         .route_layer(middleware::from_fn(auth_middleware))
+    .layer(DefaultBodyLimit::max(10 * 1024 * 1024))
 }
 
 pub async fn get_messages(

@@ -32,12 +32,13 @@ export function setupListeners() {
 	});
 
 	listen<string>("ws-disconnected", async () => {
-		await invoke("connect_ws");
+		// await invoke("connect_ws");
+		notificationStore.pushError("ws disconnected")
 	});
 
 	listen<string>("ws-error", async (error) => {
 		notificationStore.pushError(String(error));
 
-		await invoke("connect_ws");
+		// await invoke("connect_ws");
 	});
 }
