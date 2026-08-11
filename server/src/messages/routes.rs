@@ -20,8 +20,12 @@ use tokio::{
 
 use crate::{
     messages::{
-        models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq}, service::save_image,
-    }, middleware::auth_middleware, path::get_app_dir, state::AppState,
+        models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq},
+        service::save_image,
+    },
+    middleware::auth_middleware,
+    path::get_app_dir,
+    state::AppState,
 };
 
 pub fn router() -> Router<AppState> {
@@ -125,8 +129,9 @@ pub async fn upload_image(State(app_state): State<AppState>, mut mutlipart: Mult
             match save_image(&file, &app_state.message_db).await {
                 Ok(attachment) => {
                     return Json(AttachmentUser::from(attachment)).into_response();
-                },
-                Err(_) => {
+                }
+                Err(error) => {
+                    eprintln!("error {error}");
                     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
                 }
             };

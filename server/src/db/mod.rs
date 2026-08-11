@@ -33,7 +33,7 @@ impl Database {
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS attachments (
                 id TEXT PRIMARY KEY NOT NULL UNIQUE,
-                filelocation TEXT NOT NULL UNIQUE
+                filelocation TEXT NOT NULL
             )",
         )
         .execute(&pool)
