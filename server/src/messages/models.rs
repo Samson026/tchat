@@ -43,8 +43,21 @@ pub struct DownloadReq {
     pub fileName: String,
 }
 
-#[derive(FromRow)]
+#[derive(FromRow, Deserialize)]
 pub struct Attachment {
-    pub id: i64,
-    pub file_location: String
+    pub id: String,
+    pub file_location: String,
+}
+
+#[derive(Serialize)]
+pub struct AttachmentUser {
+    pub id: String
+}
+
+impl From<Attachment> for AttachmentUser {
+    fn from(attachment: Attachment) -> Self {
+        Self {
+            id: attachment.id
+        }
+    }
 }

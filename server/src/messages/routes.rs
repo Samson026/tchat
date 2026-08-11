@@ -14,18 +14,14 @@ use axum::{
 };
 use protocol::{BASE_ROUTE, CHATS, DOWNLOAD, UPLOAD};
 use tokio::{
-    fs::{self, File, create_dir_all},
+    fs::{self, File as AsyncFile, create_dir_all},
     io::AsyncWriteExt,
 };
 
 use crate::{
     messages::{
-        models::{ChatHistoryReq, ChatMessage, DownloadReq},
-        service::save_image,
-    },
-    middleware::auth_middleware,
-    path::get_app_dir,
-    state::AppState,
+        models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq}, service::save_image,
+    }, middleware::auth_middleware, path::get_app_dir, state::AppState,
 };
 
 pub fn router() -> Router<AppState> {
@@ -74,10 +70,7 @@ pub async fn get_chats(
     }
 }
 
-pub async fn upload_image(
-    mut mutlipart: Multipart, 
-    State(app_state): State<AppState>
-) -> Response {
+pub async fn upload_image(State(app_state): State<AppState>, mut mutlipart: Multipart) -> Response {
     let mut file_name = String::new();
     let mut chunk_number = 0;
     let mut total_chunks = 0;
@@ -118,7 +111,7 @@ pub async fn upload_image(
         .await
         .map_err(|_| return StatusCode::INTERNAL_SERVER_ERROR.into_response());
     let chunk_path = temp_dir.join(chunk_number.to_string());
-    let mut file = match File::create(&chunk_path).await {
+    let mut file = match AsyncFile::create(&chunk_path).await {
         Ok(file) => file,
         Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     };
@@ -129,7 +122,14 @@ pub async fn upload_image(
 
     if is_upload_complete(&temp_dir, total_chunks) {
         if let Ok(file) = assemble_file(&temp_dir, &file_name, total_chunks).await {
-            save_image(&file, &app_state.message_db).await;
+            match save_image(&file, &app_state.message_db).await {
+                Ok(attachment) => {
+                    return Json(AttachmentUser::from(attachment)).into_response();
+                },
+                Err(_) => {
+                    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+                }
+            };
         }
     }
     StatusCode::OK.into_response()

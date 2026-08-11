@@ -129,8 +129,8 @@ impl MessagesDB {
     }
 
     pub async fn create_attachment(
-        &mut self,
-        attachment_id: &i64,
+        &self,
+        attachment_id: &str,
         file_location: &str,
     ) -> Result<Attachment, sqlx::Error> {
         sqlx::query_as::<_, Attachment>(
