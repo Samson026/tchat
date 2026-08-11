@@ -94,7 +94,7 @@ async function getMessaess() {
 	});
 }
 
-async function sendMessage(message: string) {
+async function sendMessage(message: string, attachment: Attachment | null) {
 	if (!state.user) return;
 
 	const recv_id = Number(route.params.id);
@@ -103,6 +103,7 @@ async function sendMessage(message: string) {
 		sender_id: state.user.id,
 		recv_id: recv_id,
 		content: message,
+		attachment: attachment?.id ?? null
 	};
 
 	await invoke("send", {
@@ -125,9 +126,10 @@ async function uploadImage(file: File) {
         "context-type": file.type
       }
     })
-    console.log(attachment)
+    return attachment
   } catch (error) {
     notificationStore.pushError(String(error))
+    return null;
   }
 }
 
@@ -137,12 +139,13 @@ async function getChats() {
 
 const submitForm = handleSubmit(async (values) => {
   console.log("inside handlesubmt")
+  var attachment: Attachment | null = null;
   if (selectedFile.value) {
-      await uploadImage(selectedFile.value)
+      attachment = await uploadImage(selectedFile.value)
   }
   if (values.input) {
     try {
-		await sendMessage(values.input);
+		await sendMessage(values.input, attachment);
 		resetForm();
 	} catch (error) {
 		notificationStore.pushError(String(error));
