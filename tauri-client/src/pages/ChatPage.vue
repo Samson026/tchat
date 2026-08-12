@@ -7,7 +7,7 @@
 				class="flex flex-col col h-full justify-end px-10 py-10 overflow-y-auto"
 			>
 				<ChatMessage
-					v-for="(message, index) in state.messages"
+					v-for="(message, index) in state.chats_data.get(state.chating_with?.id ?? 0)?.messages"
 					:key="index"
 					:message="message"
 					:primary="message.sender_id === state.user?.id"
@@ -98,7 +98,7 @@ const selectedFile = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 
 const username = computed(() => {
-	return state.chats_data.get(Number(route.params.id))?.username;
+	return state.chats_data.get(Number(route.params.id))?.user.username;
 });
 
 function removeAttach() {
@@ -142,10 +142,8 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 		message: msg,
 	});
 
-	if (state.messages === null) {
-		state.messages = [msg];
-	}
-	state.messages.push(msg);
+	// add msg to local data
+	state.chats_data.get(Number(route.params.id))?.messages.push(msg)
 }
 
 async function uploadImage(file: File) {
@@ -193,18 +191,4 @@ const submitForm = handleSubmit(async (values) => {
 // 	await sendMessage(inputRef.value);
 // 	inputRef.value = "";
 // }
-
-onMounted(async () => {
-	if (state.user) {
-		state.messages = await getMessaess();
-		const newUsers = await getChats();
-		newUsers.forEach((user) => {
-			if (!state.chats_data.has(user.id)) {
-				state.chats_data.set(user.id, user);
-			}
-		});
-		console.log("got message");
-		console.log(state.messages);
-	}
-});
 </script>

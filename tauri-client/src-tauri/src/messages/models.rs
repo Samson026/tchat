@@ -14,6 +14,14 @@ pub struct User {
     pub username: String,
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct Chat {
+    pub id: i64,
+    pub username: String,
+    pub user_id: i64,
+    pub last_read_id: i64
+}
+
 #[derive(Serialize)]
 pub struct GetMessagesReq {
     pub receiver: i64,
@@ -28,4 +36,10 @@ pub struct DownloadReq {
 #[derive(Deserialize, Serialize)]
 pub struct Attachment {
     pub id: String,
+}
+
+#[derive(Serialize)]
+pub struct UpdateLastReadReq {
+    pub chat_id: i64,
+    pub message_id: i64
 }

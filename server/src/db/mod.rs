@@ -71,7 +71,7 @@ impl Database {
                 FOREIGN KEY (user_1_id) REFERENCES users(id),
                 FOREIGN KEY (user_2_id) REFERENCES users(id),
                 FOREIGN KEY (user_1_last_read_id) REFERENCES messages(id),
-                FOREIGN KEY (user_2_last_read_id) REFERENCES messages(id),
+                FOREIGN KEY (user_2_last_read_id) REFERENCES messages(id)
             )",
         )
         .execute(&pool)

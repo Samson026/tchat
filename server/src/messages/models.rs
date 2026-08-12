@@ -44,7 +44,8 @@ pub struct User {
 pub struct ClientChat {
     pub id: i64,
     pub username: String,
-    pub user_id: i64
+    pub user_id: i64,
+    pub last_read_id: i64
 }
 
 #[derive(Deserialize)]

@@ -28,22 +28,13 @@ const props = defineProps<{
 	user: User;
 }>();
 
-const unread = computed(() => {
-	return state.chats_data.get(props.user.id)?.unread ?? 0;
-});
+const unread = 0;
 
 async function setChat(recvID: number) {
 	state.chating_with = props.user;
-	state.messages = await getChat(recvID);
 	const chatData = state.chats_data.get(recvID);
 	if (chatData) chatData.unread = 0;
 
 	router.push(`/home/chat/${recvID}`);
-}
-
-async function getChat(recvID: number) {
-	return await invoke<Message[]>("get_messages", {
-		receiverId: recvID,
-	});
 }
 </script>

@@ -1,7 +1,20 @@
 export interface User {
 	id: number;
 	username: string;
-	unread: number;
+}
+
+export interface Chat {
+	id: number;
+	username: string,
+	user_id: number,
+	last_read_id: number
+}
+
+export interface ChatData {
+	user: User,
+	id: number
+	messages: Message[],
+	unread: number
 }
 
 export interface Message {

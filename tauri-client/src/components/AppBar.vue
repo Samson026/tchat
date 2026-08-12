@@ -6,9 +6,9 @@
 		<div class="flex flex-col flex-1 min-h-0">
 			<p class="text-text opacity-50 mt-10 text-xl">Chats:</p>
 			<UserBtn
-				v-for="user in state.chats_data"
-				:key="user[0]"
-				:user="user[1]"
+				v-for="[chatId, chatData] in state.chats_data"
+				:key="chatId"
+				:user="chatData.user"
 				class="-ml-2"
 			/>
 			<button
@@ -33,11 +33,13 @@
 import { invoke } from "@tauri-apps/api/core";
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
-import type { User } from "../models/user.ts";
+import type { Chat, ChatData, Message, User } from "../models/user.ts";
 import { useState } from "../stores/state.ts";
 import UserBtn from "./UserBtn.vue";
+import { useNotification } from "../stores/notifications.ts";
 
 const state = useState();
+const notificationStore = useNotification()
 const router = useRouter();
 
 function newChat() {
@@ -55,12 +57,35 @@ async function logout() {
 	}
 }
 
-onMounted(async () => {
-	const newUsers = await invoke<User[]>("get_chats");
-	newUsers.forEach((user) => {
-		if (!state.chats_data.has(user.id)) {
-			state.chats_data.set(user.id, user);
+async function fetchChatData() {
+	try {
+		const chats = await invoke<Chat[]>("get_chats")
+		for (const chat of chats) {
+			const messages = await invoke<Message[]>("get_messages")
+			const user: User = {
+				id: chat.user_id,
+				username: chat.username
+			}
+			const chatData: ChatData = {
+				user,
+				id: chat.id,
+				messages,
+				unread: chat.last_read_id
+			}
+			state.chats_data.set(user.id, chatData)
 		}
-	});
+	} catch(error) {
+		notificationStore.pushError(String(error));
+	}
+}
+
+onMounted(async () => {
+	// const newUsers = await invoke<User[]>("get_chats");
+	// newUsers.forEach((user) => {
+	// 	if (!state.chats_data.has(user.id)) {
+	// 		state.chats_data.set(user.id, user);
+	// 	}
+	// });
+	await fetchChatData();
 });
 </script>

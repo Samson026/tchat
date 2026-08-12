@@ -82,6 +82,10 @@ impl MessagesDB {
                     WHEN u1.id = ? THEN u2.username
                     ELSE u1.username
                 END AS username
+                CASE
+                    WHEN u1.id = ? THEN user_1_last_read_id
+                    ELSE user_2_last_read_id
+                    as last_read_id
             FROM chats
             JOIN users u1 ON chats.user_1_id = u1.id
             JOIN users u2 ON chats.user_2_id = u2.id
