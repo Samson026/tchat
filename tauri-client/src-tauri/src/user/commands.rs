@@ -12,6 +12,7 @@ use reqwest_cookie_store::CookieStoreMutex;
 use tauri::Manager;
 
 use crate::{
+    constants::COOKIE_FILE,
     settings::SettingsWriter,
     user::models::{NewUserRequest, User},
 };
@@ -133,7 +134,7 @@ pub async fn create_user(
         .path()
         .app_cache_dir()
         .map_err(|error| error.to_string())?
-        .join("cookies.json");
+        .join(COOKIE_FILE);
 
     // save cookies
     client
@@ -168,7 +169,7 @@ pub async fn login(
         .path()
         .app_cache_dir()
         .map_err(|error| error.to_string())?
-        .join("cookies.json");
+        .join(COOKIE_FILE);
 
     // save cookies
     client
@@ -212,7 +213,7 @@ pub fn logout(
         .path()
         .app_cache_dir()
         .map_err(|error| error.to_string())?
-        .join("cookies.json");
+        .join(COOKIE_FILE);
 
     let file = File::create(&path).map_err(|error| error.to_string())?;
     let mut writer = BufWriter::new(file);

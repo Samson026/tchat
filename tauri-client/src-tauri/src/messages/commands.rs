@@ -12,6 +12,7 @@ use protocol::{CHATS, DOWNLOAD, GET_MESSAGES, UPLOAD};
 use tokio::fs::{create_dir_all, write};
 
 use crate::{
+    constants::ATTACHMENTS_DIR,
     messages::models::{Attachment, ChatMessage, DownloadReq, GetMessagesReq, User},
     settings::SettingsWriter,
 };
@@ -201,7 +202,7 @@ pub async fn download_image(
         .path()
         .app_cache_dir()
         .map_err(|error| error.to_string())?
-        .join("attachments");
+        .join(ATTACHMENTS_DIR);
 
     create_dir_all(&image_dir)
         .map_err(|error| error.to_string())
