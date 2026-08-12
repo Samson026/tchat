@@ -8,6 +8,9 @@ use axum::{
     response::Response,
     routing::get,
 };
+
+use futures_util::sink::SinkExt;
+
 use protocol::BASE_ROUTE;
 
 use crate::{middleware::auth_middleware, state::AppState, websocket::models::ChatMessage};
@@ -71,7 +74,13 @@ pub async fn handle_socket(mut socket: WebSocket, user_id: i64, mut app_state: A
                           let _ = recv.send(parsed);
                       }
                   },
-                  Some(Ok(Message::Close(_))) | None => {
+                  Some(Ok(Message::Close(_))) => {
+                      if let Err(error) = socket.flush().await {
+                          eprintln!("Error: {error}");
+                      }
+                      break;
+                  },
+                  None => {
                       break;
                   }
                   Some(Err(error)) => {

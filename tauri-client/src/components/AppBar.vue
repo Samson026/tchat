@@ -46,6 +46,7 @@ function newChat() {
 
 async function logout() {
 	try {
+	    await invoke("disconnect_ws");
 		await invoke("logout");
 		state.$reset();
 		router.push("/");

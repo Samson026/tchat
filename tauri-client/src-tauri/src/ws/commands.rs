@@ -144,8 +144,8 @@ pub async fn send(state: tauri::State<'_, WsState>, message: ChatMessage) -> Res
 pub async fn disconnect_ws(state: tauri::State<'_, WsState>) -> Result<(), String> {
     let mut connection = state.connection.lock().await;
 
-    let ws = connection
-        .as_mut()
+    let mut ws = connection
+        .take()
         .ok_or_else(|| "Websocket is not connected".to_string())?;
 
     ws.close().await
