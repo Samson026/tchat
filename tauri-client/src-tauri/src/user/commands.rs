@@ -131,7 +131,7 @@ pub async fn create_user(
 
     let path = app
         .path()
-        .app_data_dir()
+        .app_cache_dir()
         .map_err(|error| error.to_string())?
         .join("cookies.json");
 
@@ -166,7 +166,7 @@ pub async fn login(
 
     let path = app
         .path()
-        .app_data_dir()
+        .app_cache_dir()
         .map_err(|error| error.to_string())?
         .join("cookies.json");
 
@@ -210,7 +210,7 @@ pub fn logout(
 
     let path = app
         .path()
-        .app_data_dir()
+        .app_cache_dir()
         .map_err(|error| error.to_string())?
         .join("cookies.json");
 
