@@ -1,6 +1,6 @@
 [package]
 name = "tChat"
-version = "0.1.0"
+version = "0.2.0"
 description = "A tauri chat app"
 authors = ["you"]
 edition = "2021"
