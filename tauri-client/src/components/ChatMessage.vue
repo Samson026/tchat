@@ -39,7 +39,7 @@ onMounted(async () => {
 				fileId: props.message.attachment,
 			});
 
-			const dataDir = await path.appDataDir();
+			const dataDir = await path.appCacheDir();
 			imageUrl.value = convertFileSrc(
 				await path.join(dataDir, "attachments", props.message.attachment),
 			);
