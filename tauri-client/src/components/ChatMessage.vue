@@ -10,10 +10,10 @@
 				{{ message.content }}
 			</p>
 		</div>
-		<div 
-		    v-if="imageUrl" 
-		    class="max-w-80 mt-1"
-            :class="primary ? 'self-end' : 'self-start'"
+		<div
+			v-if="imageUrl"
+			class="max-w-80 mt-1"
+			:class="primary ? 'self-end' : 'self-start'"
 		>
 			<img :src="imageUrl" alt="" class="rounded">
 		</div>
