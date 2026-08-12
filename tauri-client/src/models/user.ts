@@ -12,7 +12,7 @@ export interface Chat {
 
 export interface ChatData {
 	user: User,
-	id: number
+	id: number | null
 	messages: Message[],
 	unread: number
 }

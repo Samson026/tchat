@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import type { User } from "../models/user";
+import type { ChatData, User } from "../models/user";
 import { useState } from "../stores/state";
 
 const state = useState();
@@ -20,7 +20,15 @@ const router = useRouter();
 
 function chatUser(user: User) {
 	state.chating_with = user;
-	state.chats_data.set(user.id, user);
+
+	const chatData: ChatData = {
+		user: user,
+		id: null,
+		messages: [],
+		unread: 0
+	}
+	
+	state.chats_data.set(user.id, chatData);
 
 	router.push(`/home/chat/${user.id}`);
 }

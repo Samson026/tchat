@@ -61,7 +61,13 @@ async function fetchChatData() {
 	try {
 		const chats = await invoke<Chat[]>("get_chats")
 		for (const chat of chats) {
-			const messages = await invoke<Message[]>("get_messages")
+			const messages = await invoke<Message[]>("get_messages", {
+				receiverId: chat.user_id
+			})
+			for (const message of messages) {
+				console.log("here is a message")
+				console.log(message.content)
+			}
 			const user: User = {
 				id: chat.user_id,
 				username: chat.username
@@ -73,6 +79,7 @@ async function fetchChatData() {
 				unread: chat.last_read_id
 			}
 			state.chats_data.set(user.id, chatData)
+			console.log(state.chats_data)
 		}
 	} catch(error) {
 		notificationStore.pushError(String(error));

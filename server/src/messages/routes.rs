@@ -75,7 +75,10 @@ pub async fn get_chats(
 ) -> Response {
     match app_state.message_db.get_chats(&user_id).await {
         Ok(chats) => Json(chats).into_response(),
-        Err(error) => (StatusCode::NOT_FOUND, error.to_string()).into_response(),
+        Err(error) => {
+            eprintln!("Error: {error}");
+            (StatusCode::NOT_FOUND, error.to_string()).into_response()
+        }
     }
 }
 

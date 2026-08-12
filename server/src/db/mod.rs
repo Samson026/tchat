@@ -63,8 +63,8 @@ impl Database {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_1_id NOT NULL,
                 user_2_id NOT NULL,
-                user_1_last_read_id NOT NULL,
-                user_2_last_read_id NOT NULL,
+                user_1_last_read_id,
+                user_2_last_read_id,
 
                 CHECK (user_1_id < user_2_id)
                 UNIQUE (user_1_id, user_2_id),
