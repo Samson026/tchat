@@ -19,7 +19,7 @@ pub struct Chat {
     pub id: i64,
     pub username: String,
     pub user_id: i64,
-    pub last_read_id: i64
+    pub read_count: i64
 }
 
 #[derive(Serialize)]
@@ -41,5 +41,5 @@ pub struct Attachment {
 #[derive(Serialize)]
 pub struct UpdateLastReadReq {
     pub chat_id: i64,
-    pub message_id: i64
+    pub read_count: i64
 }

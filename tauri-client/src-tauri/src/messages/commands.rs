@@ -128,13 +128,13 @@ impl MessageClient {
     pub async fn update_read(
         &self,
         chat_id: &i64,
-        message_id: &i64,
+        read_count: &i64,
         server_addr: &str
     ) -> Result<(), reqwest::Error> {
         let url = format!("http://{server_addr}{GET_MESSAGES}{READ}");
         let body = UpdateLastReadReq {
             chat_id: *chat_id,
-            message_id: *message_id
+            read_count: *read_count
         };
         
         self.client
@@ -250,7 +250,7 @@ pub async fn update_read(
     message_client: tauri::State<'_, MessageClient>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
     chat_id: i64,
-    message_id: i64
+    read_count: i64
 ) -> Result<(), String> {
     let server_addr = settings_writer
         .lock()
@@ -259,7 +259,7 @@ pub async fn update_read(
     
     message_client
         .inner()
-        .update_read(&chat_id, &message_id, &server_addr)
+        .update_read(&chat_id, &read_count, &server_addr)
         .await
         .map_err(|error| error.to_string())?;
     Ok(())

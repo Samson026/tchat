@@ -228,7 +228,7 @@ pub async fn update_last_read_message(
 ) -> Response {
     match app_state
         .message_db
-        .set_read_message(&data.chat_id, &user_id, &data.message_id)
+        .set_read_message(&data.chat_id, &user_id, &data.read_count)
         .await {
             Ok(_) => StatusCode::OK.into_response(),
             Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response()

@@ -37,7 +37,7 @@ async function setChat(recvID: number) {
 		// update last read message
 		await invoke("update_read", {
 			chatId: chatData.id,
-			messageId: chatData.messages[chatData.messages.length - 1].
+			readCount: chatData.messages.length
 		})
 	}
 	
