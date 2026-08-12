@@ -33,7 +33,14 @@ const unread = 0;
 async function setChat(recvID: number) {
 	state.chating_with = props.user;
 	const chatData = state.chats_data.get(recvID);
-	if (chatData) chatData.unread = 0;
+	if (chatData) {
+		// update last read message
+		await invoke("update_read", {
+			chatId: chatData.id,
+			messageId: chatData.messages[chatData.messages.length - 1].
+		})
+	}
+	
 
 	router.push(`/home/chat/${recvID}`);
 }
