@@ -30,7 +30,7 @@ pub async fn create_user(
         Ok(user) => {
             session.insert("user_id", user.id).await.unwrap();
             Json(user).into_response()
-        },
+        }
         Err(error) => {
             eprintln!("Error creating user: {error}");
             (StatusCode::INTERNAL_SERVER_ERROR, "Could not create user").into_response()
