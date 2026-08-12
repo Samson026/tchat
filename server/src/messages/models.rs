@@ -61,3 +61,9 @@ impl From<Attachment> for AttachmentUser {
         Self { id: attachment.id }
     }
 }
+
+#[derive(Deserialize)]
+pub struct UpdateLastReadReq {
+    pub chat_id: i64,
+    pub message_id: i64
+}

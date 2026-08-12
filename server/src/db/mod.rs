@@ -63,11 +63,15 @@ impl Database {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_1_id NOT NULL,
                 user_2_id NOT NULL,
+                user_1_last_read_id NOT NULL,
+                user_2_last_read_id NOT NULL,
 
                 CHECK (user_1_id < user_2_id)
                 UNIQUE (user_1_id, user_2_id),
                 FOREIGN KEY (user_1_id) REFERENCES users(id),
-                FOREIGN KEY (user_2_id) REFERENCES users(id)
+                FOREIGN KEY (user_2_id) REFERENCES users(id),
+                FOREIGN KEY (user_1_last_read_id) REFERENCES messages(id),
+                FOREIGN KEY (user_2_last_read_id) REFERENCES messages(id),
             )",
         )
         .execute(&pool)

@@ -158,4 +158,31 @@ impl MessagesDB {
         .fetch_one(&self.pool)
         .await
     }
+
+    pub async fn set_read_message(&self, chat_id: &i64, user_id: &i64, last_read_message_id: &i64) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "
+                UPDATE chats
+                SET 
+                    user_1_last_read_id = CASE
+                        WHEN user_1_id = ? THEN ?
+                        ELSE user_1_last_read_id
+                    END,
+                    user_2_last_read_id = CASE
+                        WHEN user_2_id = ? THEN ?
+                        ELSE user_2_last_read_id
+                    END
+                WHERE id = ?
+            ",
+        )
+        .bind(user_id)
+        .bind(last_read_message_id)
+        .bind(user_id)
+        .bind(last_read_message_id)
+        .bind(chat_id)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
 }

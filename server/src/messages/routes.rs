@@ -12,7 +12,7 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use protocol::{BASE_ROUTE, CHATS, DOWNLOAD, UPLOAD};
+use protocol::{BASE_ROUTE, CHATS, DOWNLOAD, READ, UPLOAD};
 use tokio::{
     fs::{self, File as AsyncFile, create_dir_all},
     io::AsyncWriteExt,
@@ -20,12 +20,8 @@ use tokio::{
 
 use crate::{
     messages::{
-        models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq},
-        service::save_image,
-    },
-    middleware::auth_middleware,
-    path::get_app_dir,
-    state::AppState,
+        models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq, UpdateLastReadReq}, service::save_image,
+    }, middleware::auth_middleware, path::get_app_dir, state::AppState,
 };
 
 #[cfg(test)]
@@ -38,6 +34,7 @@ pub fn router() -> Router<AppState> {
         .route(CHATS, get(get_chats))
         .route(UPLOAD, post(upload_image))
         .route(DOWNLOAD, get(download_image))
+        .route(READ, post(update_last_read_message))
         .route_layer(middleware::from_fn(auth_middleware))
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024))
 }
@@ -219,4 +216,18 @@ pub async fn download_image(
     };
 
     ([(header::CONTENT_TYPE, content_type)], file).into_response()
+}
+
+pub async fn update_last_read_message(
+    State(app_state): State<AppState>,
+    Extension(user_id): Extension<i64>,
+    Json(data): Json<UpdateLastReadReq>
+) -> Response {
+    match app_state
+        .message_db
+        .set_read_message(&data.chat_id, &user_id, &data.message_id)
+        .await {
+            Ok(_) => StatusCode::OK.into_response(),
+            Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response()
+        }
 }
