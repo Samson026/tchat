@@ -1,4 +1,4 @@
-use std::{path::PathBuf, sync::Mutex};
+use std::{fs, path::PathBuf, sync::Mutex};
 
 use futures_util::TryFutureExt;
 use reqwest::{
@@ -12,6 +12,7 @@ use protocol::{CHATS, DOWNLOAD, GET_MESSAGES, UPLOAD};
 use tokio::fs::{create_dir_all, write};
 
 use crate::{
+    constants::ATTACHMENTS_DIR,
     messages::models::{Attachment, ChatMessage, DownloadReq, GetMessagesReq, User},
     settings::SettingsWriter,
 };
@@ -199,9 +200,9 @@ pub async fn download_image(
 ) -> Result<Attachment, String> {
     let image_dir = app
         .path()
-        .app_data_dir()
+        .app_cache_dir()
         .map_err(|error| error.to_string())?
-        .join("attachments");
+        .join(ATTACHMENTS_DIR);
 
     create_dir_all(&image_dir)
         .map_err(|error| error.to_string())
@@ -212,7 +213,12 @@ pub async fn download_image(
         .map_err(|error| error.to_string())?
         .server_address();
 
-    println!("got here");
+    let image_path = image_dir.join(&file_id);
+
+    if fs::exists(&image_path).map_err(|error| error.to_string())? {
+        return Ok(Attachment { id: file_id });
+    }
+
     message_client
         .inner()
         .download_image(&file_id, &server_addr, &image_dir)

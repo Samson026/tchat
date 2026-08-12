@@ -7,6 +7,8 @@ use std::{
 use protocol::SERVER_ADDRESS;
 use serde::{Deserialize, Serialize};
 
+use crate::constants::SETTINGS_FILE;
+
 pub struct SettingsWriter {
     file_location: PathBuf,
     pub settings: Settings,
@@ -15,7 +17,7 @@ pub struct SettingsWriter {
 impl SettingsWriter {
     pub fn new(data_dir: &Path) -> Result<Self, Error> {
         // create file if not exist
-        let path = data_dir.join("settings.json");
+        let path = data_dir.join(SETTINGS_FILE);
 
         if !path.exists() {
             let file = File::create(&path)?;

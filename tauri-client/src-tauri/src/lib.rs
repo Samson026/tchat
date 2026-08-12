@@ -1,11 +1,13 @@
 use std::sync::Mutex;
 
 use crate::{
-    auth::AuthClient, messages::MessageClient, settings::SettingsWriter, user::Client, ws::WsState,
+    auth::AuthClient, constants::COOKIE_FILE, messages::MessageClient, settings::SettingsWriter,
+    user::Client, ws::WsState,
 };
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 mod auth;
+mod constants;
 mod messages;
 mod settings;
 mod user;
@@ -20,11 +22,8 @@ pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
             let data_path = app.path().app_data_dir()?;
-            let cookie_path = data_path.join("cookies.json");
+            let cookie_path = app.path().app_cache_dir()?.join(COOKIE_FILE);
 
-            if let Some(str) = data_path.to_str() {
-                println!("data path {str}");
-            }
             std::fs::create_dir_all(cookie_path.parent().expect("Cookie path has no parent"))?;
 
             let cookie_store = {
