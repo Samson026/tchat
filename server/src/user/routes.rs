@@ -19,6 +19,7 @@ pub fn router() -> Router<AppState> {
 
 pub async fn create_user(
     State(mut app_state): State<AppState>,
+    session: Session,
     Json(data): Json<LoginRequest>,
 ) -> Response {
     match app_state
@@ -26,7 +27,10 @@ pub async fn create_user(
         .add_user(&data.username, &data.password)
         .await
     {
-        Ok(user) => Json(user).into_response(),
+        Ok(user) => {
+            session.insert("user_id", user.id).await.unwrap();
+            Json(user).into_response()
+        },
         Err(error) => {
             eprintln!("Error creating user: {error}");
             (StatusCode::INTERNAL_SERVER_ERROR, "Could not create user").into_response()
