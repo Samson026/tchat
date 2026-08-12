@@ -40,6 +40,13 @@ pub struct User {
     pub username: String,
 }
 
+#[derive(FromRow, Serialize)]
+pub struct ClientChat {
+    pub id: i64,
+    pub username: String,
+    pub user_id: i64
+}
+
 #[derive(Deserialize)]
 pub struct DownloadReq {
     pub file_id: String,

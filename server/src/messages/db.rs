@@ -1,6 +1,6 @@
 use sqlx::{Error, SqlitePool};
 
-use crate::messages::models::{Attachment, Chat, Message, User};
+use crate::messages::models::{Attachment, Chat, ClientChat, Message, User};
 
 #[derive(Clone)]
 pub struct MessagesDB {
@@ -69,14 +69,15 @@ impl MessagesDB {
         .await
     }
 
-    pub async fn get_chats(&self, user_id: &i64) -> Result<Vec<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>(
+    pub async fn get_chats(&self, user_id: &i64) -> Result<Vec<ClientChat>, sqlx::Error> {
+        sqlx::query_as::<_, ClientChat>(
             "
             SELECT
+                chats.id,
                 CASE
                     WHEN u1.id = ? THEN u2.id
                     ELSE u1.id
-                END AS id,
+                END AS user_id,
                 CASE
                     WHEN u1.id = ? THEN u2.username
                     ELSE u1.username

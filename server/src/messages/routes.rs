@@ -74,7 +74,7 @@ pub async fn get_chats(
     Extension(user_id): Extension<i64>,
 ) -> Response {
     match app_state.message_db.get_chats(&user_id).await {
-        Ok(users) => Json(users).into_response(),
+        Ok(chats) => Json(chats).into_response(),
         Err(error) => (StatusCode::NOT_FOUND, error.to_string()).into_response(),
     }
 }
