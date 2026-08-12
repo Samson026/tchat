@@ -1,8 +1,8 @@
 <template>
 	<div class="flex flex-col w-full">
 		<div
-			class="my-0.5 w-fit max-w-[40%] rounded-2xl self-end"
-			:class="primary ? 'bg-primary' : 'bg-secondary'"
+			class="my-0.5 w-fit max-w-[40%] rounded-2xl"
+			:class="primary ? 'bg-primary self-end' : 'bg-secondary self-start'"
 		>
 			<p
 				class="whitespace-pre-wrap break-word text-text px-3 py-2 text-left w-fit"
@@ -10,7 +10,11 @@
 				{{ message.content }}
 			</p>
 		</div>
-		<div v-if="imageUrl" class="max-w-80 self-end mt-1">
+		<div
+			v-if="imageUrl"
+			class="max-w-80 mt-1"
+			:class="primary ? 'self-end' : 'self-start'"
+		>
 			<img :src="imageUrl" alt="" class="rounded">
 		</div>
 	</div>
