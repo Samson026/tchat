@@ -148,7 +148,6 @@ pub async fn disconnect_ws(state: tauri::State<'_, WsState>) -> Result<(), Strin
         .take()
         .ok_or_else(|| "Websocket is not connected".to_string())?;
 
-    ws.close().await
-        .map_err(|error| error.to_string())?;
+    ws.close().await.map_err(|error| error.to_string())?;
     Ok(())
 }
