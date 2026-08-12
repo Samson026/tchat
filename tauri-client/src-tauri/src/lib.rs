@@ -56,6 +56,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             ws::commands::connect_ws,
             ws::commands::send,
+            ws::commands::disconnect_ws,
             user::commands::create_user,
             user::commands::login,
             user::commands::get_users,
