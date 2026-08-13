@@ -74,6 +74,7 @@ const submitForm = handleSubmit(async (values) => {
 			username: values.username,
 			password: values.password,
 		});
+		await invoke("connect_ws");
 	} catch (error) {
 		notificationStore.pushError(`Could not create user, ${String(error)}`);
 		return;
