@@ -11,16 +11,11 @@ export function setupListeners() {
 		const message = JSON.parse(event.payload) as Message;
 		console.log(`got message ${event.payload}`);
 		// currently chatting with user
-		if (state.chating_with?.id === message.sender_id) {
+		if (state.chats_data.get(message.sender_id)) {
 			state.chats_data.get(message.sender_id)?.messages.push(message)
+			return
 		}
-		// not new chat
-		if (state.chats_data.has(message.sender_id)) {
-			state.addNotification(message.sender_id);
-			return;
-		}
-		// new chat
-		// TODO:
+
 		// Pull user from db, get rid of local all users
 		const user = state.all_users.get(message.sender_id);
 		if (user) {

@@ -76,10 +76,10 @@ import { invoke } from "@tauri-apps/api/core";
 import { toTypedSchema } from "@vee-validate/zod";
 import { CameraIcon, X } from "lucide-vue-next";
 import { useForm } from "vee-validate";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
-import type { Attachment, Message, User } from "../models/user.ts";
+import type { Attachment, Message } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
@@ -141,13 +141,6 @@ function onImageSelected(event: Event) {
 	imagePreview.value = URL.createObjectURL(selectedFile.value);
 }
 
-async function getMessaess() {
-	const recv_id: number = Number(route.params.id);
-	return await invoke<Message[]>("get_messages", {
-		receiverId: recv_id,
-	});
-}
-
 async function sendMessage(message: string, attachment: Attachment | null) {
 	if (!state.user) return;
 
@@ -186,10 +179,6 @@ async function uploadImage(file: File) {
 		notificationStore.pushError(String(error));
 		return null;
 	}
-}
-
-async function getChats() {
-	return invoke<User[]>("get_chats");
 }
 
 const submitForm = handleSubmit(async (values) => {

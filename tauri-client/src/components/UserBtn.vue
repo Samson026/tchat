@@ -18,7 +18,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import type { Message, User } from "../models/user";
+import type { User } from "../models/user";
 import { useState } from "../stores/state";
 
 const router = useRouter();

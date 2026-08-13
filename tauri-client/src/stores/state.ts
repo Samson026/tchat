@@ -8,7 +8,7 @@ interface State {
 
 import { invoke } from "@tauri-apps/api/core";
 import { defineStore } from "pinia";
-import type { ChatData, Message, Settings, User } from "../models/user";
+import type { ChatData, Settings, User } from "../models/user";
 
 let allUsersRequest: Promise<User[]> | null = null;
 
@@ -40,17 +40,6 @@ export const useState = defineStore("stateStore", {
 				}
 			} finally {
 				allUsersRequest = null;
-			}
-		},
-		addNotification(userId: number) {
-			const user = this.chats_data.get(userId);
-
-			if (user) {
-				if (user.unread) {
-					user.unread += 1;
-				} else {
-					user.unread = 1;
-				}
 			}
 		},
 	},
