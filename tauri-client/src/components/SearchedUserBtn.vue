@@ -25,7 +25,7 @@ function chatUser(user: User) {
 		user: user,
 		id: null,
 		messages: [],
-		unread: 0
+		read_count: 0
 	}
 	
 	state.chats_data.set(user.id, chatData);

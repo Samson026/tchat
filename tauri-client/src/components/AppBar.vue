@@ -76,7 +76,7 @@ async function fetchChatData() {
 				user,
 				id: chat.id,
 				messages,
-				unread: chat.last_read_id
+				read_count: chat.read_count
 			}
 			state.chats_data.set(user.id, chatData)
 			console.log(state.chats_data)

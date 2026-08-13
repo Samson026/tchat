@@ -7,14 +7,14 @@ export interface Chat {
 	id: number;
 	username: string,
 	user_id: number,
-	last_read_id: number
+	read_count: number
 }
 
 export interface ChatData {
 	user: User,
 	id: number | null
 	messages: Message[],
-	unread: number
+	read_count: number
 }
 
 export interface Message {

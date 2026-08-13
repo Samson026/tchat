@@ -76,7 +76,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { toTypedSchema } from "@vee-validate/zod";
 import { CameraIcon, X } from "lucide-vue-next";
 import { useForm } from "vee-validate";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
 import type { Attachment, Message, User } from "../models/user.ts";
@@ -100,6 +100,28 @@ const imagePreview = ref<string | null>(null);
 const username = computed(() => {
 	return state.chats_data.get(Number(route.params.id))?.user.username;
 });
+
+// Watch message count to update read status
+watch(
+	() => {
+		const chatId = Number(route.params.id);
+		return {
+			chatId,
+			messageCount: state.chats_data.get(chatId)?.messages.length ?? 0
+		}
+	},
+	async ({chatId, messageCount}) => {
+		const chatData = state.chats_data.get(chatId);
+		
+		if (!chatData) return;
+		chatData.read_count = messageCount
+
+		await invoke("update_read", {
+			chatId: chatData.id,
+			readCount: messageCount
+		})
+	}
+)
 
 function removeAttach() {
 	selectedFile.value = null;
@@ -130,6 +152,7 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 	if (!state.user) return;
 
 	const recv_id = Number(route.params.id);
+	const chatData = state.chats_data.get(recv_id)
 
 	const msg: Message = {
 		sender_id: state.user.id,
@@ -143,7 +166,9 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 	});
 
 	// add msg to local data
-	state.chats_data.get(Number(route.params.id))?.messages.push(msg)
+	if (!chatData)
+		return
+	chatData.messages.push(msg)
 }
 
 async function uploadImage(file: File) {

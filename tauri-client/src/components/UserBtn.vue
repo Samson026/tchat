@@ -9,7 +9,7 @@
 	>
 		<span>{{ user.username }}</span>
 		<span v-if="unread > 0" class="ml-auto">
-			{{ state.chats_data.get(user.id)?.unread }}
+			{{ unread }}
 		</span>
 	</button>
 </template>
@@ -28,7 +28,16 @@ const props = defineProps<{
 	user: User;
 }>();
 
-const unread = 0;
+const unread = computed(() => {
+	const chatData = state.chats_data.get(props.user.id);
+
+	if (!chatData)
+		return 0
+	console.log(chatData)
+	console.log(chatData.messages.length)
+	console.log(`unread ${chatData.read_count - chatData.messages.length}`)
+	return chatData.messages.length - chatData.read_count;
+})
 
 async function setChat(recvID: number) {
 	state.chating_with = props.user;
@@ -39,6 +48,9 @@ async function setChat(recvID: number) {
 			chatId: chatData.id,
 			readCount: chatData.messages.length
 		})
+
+		// update local data
+		chatData.read_count = chatData.messages.length 
 	}
 	
 
