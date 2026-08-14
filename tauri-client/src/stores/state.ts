@@ -1,7 +1,6 @@
 interface State {
 	user: User | null;
-	chats_data: Map<number, User>;
-	messages: Message[] | null;
+	chats_data: Map<number, ChatData>;
 	chating_with: User | null;
 	all_users: Map<number, User>;
 	settings: Settings | null;
@@ -9,7 +8,7 @@ interface State {
 
 import { invoke } from "@tauri-apps/api/core";
 import { defineStore } from "pinia";
-import type { Message, Settings, User } from "../models/user";
+import type { ChatData, Settings, User } from "../models/user";
 
 let allUsersRequest: Promise<User[]> | null = null;
 
@@ -19,8 +18,7 @@ export const useState = defineStore("stateStore", {
 		return {
 			// all these properties will have their type inferred automatically
 			user: null,
-			chats_data: new Map<number, User>(),
-			messages: null,
+			chats_data: new Map<number, ChatData>(),
 			chating_with: null,
 			all_users: new Map<number, User>(),
 			settings: null,
@@ -42,17 +40,6 @@ export const useState = defineStore("stateStore", {
 				}
 			} finally {
 				allUsersRequest = null;
-			}
-		},
-		addNotification(userId: number) {
-			const user = this.chats_data.get(userId);
-
-			if (user) {
-				if (user.unread) {
-					user.unread += 1;
-				} else {
-					user.unread = 1;
-				}
 			}
 		},
 	},

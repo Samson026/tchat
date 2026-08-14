@@ -7,7 +7,7 @@
 				class="flex flex-col col h-full justify-end px-10 py-10 overflow-y-auto"
 			>
 				<ChatMessage
-					v-for="(message, index) in state.messages"
+					v-for="(message, index) in state.chats_data.get(state.chating_with?.id ?? 0)?.messages"
 					:key="index"
 					:message="message"
 					:primary="message.sender_id === state.user?.id"
@@ -76,10 +76,10 @@ import { invoke } from "@tauri-apps/api/core";
 import { toTypedSchema } from "@vee-validate/zod";
 import { CameraIcon, X } from "lucide-vue-next";
 import { useForm } from "vee-validate";
-import { computed, onMounted, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
-import type { Attachment, Message, User } from "../models/user.ts";
+import type { Attachment, Message } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
@@ -98,8 +98,30 @@ const selectedFile = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 
 const username = computed(() => {
-	return state.chats_data.get(Number(route.params.id))?.username;
+	return state.chats_data.get(Number(route.params.id))?.user.username;
 });
+
+// Watch message count to update read status
+watch(
+	() => {
+		const chatId = Number(route.params.id);
+		return {
+			chatId,
+			messageCount: state.chats_data.get(chatId)?.messages.length ?? 0,
+		};
+	},
+	async ({ chatId, messageCount }) => {
+		const chatData = state.chats_data.get(chatId);
+
+		if (!chatData) return;
+		chatData.read_count = messageCount;
+
+		await invoke("update_read", {
+			chatId: chatData.id,
+			readCount: messageCount,
+		});
+	},
+);
 
 function removeAttach() {
 	selectedFile.value = null;
@@ -119,17 +141,11 @@ function onImageSelected(event: Event) {
 	imagePreview.value = URL.createObjectURL(selectedFile.value);
 }
 
-async function getMessaess() {
-	const recv_id: number = Number(route.params.id);
-	return await invoke<Message[]>("get_messages", {
-		receiverId: recv_id,
-	});
-}
-
 async function sendMessage(message: string, attachment: Attachment | null) {
 	if (!state.user) return;
 
 	const recv_id = Number(route.params.id);
+	const chatData = state.chats_data.get(recv_id);
 
 	const msg: Message = {
 		sender_id: state.user.id,
@@ -142,10 +158,9 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 		message: msg,
 	});
 
-	if (state.messages === null) {
-		state.messages = [msg];
-	}
-	state.messages.push(msg);
+	// add msg to local data
+	if (!chatData) return;
+	chatData.messages.push(msg);
 }
 
 async function uploadImage(file: File) {
@@ -163,10 +178,6 @@ async function uploadImage(file: File) {
 		notificationStore.pushError(String(error));
 		return null;
 	}
-}
-
-async function getChats() {
-	return invoke<User[]>("get_chats");
 }
 
 const submitForm = handleSubmit(async (values) => {
@@ -193,18 +204,4 @@ const submitForm = handleSubmit(async (values) => {
 // 	await sendMessage(inputRef.value);
 // 	inputRef.value = "";
 // }
-
-onMounted(async () => {
-	if (state.user) {
-		state.messages = await getMessaess();
-		const newUsers = await getChats();
-		newUsers.forEach((user) => {
-			if (!state.chats_data.has(user.id)) {
-				state.chats_data.set(user.id, user);
-			}
-		});
-		console.log("got message");
-		console.log(state.messages);
-	}
-});
 </script>

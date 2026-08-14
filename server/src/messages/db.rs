@@ -1,6 +1,6 @@
 use sqlx::{Error, SqlitePool};
 
-use crate::messages::models::{Attachment, Chat, Message, User};
+use crate::messages::models::{Attachment, Chat, ClientChat, Message};
 
 #[derive(Clone)]
 pub struct MessagesDB {
@@ -69,24 +69,30 @@ impl MessagesDB {
         .await
     }
 
-    pub async fn get_chats(&self, user_id: &i64) -> Result<Vec<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>(
+    pub async fn get_chats(&self, user_id: &i64) -> Result<Vec<ClientChat>, sqlx::Error> {
+        sqlx::query_as::<_, ClientChat>(
             "
             SELECT
+                chats.id,
                 CASE
                     WHEN u1.id = ? THEN u2.id
                     ELSE u1.id
-                END AS id,
+                END AS user_id,
                 CASE
                     WHEN u1.id = ? THEN u2.username
                     ELSE u1.username
-                END AS username
+                END AS username,
+                CASE
+                    WHEN u1.id = ? THEN user_1_read_count
+                    ELSE user_2_read_count
+                END AS read_count
             FROM chats
             JOIN users u1 ON chats.user_1_id = u1.id
             JOIN users u2 ON chats.user_2_id = u2.id
             WHERE u1.id = ? OR u2.id = ?
             ",
         )
+        .bind(user_id)
         .bind(user_id)
         .bind(user_id)
         .bind(user_id)
@@ -157,5 +163,37 @@ impl MessagesDB {
         .bind(file_id)
         .fetch_one(&self.pool)
         .await
+    }
+
+    pub async fn set_read_message(
+        &self,
+        chat_id: &i64,
+        user_id: &i64,
+        read_count: &i64,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "
+                UPDATE chats
+                SET 
+                    user_1_read_count = CASE
+                        WHEN user_1_id = ? THEN ?
+                        ELSE user_1_read_count
+                    END,
+                    user_2_read_count = CASE
+                        WHEN user_2_id = ? THEN ?
+                        ELSE user_2_read_count
+                    END
+                WHERE id = ?
+            ",
+        )
+        .bind(user_id)
+        .bind(read_count)
+        .bind(user_id)
+        .bind(read_count)
+        .bind(chat_id)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
     }
 }

@@ -9,7 +9,7 @@
 	>
 		<span>{{ user.username }}</span>
 		<span v-if="unread > 0" class="ml-auto">
-			{{ state.chats_data.get(user.id)?.unread }}
+			{{ unread }}
 		</span>
 	</button>
 </template>
@@ -18,7 +18,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import type { Message, User } from "../models/user";
+import type { User } from "../models/user";
 import { useState } from "../stores/state";
 
 const router = useRouter();
@@ -29,21 +29,29 @@ const props = defineProps<{
 }>();
 
 const unread = computed(() => {
-	return state.chats_data.get(props.user.id)?.unread ?? 0;
+	const chatData = state.chats_data.get(props.user.id);
+
+	if (!chatData) return 0;
+	console.log(chatData);
+	console.log(chatData.messages.length);
+	console.log(`unread ${chatData.read_count - chatData.messages.length}`);
+	return chatData.messages.length - chatData.read_count;
 });
 
 async function setChat(recvID: number) {
 	state.chating_with = props.user;
-	state.messages = await getChat(recvID);
 	const chatData = state.chats_data.get(recvID);
-	if (chatData) chatData.unread = 0;
+	if (chatData) {
+		// update last read message
+		await invoke("update_read", {
+			chatId: chatData.id,
+			readCount: chatData.messages.length,
+		});
+
+		// update local data
+		chatData.read_count = chatData.messages.length;
+	}
 
 	router.push(`/home/chat/${recvID}`);
-}
-
-async function getChat(recvID: number) {
-	return await invoke<Message[]>("get_messages", {
-		receiverId: recvID,
-	});
 }
 </script>

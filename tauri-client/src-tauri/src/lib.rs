@@ -65,6 +65,7 @@ pub fn run() {
             messages::commands::get_chats,
             messages::commands::upload_image,
             messages::commands::download_image,
+            messages::commands::update_read,
             auth::commands::auth,
             settings::commands::update_settings,
             settings::commands::get_settings

@@ -10,3 +10,4 @@ pub const AUTH: &str = "/auth";
 pub const CHATS: &str = "/chats";
 pub const UPLOAD: &str = "/upload";
 pub const DOWNLOAD: &str = "/download";
+pub const READ: &str = "/read";

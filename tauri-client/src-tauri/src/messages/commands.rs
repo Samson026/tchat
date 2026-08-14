@@ -8,12 +8,14 @@ use reqwest::{
 
 use tauri::Manager;
 
-use protocol::{CHATS, DOWNLOAD, GET_MESSAGES, UPLOAD};
+use protocol::{CHATS, DOWNLOAD, GET_MESSAGES, READ, UPLOAD};
 use tokio::fs::{create_dir_all, write};
 
 use crate::{
     constants::ATTACHMENTS_DIR,
-    messages::models::{Attachment, ChatMessage, DownloadReq, GetMessagesReq, User},
+    messages::models::{
+        Attachment, Chat, ChatMessage, DownloadReq, GetMessagesReq, UpdateLastReadReq,
+    },
     settings::SettingsWriter,
 };
 
@@ -48,14 +50,14 @@ impl MessageClient {
             .await
     }
 
-    pub async fn get_chats(&self, server_addr: &str) -> Result<Vec<User>, Error> {
+    pub async fn get_chats(&self, server_addr: &str) -> Result<Vec<Chat>, Error> {
         let url = format!("http://{server_addr}{GET_MESSAGES}{CHATS}");
         self.client
             .get(url)
             .send()
             .await?
             .error_for_status()?
-            .json::<Vec<User>>()
+            .json::<Vec<Chat>>()
             .await
     }
 
@@ -126,6 +128,28 @@ impl MessageClient {
             id: file_id.to_string(),
         })
     }
+
+    pub async fn update_read(
+        &self,
+        chat_id: &i64,
+        read_count: &i64,
+        server_addr: &str,
+    ) -> Result<(), reqwest::Error> {
+        let url = format!("http://{server_addr}{GET_MESSAGES}{READ}");
+        let body = UpdateLastReadReq {
+            chat_id: *chat_id,
+            read_count: *read_count,
+        };
+
+        self.client
+            .post(url)
+            .json(&body)
+            .send()
+            .await?
+            .error_for_status()?;
+
+        Ok(())
+    }
 }
 
 #[tauri::command]
@@ -150,7 +174,7 @@ pub async fn get_messages(
 pub async fn get_chats(
     message_client: tauri::State<'_, MessageClient>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
-) -> Result<Vec<User>, String> {
+) -> Result<Vec<Chat>, String> {
     let server_addr = settings_writer
         .lock()
         .map_err(|error| error.to_string())?
@@ -223,4 +247,24 @@ pub async fn download_image(
         .inner()
         .download_image(&file_id, &server_addr, &image_dir)
         .await
+}
+
+#[tauri::command]
+pub async fn update_read(
+    message_client: tauri::State<'_, MessageClient>,
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
+    chat_id: i64,
+    read_count: i64,
+) -> Result<(), String> {
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
+    message_client
+        .inner()
+        .update_read(&chat_id, &read_count, &server_addr)
+        .await
+        .map_err(|error| error.to_string())?;
+    Ok(())
 }

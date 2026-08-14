@@ -16,6 +16,8 @@ pub struct SettingsWriter {
 
 impl SettingsWriter {
     pub fn new(data_dir: &Path) -> Result<Self, Error> {
+        fs::create_dir_all(data_dir)?;
+
         // create file if not exist
         let path = data_dir.join(SETTINGS_FILE);
 

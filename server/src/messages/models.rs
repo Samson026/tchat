@@ -35,9 +35,11 @@ pub struct Chat {
 }
 
 #[derive(FromRow, Serialize)]
-pub struct User {
+pub struct ClientChat {
     pub id: i64,
     pub username: String,
+    pub user_id: i64,
+    pub read_count: i64,
 }
 
 #[derive(Deserialize)]
@@ -60,4 +62,10 @@ impl From<Attachment> for AttachmentUser {
     fn from(attachment: Attachment) -> Self {
         Self { id: attachment.id }
     }
+}
+
+#[derive(Deserialize)]
+pub struct UpdateLastReadReq {
+    pub chat_id: i64,
+    pub read_count: i64,
 }
