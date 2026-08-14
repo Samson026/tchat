@@ -17,10 +17,16 @@ export async function setupListeners() {
 			return;
 		}
 
-		// Pull user from db, get rid of local all users
-		const user = await invoke<User>("get_user", {
-			userId: message.sender_id
-		})
+		const user = state.all_users.has(message.sender_id)
+			? state.all_users.get(message.sender_id)
+			: (async () => {
+				const u = await invoke<User>("get_user", {
+					userId: message.sender_id
+				})
+				state.all_users.set(u.id, u)
+				return u
+			})
+
 		if (user) {
 			console.log(`adding user ${user}`);
 

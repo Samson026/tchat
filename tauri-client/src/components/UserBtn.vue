@@ -35,9 +35,18 @@ const chattingWith = ref<User | null>(null);
 watch(
 	(() => Number(route.params.id)),
 	(async (userId: number) => {
-		chattingWith.value = await invoke<User>("get_user", {
-			userId
-		})
+		const fromState = state.all_users.get(userId)
+
+		if (!fromState) {
+			chattingWith.value = await invoke<User>("get_user", {
+				userId
+			})
+			state.all_users.set(userId, chattingWith.value)
+			return
+		}
+
+		chattingWith.value = fromState
+		
 	}),
 	{ immediate: true}
 );
