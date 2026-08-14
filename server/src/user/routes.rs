@@ -1,7 +1,7 @@
 use axum::{
     Json, Router, extract::{Path, State}, http::{StatusCode}, response::{IntoResponse, Response}, routing::{get, post},
 };
-use protocol::{BASE_ROUTE, CREATE_USER_PATH, LOGIN_PATH};
+use protocol::{BASE_ROUTE, CREATE_USER_PATH, GET_USER, LOGIN_PATH};
 use tower_sessions::Session;
 
 use crate::{state::AppState, user::models::{GetUserParams, LoginRequest}};
@@ -11,7 +11,7 @@ pub fn router() -> Router<AppState> {
         .route(CREATE_USER_PATH, post(create_user))
         .route(LOGIN_PATH, post(login))
         .route(BASE_ROUTE, get(get_users))
-        .route(&format!("{BASE_ROUTE}:id"), get(get_user))
+        .route(GET_USER, get(get_user))
 }
 
 pub async fn create_user(

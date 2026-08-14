@@ -16,33 +16,26 @@ export async function setupListeners() {
 			state.chats_data.get(message.sender_id)?.messages.push(message);
 			return;
 		}
+		console.log(message);
+		let user = state.all_users.get(message.sender_id);
 
-		const user = state.all_users.has(message.sender_id)
-			? state.all_users.get(message.sender_id)
-			: (async () => {
-				const u = await invoke<User>("get_user", {
-					userId: message.sender_id
-				})
-				state.all_users.set(u.id, u)
-				return u
-			})
-
-		if (user) {
-			console.log(`adding user ${user}`);
-
-			const chatData = {
-				user,
-				id: null,
-				messages: [message],
-			} as ChatData;
-
-			state.chats_data.set(message.sender_id, chatData);
+		if (!user) {
+			user = await invoke<User>("get_user", {
+				userId: message.sender_id,
+			});
+			state.all_users.set(user.id, user);
 		}
+
+		const chatData = {
+			user,
+			id: null,
+			messages: [message],
+		} as ChatData;
+
+		state.chats_data.set(message.sender_id, chatData);
 	});
 
 	listen<string>("ws-error", async (event) => {
 		notificationStore.pushError(event.payload);
-
-		// await invoke("connect_ws");
 	});
 }
