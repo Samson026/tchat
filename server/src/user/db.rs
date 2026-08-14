@@ -38,6 +38,18 @@ impl UserDB {
         .await
     }
 
+    pub async fn get_user_from_id(&self, id: &i64) -> Result<User, sqlx::Error> {
+        sqlx::query_as::<_, User>(
+            "
+            SELECT * FROM users
+            WHERE id = ?
+            ",
+        )
+        .bind(id)
+        .fetch_one(&self.pool)
+        .await
+    }
+
     pub async fn get_users(&mut self) -> Result<Vec<User>, sqlx::Error> {
         sqlx::query_as::<_, User>("SELECT * FROM users")
             .fetch_all(&self.pool)

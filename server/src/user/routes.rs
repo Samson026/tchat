@@ -1,20 +1,17 @@
 use axum::{
-    Json, Router,
-    extract::State,
-    http::StatusCode,
-    response::{IntoResponse, Response},
-    routing::{get, post},
+    Json, Router, extract::{Path, State}, http::{StatusCode}, response::{IntoResponse, Response}, routing::{get, post},
 };
 use protocol::{BASE_ROUTE, CREATE_USER_PATH, LOGIN_PATH};
 use tower_sessions::Session;
 
-use crate::{state::AppState, user::models::LoginRequest};
+use crate::{state::AppState, user::models::{GetUserParams, LoginRequest}};
 
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(CREATE_USER_PATH, post(create_user))
         .route(LOGIN_PATH, post(login))
         .route(BASE_ROUTE, get(get_users))
+        .route(&format!("{BASE_ROUTE}:id"), get(get_user))
 }
 
 pub async fn create_user(
@@ -42,6 +39,20 @@ pub async fn get_users(State(mut app_state): State<AppState>) -> Response {
     match app_state.user_db.get_users().await {
         Ok(users) => Json(users).into_response(),
         Err(_) => (StatusCode::NOT_FOUND, "Messages not found").into_response(),
+    }
+}
+
+pub async fn get_user(
+    State(app_state): State<AppState>,
+    Path(params): Path<GetUserParams>,
+) -> Response {
+    match app_state.user_db.get_user_from_id(&params.id).await {
+        Ok(user) => Json(user).into_response(),
+        Err(sqlx::Error::RowNotFound) => StatusCode::NOT_FOUND.into_response(),
+        Err(error) => {
+            eprintln!("DB Error: {error}");
+            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        }
     }
 }
 

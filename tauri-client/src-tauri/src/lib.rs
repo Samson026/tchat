@@ -61,6 +61,7 @@ pub fn run() {
             user::commands::login,
             user::commands::get_users,
             user::commands::logout,
+            user::commands::get_user,
             messages::commands::get_messages,
             messages::commands::get_chats,
             messages::commands::upload_image,
