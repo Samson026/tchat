@@ -19,8 +19,6 @@ const state = useState();
 const router = useRouter();
 
 function chatUser(user: User) {
-	state.chating_with = user;
-
 	const chatData: ChatData = {
 		user: user,
 		id: null,

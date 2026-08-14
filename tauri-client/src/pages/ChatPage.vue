@@ -1,13 +1,13 @@
 <template>
 	<main class="flex flex-col h-screen">
 		<div clas="px-10 py-10"></div>
-		<h2 class="text-text m-5">Chatting with: {{ username }}</h2>
+		<h2 class="text-text m-5">Chatting with: {{ chattingWith.username }}</h2>
 		<div class="flex min-h-0 flex-1 flex-col justify-end">
 			<div
 				class="flex flex-col col h-full justify-end px-10 py-10 overflow-y-auto"
 			>
 				<ChatMessage
-					v-for="(message, index) in state.chats_data.get(state.chating_with?.id ?? 0)?.messages"
+					v-for="(message, index) in state.chats_data.get(chattingWith.id)?.messages"
 					:key="index"
 					:message="message"
 					:primary="message.sender_id === state.user?.id"
@@ -79,7 +79,7 @@ import { useForm } from "vee-validate";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
-import type { Attachment, Message } from "../models/user.ts";
+import type { Attachment, Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
@@ -97,14 +97,21 @@ const [input] = defineField("input");
 const selectedFile = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 
-const username = computed(() => {
-	return state.chats_data.get(Number(route.params.id))?.user.username;
-});
+const chattingWith = computed<User>(() => {
+	const user = state.all_users.get(Number(route.params.id))
+
+	if (!user) return {
+		id: 0,
+		username: "not found"
+	} as User
+
+	return user
+})
 
 // Watch message count to update read status
 watch(
 	() => {
-		const chatId = Number(route.params.id);
+		const chatId = chattingWith.value.id;
 		return {
 			chatId,
 			messageCount: state.chats_data.get(chatId)?.messages.length ?? 0,
@@ -143,13 +150,12 @@ function onImageSelected(event: Event) {
 
 async function sendMessage(message: string, attachment: Attachment | null) {
 	if (!state.user) return;
-
-	const recv_id = Number(route.params.id);
-	const chatData = state.chats_data.get(recv_id);
+	
+	const chatData = state.chats_data.get(chattingWith.value.id);
 
 	const msg: Message = {
 		sender_id: state.user.id,
-		recv_id: recv_id,
+		recv_id: chattingWith.value.id,
 		content: message,
 		attachment: attachment?.id ?? null,
 	};
@@ -197,11 +203,4 @@ const submitForm = handleSubmit(async (values) => {
 		}
 	}
 });
-
-// async function handleSubmit() {
-// 	if (inputRef.value === null) return;
-
-// 	await sendMessage(inputRef.value);
-// 	inputRef.value = "";
-// }
 </script>
