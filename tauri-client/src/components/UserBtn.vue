@@ -16,10 +16,11 @@
 
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { User } from "../models/user";
 import { useState } from "../stores/state";
+import { ref } from "vue";
 
 const router = useRouter();
 const state = useState();
@@ -29,9 +30,17 @@ const props = defineProps<{
 	user: User;
 }>();
 
-const chattingWith = computed<User | undefined>(() => {
-	return state.all_users.get(Number(route.params.id))
-})
+const chattingWith = ref<User | null>(null);
+
+watch(
+	(() => Number(route.params.id)),
+	(async (userId: number) => {
+		chattingWith.value = await invoke<User>("get_user", {
+			userId
+		})
+	}),
+	{ immediate: true}
+);
 
 const unread = computed(() => {
 	const chatData = state.chats_data.get(props.user.id);
