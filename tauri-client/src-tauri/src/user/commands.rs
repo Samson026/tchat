@@ -109,11 +109,7 @@ impl Client {
         cookie_store::serde::json::save(&store, &mut writer).map_err(std::io::Error::other)
     }
 
-    pub async fn get_user(
-        &self,
-        user_id: &i64,
-        server_addr: &str
-    ) -> Result<User, Error> {
+    pub async fn get_user(&self, user_id: &i64, server_addr: &str) -> Result<User, Error> {
         let url = format!("http://{server_addr}{GET_USERS}/{user_id}");
 
         self.client
@@ -242,13 +238,13 @@ pub fn logout(
 pub async fn get_user(
     client: tauri::State<'_, Client>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
-    user_id: i64
+    user_id: i64,
 ) -> Result<User, String> {
     let server_addr = settings_writer
         .lock()
         .map_err(|error| error.to_string())?
         .server_address();
-    
+
     client
         .inner()
         .get_user(&user_id, &server_addr)

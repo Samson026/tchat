@@ -16,15 +16,14 @@
 
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
-import { computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { User } from "../models/user";
 import { useState } from "../stores/state";
-import { ref } from "vue";
 
 const router = useRouter();
 const state = useState();
-const route = useRoute()
+const route = useRoute();
 
 const props = defineProps<{
 	user: User;
@@ -33,22 +32,21 @@ const props = defineProps<{
 const chattingWith = ref<User | null>(null);
 
 watch(
-	(() => Number(route.params.id)),
-	(async (userId: number) => {
-		const fromState = state.all_users.get(userId)
+	() => Number(route.params.id),
+	async (userId: number) => {
+		const fromState = state.all_users.get(userId);
 
 		if (!fromState) {
 			chattingWith.value = await invoke<User>("get_user", {
-				userId
-			})
-			state.all_users.set(userId, chattingWith.value)
-			return
+				userId,
+			});
+			state.all_users.set(userId, chattingWith.value);
+			return;
 		}
 
-		chattingWith.value = fromState
-		
-	}),
-	{ immediate: true}
+		chattingWith.value = fromState;
+	},
+	{ immediate: true },
 );
 
 const unread = computed(() => {

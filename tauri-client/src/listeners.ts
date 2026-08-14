@@ -1,8 +1,8 @@
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { ChatData, Message, User } from "./models/user";
 import { useNotification } from "./stores/notifications";
 import { useState } from "./stores/state";
-import { invoke } from "@tauri-apps/api/core";
 
 export async function setupListeners() {
 	const state = useState();

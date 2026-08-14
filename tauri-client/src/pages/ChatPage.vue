@@ -98,15 +98,16 @@ const selectedFile = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 
 const chattingWith = computed<User>(() => {
-	const user = state.all_users.get(Number(route.params.id))
+	const user = state.all_users.get(Number(route.params.id));
 
-	if (!user) return {
-		id: 0,
-		username: "not found"
-	} as User
+	if (!user)
+		return {
+			id: 0,
+			username: "not found",
+		} as User;
 
-	return user
-})
+	return user;
+});
 
 // Watch message count to update read status
 watch(
@@ -150,7 +151,7 @@ function onImageSelected(event: Event) {
 
 async function sendMessage(message: string, attachment: Attachment | null) {
 	if (!state.user) return;
-	
+
 	const chatData = state.chats_data.get(chattingWith.value.id);
 
 	const msg: Message = {

@@ -16,5 +16,5 @@ pub struct User {
 
 #[derive(Deserialize)]
 pub struct GetUserParams {
-    pub id: i64
+    pub id: i64,
 }

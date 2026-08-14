@@ -1,10 +1,17 @@
 use axum::{
-    Json, Router, extract::{Path, State}, http::{StatusCode}, response::{IntoResponse, Response}, routing::{get, post},
+    Json, Router,
+    extract::{Path, State},
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    routing::{get, post},
 };
 use protocol::{BASE_ROUTE, CREATE_USER_PATH, GET_USER, LOGIN_PATH};
 use tower_sessions::Session;
 
-use crate::{state::AppState, user::models::{GetUserParams, LoginRequest}};
+use crate::{
+    state::AppState,
+    user::models::{GetUserParams, LoginRequest},
+};
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -51,7 +58,7 @@ pub async fn get_user(
         Err(sqlx::Error::RowNotFound) => StatusCode::NOT_FOUND.into_response(),
         Err(error) => {
             eprintln!("DB Error: {error}");
-            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+            StatusCode::INTERNAL_SERVER_ERROR.into_response()
         }
     }
 }
