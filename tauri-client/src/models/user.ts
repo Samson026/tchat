@@ -5,16 +5,16 @@ export interface User {
 
 export interface Chat {
 	id: number;
-	username: string,
-	user_id: number,
-	read_count: number
+	username: string;
+	user_id: number;
+	read_count: number;
 }
 
 export interface ChatData {
-	user: User,
-	id: number | null
-	messages: Message[],
-	read_count: number
+	user: User;
+	id: number | null;
+	messages: Message[];
+	read_count: number;
 }
 
 export interface Message {

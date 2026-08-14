@@ -12,8 +12,8 @@ export function setupListeners() {
 		console.log(`got message ${event.payload}`);
 		// currently chatting with user
 		if (state.chats_data.get(message.sender_id)) {
-			state.chats_data.get(message.sender_id)?.messages.push(message)
-			return
+			state.chats_data.get(message.sender_id)?.messages.push(message);
+			return;
 		}
 
 		// Pull user from db, get rid of local all users
@@ -24,9 +24,9 @@ export function setupListeners() {
 			const chatData = {
 				user,
 				id: null,
-				messages: [message]
-			} as ChatData
-			
+				messages: [message],
+			} as ChatData;
+
 			state.chats_data.set(message.sender_id, chatData);
 		}
 	});

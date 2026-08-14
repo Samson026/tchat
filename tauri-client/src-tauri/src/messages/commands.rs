@@ -12,7 +12,11 @@ use protocol::{CHATS, DOWNLOAD, GET_MESSAGES, READ, UPLOAD};
 use tokio::fs::{create_dir_all, write};
 
 use crate::{
-    constants::ATTACHMENTS_DIR, messages::models::{Attachment, Chat, ChatMessage, DownloadReq, GetMessagesReq, UpdateLastReadReq, User}, settings::{self, SettingsWriter},
+    constants::ATTACHMENTS_DIR,
+    messages::models::{
+        Attachment, Chat, ChatMessage, DownloadReq, GetMessagesReq, UpdateLastReadReq,
+    },
+    settings::SettingsWriter,
 };
 
 #[derive(Debug)]
@@ -129,14 +133,14 @@ impl MessageClient {
         &self,
         chat_id: &i64,
         read_count: &i64,
-        server_addr: &str
+        server_addr: &str,
     ) -> Result<(), reqwest::Error> {
         let url = format!("http://{server_addr}{GET_MESSAGES}{READ}");
         let body = UpdateLastReadReq {
             chat_id: *chat_id,
-            read_count: *read_count
+            read_count: *read_count,
         };
-        
+
         self.client
             .post(url)
             .json(&body)
@@ -250,13 +254,13 @@ pub async fn update_read(
     message_client: tauri::State<'_, MessageClient>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
     chat_id: i64,
-    read_count: i64
+    read_count: i64,
 ) -> Result<(), String> {
     let server_addr = settings_writer
         .lock()
         .map_err(|error| error.to_string())?
         .server_address();
-    
+
     message_client
         .inner()
         .update_read(&chat_id, &read_count, &server_addr)

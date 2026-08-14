@@ -1,6 +1,6 @@
 use sqlx::{Error, SqlitePool};
 
-use crate::messages::models::{Attachment, Chat, ClientChat, Message, User};
+use crate::messages::models::{Attachment, Chat, ClientChat, Message};
 
 #[derive(Clone)]
 pub struct MessagesDB {
@@ -165,7 +165,12 @@ impl MessagesDB {
         .await
     }
 
-    pub async fn set_read_message(&self, chat_id: &i64, user_id: &i64, read_count: &i64) -> Result<(), sqlx::Error> {
+    pub async fn set_read_message(
+        &self,
+        chat_id: &i64,
+        user_id: &i64,
+        read_count: &i64,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             "
                 UPDATE chats

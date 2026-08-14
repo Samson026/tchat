@@ -107,21 +107,21 @@ watch(
 		const chatId = Number(route.params.id);
 		return {
 			chatId,
-			messageCount: state.chats_data.get(chatId)?.messages.length ?? 0
-		}
+			messageCount: state.chats_data.get(chatId)?.messages.length ?? 0,
+		};
 	},
-	async ({chatId, messageCount}) => {
+	async ({ chatId, messageCount }) => {
 		const chatData = state.chats_data.get(chatId);
-		
+
 		if (!chatData) return;
-		chatData.read_count = messageCount
+		chatData.read_count = messageCount;
 
 		await invoke("update_read", {
 			chatId: chatData.id,
-			readCount: messageCount
-		})
-	}
-)
+			readCount: messageCount,
+		});
+	},
+);
 
 function removeAttach() {
 	selectedFile.value = null;
@@ -145,7 +145,7 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 	if (!state.user) return;
 
 	const recv_id = Number(route.params.id);
-	const chatData = state.chats_data.get(recv_id)
+	const chatData = state.chats_data.get(recv_id);
 
 	const msg: Message = {
 		sender_id: state.user.id,
@@ -159,9 +159,8 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 	});
 
 	// add msg to local data
-	if (!chatData)
-		return
-	chatData.messages.push(msg)
+	if (!chatData) return;
+	chatData.messages.push(msg);
 }
 
 async function uploadImage(file: File) {

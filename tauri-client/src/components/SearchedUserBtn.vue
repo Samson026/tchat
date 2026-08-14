@@ -25,9 +25,9 @@ function chatUser(user: User) {
 		user: user,
 		id: null,
 		messages: [],
-		read_count: 0
-	}
-	
+		read_count: 0,
+	};
+
 	state.chats_data.set(user.id, chatData);
 
 	router.push(`/home/chat/${user.id}`);

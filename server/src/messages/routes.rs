@@ -20,8 +20,12 @@ use tokio::{
 
 use crate::{
     messages::{
-        models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq, UpdateLastReadReq}, service::save_image,
-    }, middleware::auth_middleware, path::get_app_dir, state::AppState,
+        models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq, UpdateLastReadReq},
+        service::save_image,
+    },
+    middleware::auth_middleware,
+    path::get_app_dir,
+    state::AppState,
 };
 
 #[cfg(test)]
@@ -224,13 +228,14 @@ pub async fn download_image(
 pub async fn update_last_read_message(
     State(app_state): State<AppState>,
     Extension(user_id): Extension<i64>,
-    Json(data): Json<UpdateLastReadReq>
+    Json(data): Json<UpdateLastReadReq>,
 ) -> Response {
     match app_state
         .message_db
         .set_read_message(&data.chat_id, &user_id, &data.read_count)
-        .await {
-            Ok(_) => StatusCode::OK.into_response(),
-            Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response()
-        }
+        .await
+    {
+        Ok(_) => StatusCode::OK.into_response(),
+        Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    }
 }

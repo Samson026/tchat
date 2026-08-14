@@ -31,13 +31,12 @@ const props = defineProps<{
 const unread = computed(() => {
 	const chatData = state.chats_data.get(props.user.id);
 
-	if (!chatData)
-		return 0
-	console.log(chatData)
-	console.log(chatData.messages.length)
-	console.log(`unread ${chatData.read_count - chatData.messages.length}`)
+	if (!chatData) return 0;
+	console.log(chatData);
+	console.log(chatData.messages.length);
+	console.log(`unread ${chatData.read_count - chatData.messages.length}`);
 	return chatData.messages.length - chatData.read_count;
-})
+});
 
 async function setChat(recvID: number) {
 	state.chating_with = props.user;
@@ -46,13 +45,12 @@ async function setChat(recvID: number) {
 		// update last read message
 		await invoke("update_read", {
 			chatId: chatData.id,
-			readCount: chatData.messages.length
-		})
+			readCount: chatData.messages.length,
+		});
 
 		// update local data
-		chatData.read_count = chatData.messages.length 
+		chatData.read_count = chatData.messages.length;
 	}
-	
 
 	router.push(`/home/chat/${recvID}`);
 }

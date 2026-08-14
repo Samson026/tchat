@@ -35,17 +35,11 @@ pub struct Chat {
 }
 
 #[derive(FromRow, Serialize)]
-pub struct User {
-    pub id: i64,
-    pub username: String,
-}
-
-#[derive(FromRow, Serialize)]
 pub struct ClientChat {
     pub id: i64,
     pub username: String,
     pub user_id: i64,
-    pub read_count: i64
+    pub read_count: i64,
 }
 
 #[derive(Deserialize)]
@@ -73,5 +67,5 @@ impl From<Attachment> for AttachmentUser {
 #[derive(Deserialize)]
 pub struct UpdateLastReadReq {
     pub chat_id: i64,
-    pub read_count: i64
+    pub read_count: i64,
 }
