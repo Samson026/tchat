@@ -3,6 +3,7 @@ pub const WEBSOCKET_PATH: &str = "/ws";
 pub const SERVER_URL: &str = "ws://127.0.0.1:3000/ws";
 pub const LOGIN_PATH: &str = "/login";
 pub const BASE_ROUTE: &str = "/";
+pub const GET_USER: &str = "/{id}";
 pub const CREATE_USER_PATH: &str = "/create";
 pub const GET_MESSAGES: &str = "/messages";
 pub const GET_USERS: &str = "/user";

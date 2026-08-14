@@ -13,3 +13,8 @@ pub struct User {
     pub username: String,
     pub password: String,
 }
+
+#[derive(Deserialize)]
+pub struct GetUserParams {
+    pub id: i64,
+}

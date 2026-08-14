@@ -1,7 +1,6 @@
 interface State {
 	user: User | null;
 	chats_data: Map<number, ChatData>;
-	chating_with: User | null;
 	all_users: Map<number, User>;
 	settings: Settings | null;
 }
@@ -19,7 +18,6 @@ export const useState = defineStore("stateStore", {
 			// all these properties will have their type inferred automatically
 			user: null,
 			chats_data: new Map<number, ChatData>(),
-			chating_with: null,
 			all_users: new Map<number, User>(),
 			settings: null,
 		};
