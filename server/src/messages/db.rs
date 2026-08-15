@@ -101,6 +101,24 @@ impl MessagesDB {
         .await
     }
 
+    pub async fn get_chat_by_ids(
+        &self, 
+        user_1_id: &i64, 
+        user_2_id: &i64
+    ) -> Result<Chat, sqlx::Error> {
+        sqlx::query_as::<_, Chat>(
+            "
+            SELECT *
+            FROM chats
+            WHERE user_1_id = ? AND user_2_id = ?
+            ",
+        )
+        .bind(user_1_id)
+        .bind(user_2_id)
+        .fetch_one(&self.pool)
+        .await
+    }
+
     pub async fn is_chat(
         &self,
         user_1_id: &i64,

@@ -1,7 +1,5 @@
 use std::{
-    fs::OpenOptions,
-    io::{Error, Write},
-    path::PathBuf,
+    cmp::max, cmp::min, fs::OpenOptions, io::{Error, Write}, path::PathBuf,
 };
 
 use axum::{
@@ -22,10 +20,7 @@ use crate::{
     messages::{
         models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq, UpdateLastReadReq},
         service::save_image,
-    },
-    middleware::auth_middleware,
-    path::get_app_dir,
-    state::AppState,
+    }, middleware::auth_middleware, path::get_app_dir, state::AppState, user::db::UserDB,
 };
 
 #[cfg(test)]
@@ -238,4 +233,26 @@ pub async fn update_last_read_message(
         Ok(_) => StatusCode::OK.into_response(),
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
+}
+
+pub async fn get_chat_from_ids(
+    State(app_state): State<AppState>,
+    Extension(user_id): Extension<i64>,
+    receiver_id: i64,
+) -> Response {
+
+    let (user_1, user_2) = if user_id < receiver_id {
+        (user_id, receiver_id)
+    } else {
+        (receiver_id, user_id)
+    };
+
+    match app_state
+        .message_db
+        .get_chat_by_ids(&user_1, &user_2)
+        .await {
+            Ok(chat) => Json(chat).into_response(),
+            Err(sqlx::Error::RowNotFound) => StatusCode::NOT_FOUND.into_response(),
+            Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response()
+        }
 }
