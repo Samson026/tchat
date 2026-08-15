@@ -15,6 +15,12 @@ pub struct Chat {
     pub user_id: i64,
     pub read_count: i64,
 }
+#[derive(Deserialize, Serialize)]
+pub struct ChatId {
+    pub id: i64,
+    pub user_1_id: i64,
+    pub user_2_id: i64,
+}
 
 #[derive(Serialize)]
 pub struct GetMessagesReq {
