@@ -10,6 +10,12 @@ export interface Chat {
 	read_count: number;
 }
 
+export interface ChatId {
+    id: number,
+    user_1_id: number,
+    user_2_id: number,
+}
+
 export interface ChatData {
 	user: User;
 	id: number | null;
