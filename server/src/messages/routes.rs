@@ -47,6 +47,7 @@ pub async fn get_messages(
             message
                 .into_iter()
                 .map(|msg| ChatMessage {
+                    chat_id: msg.chat_id,
                     sender_id: msg.sender_id,
                     recv_id: msg.recv_id,
                     content: msg.content,

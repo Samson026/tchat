@@ -155,6 +155,7 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 	const chatData = state.chats_data.get(chattingWith.value.id);
 
 	const msg: Message = {
+		chat_id: chatData?.id ?? null,
 		sender_id: state.user.id,
 		recv_id: chattingWith.value.id,
 		content: message,

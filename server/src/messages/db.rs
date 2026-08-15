@@ -17,7 +17,7 @@ impl MessagesDB {
         sender: &i64,
         receiver: &i64,
         attachment: Option<&str>,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<i64, sqlx::Error> {
         // add msg to db
         // check if chat exists
         let user_1_id = sender.min(receiver);
@@ -48,7 +48,7 @@ impl MessagesDB {
         .execute(&self.pool)
         .await?;
 
-        Ok(())
+        Ok(chat_id)
     }
     pub async fn get_messages(
         &mut self,

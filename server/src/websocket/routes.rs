@@ -13,7 +13,13 @@ use futures_util::sink::SinkExt;
 
 use protocol::BASE_ROUTE;
 
-use crate::{middleware::auth_middleware, state::AppState, websocket::models::ChatMessage};
+use super::models::IncomingChatMessage;
+
+use crate::{
+    middleware::auth_middleware,
+    state::AppState,
+    websocket::models::ChatMessage,
+};
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -44,7 +50,7 @@ pub async fn handle_socket(mut socket: WebSocket, user_id: i64, mut app_state: A
                 // Handle data received from this client.
                 match incoming {
                   Some(Ok(Message::Text(text))) => {
-                      let parsed: ChatMessage = match serde_json::from_str(&text) {
+                      let parsed: IncomingChatMessage = match serde_json::from_str(&text) {
                           Ok(message) => message,
                           Err(error) => {
                               eprintln!("Invalid websocket message: {error}");
@@ -57,21 +63,29 @@ pub async fn handle_socket(mut socket: WebSocket, user_id: i64, mut app_state: A
                       );
 
                       match app_state.message_db.add_message(&parsed.content, &parsed.sender_id, &parsed.recv_id, parsed.attachment.as_deref()).await {
-                        Ok(_) => {
+                        Ok(chat_id) => {
                             println!("saved msg to db");
+
+                            let outgoing = ChatMessage {
+                                chat_id,
+                                sender_id: parsed.sender_id,
+                                recv_id: parsed.recv_id,
+                                content: parsed.content,
+                                attachment: parsed.attachment,
+                            };
+
+                            let recv = {
+                                let connections = app_state.connections.read().await;
+                                connections.get(&outgoing.recv_id).cloned()
+                            };
+
+                            if let Some(recv) = recv {
+                                let _ = recv.send(outgoing);
+                            }
                         },
                         Err(error) => {
                             eprintln!("Error saving msg to db: {error}");
                         }
-                      }
-
-                      let recv = {
-                          let connections = app_state.connections.read().await;
-                          connections.get(&parsed.recv_id).cloned()
-                      };
-
-                      if let Some(recv) = recv {
-                          let _ = recv.send(parsed);
                       }
                   },
                   Some(Ok(Message::Close(_))) => {
