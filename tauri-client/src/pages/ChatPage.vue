@@ -170,18 +170,23 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 	await invoke("send", {
 		message: msg,
 	});
-	
-	// check if new chat
-	if (!chatData?.id) {
-		const chatIds = await invoke<ChatId>("get_chat_by_ids", {
-			receiverId: chattingWith.value.id
-		})
 
-		chatData.id = chatIds.id
-	}
-
-	// add msg to local data
 	chatData.messages.push(msg);
+
+	if (chatData.id) return;
+
+	try {
+		const chatIds = await invoke<ChatId>("get_chat_by_ids", {
+			receiverId: chattingWith.value.id,
+		});
+
+		chatData.id = chatIds.id;
+		msg.chat_id = chatIds.id;
+	} catch (error) {
+		notificationStore.pushError(
+			`Message sent, but chat ID lookup failed: ${String(error)}`,
+		);
+	}
 }
 
 async function uploadImage(file: File) {
