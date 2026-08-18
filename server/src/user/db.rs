@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::user::models::User;
+use crate::user::models::{ClientVisibleUser, User};
 
 #[derive(Clone)]
 pub struct UserDB {
@@ -38,8 +38,8 @@ impl UserDB {
         .await
     }
 
-    pub async fn get_user_from_id(&self, id: &i64) -> Result<User, sqlx::Error> {
-        sqlx::query_as::<_, User>(
+    pub async fn get_user_from_id(&self, id: &i64) -> Result<ClientVisibleUser, sqlx::Error> {
+        sqlx::query_as::<_, ClientVisibleUser>(
             "
             SELECT * FROM users
             WHERE id = ?
@@ -50,8 +50,8 @@ impl UserDB {
         .await
     }
 
-    pub async fn get_users(&mut self) -> Result<Vec<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>("SELECT * FROM users")
+    pub async fn get_users(&mut self) -> Result<Vec<ClientVisibleUser>, sqlx::Error> {
+        sqlx::query_as::<_, ClientVisibleUser>("SELECT * FROM users")
             .fetch_all(&self.pool)
             .await
     }
