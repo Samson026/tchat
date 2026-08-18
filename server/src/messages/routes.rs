@@ -6,13 +6,13 @@ use std::{
 
 use axum::{
     Extension, Json, Router,
-    extract::{DefaultBodyLimit, Multipart, Query, State},
+    extract::{DefaultBodyLimit, Multipart, Path, Query, State},
     http::{StatusCode, header},
     middleware,
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use protocol::{BASE_ROUTE, CHATS, DOWNLOAD, READ, UPLOAD};
+use protocol::{BASE_ROUTE, CHATS, DOWNLOAD, READ, RECEIVER_ID_PARAM, UPLOAD};
 use tokio::{
     fs::{self, File as AsyncFile, create_dir_all},
     io::AsyncWriteExt,
@@ -20,7 +20,10 @@ use tokio::{
 
 use crate::{
     messages::{
-        models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq, UpdateLastReadReq},
+        models::{
+            AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq, GetChatByIdParams,
+            UpdateLastReadReq,
+        },
         service::save_image,
     },
     middleware::auth_middleware,
@@ -39,6 +42,10 @@ pub fn router() -> Router<AppState> {
         .route(UPLOAD, post(upload_image))
         .route(DOWNLOAD, get(download_image))
         .route(READ, post(update_last_read_message))
+        .route(
+            &format!("{CHATS}{RECEIVER_ID_PARAM}"),
+            get(get_chat_from_ids),
+        )
         .route_layer(middleware::from_fn(auth_middleware))
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024))
 }
@@ -57,6 +64,7 @@ pub async fn get_messages(
             message
                 .into_iter()
                 .map(|msg| ChatMessage {
+                    chat_id: msg.chat_id,
                     sender_id: msg.sender_id,
                     recv_id: msg.recv_id,
                     content: msg.content,
@@ -236,6 +244,24 @@ pub async fn update_last_read_message(
         .await
     {
         Ok(_) => StatusCode::OK.into_response(),
+        Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    }
+}
+
+pub async fn get_chat_from_ids(
+    State(app_state): State<AppState>,
+    Extension(user_id): Extension<i64>,
+    Path(params): Path<GetChatByIdParams>,
+) -> Response {
+    let (user_1, user_2) = if user_id < params.receiver_id {
+        (user_id, params.receiver_id)
+    } else {
+        (params.receiver_id, user_id)
+    };
+
+    match app_state.message_db.get_chat_by_ids(&user_1, &user_2).await {
+        Ok(chat) => Json(chat).into_response(),
+        Err(sqlx::Error::RowNotFound) => StatusCode::NOT_FOUND.into_response(),
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
 }

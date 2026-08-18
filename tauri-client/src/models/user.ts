@@ -10,6 +10,12 @@ export interface Chat {
 	read_count: number;
 }
 
+export interface ChatId {
+	id: number;
+	user_1_id: number;
+	user_2_id: number;
+}
+
 export interface ChatData {
 	user: User;
 	id: number | null;
@@ -18,6 +24,7 @@ export interface ChatData {
 }
 
 export interface Message {
+	chat_id: number | null;
 	sender_id: number;
 	recv_id: number;
 	content: string;

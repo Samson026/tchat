@@ -17,7 +17,7 @@ impl MessagesDB {
         sender: &i64,
         receiver: &i64,
         attachment: Option<&str>,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<i64, sqlx::Error> {
         // add msg to db
         // check if chat exists
         let user_1_id = sender.min(receiver);
@@ -48,7 +48,7 @@ impl MessagesDB {
         .execute(&self.pool)
         .await?;
 
-        Ok(())
+        Ok(chat_id)
     }
     pub async fn get_messages(
         &mut self,
@@ -98,6 +98,24 @@ impl MessagesDB {
         .bind(user_id)
         .bind(user_id)
         .fetch_all(&self.pool)
+        .await
+    }
+
+    pub async fn get_chat_by_ids(
+        &self,
+        user_1_id: &i64,
+        user_2_id: &i64,
+    ) -> Result<Chat, sqlx::Error> {
+        sqlx::query_as::<_, Chat>(
+            "
+            SELECT *
+            FROM chats
+            WHERE user_1_id = ? AND user_2_id = ?
+            ",
+        )
+        .bind(user_1_id)
+        .bind(user_2_id)
+        .fetch_one(&self.pool)
         .await
     }
 

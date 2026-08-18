@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub struct ChatMessage {
+    pub chat_id: i64,
     pub sender_id: i64,
     pub recv_id: i64,
     pub content: String,
@@ -14,6 +15,12 @@ pub struct Chat {
     pub username: String,
     pub user_id: i64,
     pub read_count: i64,
+}
+#[derive(Deserialize, Serialize)]
+pub struct ChatId {
+    pub id: i64,
+    pub user_1_id: i64,
+    pub user_2_id: i64,
 }
 
 #[derive(Serialize)]

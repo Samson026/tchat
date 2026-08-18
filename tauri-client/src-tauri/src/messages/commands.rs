@@ -14,7 +14,7 @@ use tokio::fs::{create_dir_all, write};
 use crate::{
     constants::ATTACHMENTS_DIR,
     messages::models::{
-        Attachment, Chat, ChatMessage, DownloadReq, GetMessagesReq, UpdateLastReadReq,
+        Attachment, Chat, ChatId, ChatMessage, DownloadReq, GetMessagesReq, UpdateLastReadReq,
     },
     settings::SettingsWriter,
 };
@@ -150,6 +150,22 @@ impl MessageClient {
 
         Ok(())
     }
+
+    pub async fn get_chat_by_ids(
+        &self,
+        receiver_id: &i64,
+        server_addr: &str,
+    ) -> Result<ChatId, reqwest::Error> {
+        let url = format!("http://{server_addr}{CHATS}/{receiver_id}");
+
+        self.client
+            .get(url)
+            .send()
+            .await?
+            .error_for_status()?
+            .json::<ChatId>()
+            .await
+    }
 }
 
 #[tauri::command]
@@ -267,4 +283,22 @@ pub async fn update_read(
         .await
         .map_err(|error| error.to_string())?;
     Ok(())
+}
+
+#[tauri::command]
+pub async fn get_chat_by_ids(
+    message_client: tauri::State<'_, MessageClient>,
+    settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
+    receiver_id: i64,
+) -> Result<ChatId, String> {
+    let server_addr = settings_writer
+        .lock()
+        .map_err(|error| error.to_string())?
+        .server_address();
+
+    message_client
+        .inner()
+        .get_chat_by_ids(&receiver_id, &server_addr)
+        .await
+        .map_err(|error| error.to_string())
 }

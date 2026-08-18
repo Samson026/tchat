@@ -4,6 +4,7 @@ use sqlx::types::chrono::{DateTime, Utc};
 
 #[derive(Deserialize, Serialize)]
 pub struct ChatMessage {
+    pub chat_id: i64,
     pub sender_id: i64,
     pub recv_id: i64,
     pub content: String,
@@ -68,4 +69,9 @@ impl From<Attachment> for AttachmentUser {
 pub struct UpdateLastReadReq {
     pub chat_id: i64,
     pub read_count: i64,
+}
+
+#[derive(Deserialize)]
+pub struct GetChatByIdParams {
+    pub receiver_id: i64,
 }

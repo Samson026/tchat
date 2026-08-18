@@ -79,7 +79,7 @@ import { useForm } from "vee-validate";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
-import type { Attachment, Message, User } from "../models/user.ts";
+import type { Attachment, ChatId, Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
@@ -155,19 +155,38 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 	const chatData = state.chats_data.get(chattingWith.value.id);
 
 	const msg: Message = {
+		chat_id: chatData?.id ?? null,
 		sender_id: state.user.id,
 		recv_id: chattingWith.value.id,
 		content: message,
 		attachment: attachment?.id ?? null,
 	};
 
+	if (!chatData) {
+		notificationStore.pushError("Error: No chat data");
+		return;
+	}
+
 	await invoke("send", {
 		message: msg,
 	});
 
-	// add msg to local data
-	if (!chatData) return;
 	chatData.messages.push(msg);
+
+	if (chatData.id) return;
+
+	try {
+		const chatIds = await invoke<ChatId>("get_chat_by_ids", {
+			receiverId: chattingWith.value.id,
+		});
+
+		chatData.id = chatIds.id;
+		msg.chat_id = chatIds.id;
+	} catch (error) {
+		notificationStore.pushError(
+			`Message sent, but chat ID lookup failed: ${String(error)}`,
+		);
+	}
 }
 
 async function uploadImage(file: File) {
