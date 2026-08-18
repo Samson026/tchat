@@ -10,7 +10,7 @@ use tower_sessions::Session;
 
 use crate::{
     state::AppState,
-    user::models::{GetUserParams, LoginRequest},
+    user::models::{ClientVisibleUser, GetUserParams, LoginRequest},
 };
 
 pub fn router() -> Router<AppState> {
@@ -33,7 +33,7 @@ pub async fn create_user(
     {
         Ok(user) => {
             session.insert("user_id", user.id).await.unwrap();
-            Json(user).into_response()
+            Json::<ClientVisibleUser>(user.into()).into_response()
         }
         Err(error) => {
             eprintln!("Error creating user: {error}");
@@ -54,7 +54,7 @@ pub async fn get_user(
     Path(params): Path<GetUserParams>,
 ) -> Response {
     match app_state.user_db.get_user_from_id(&params.id).await {
-        Ok(user) => Json(user).into_response(),
+        Ok(user) => Json::<ClientVisibleUser>(user.into()).into_response(),
         Err(sqlx::Error::RowNotFound) => StatusCode::NOT_FOUND.into_response(),
         Err(error) => {
             eprintln!("DB Error: {error}");
@@ -72,7 +72,7 @@ pub async fn login(
         Ok(user) => {
             if data.password == user.password {
                 session.insert("user_id", user.id).await.unwrap();
-                Json(user).into_response()
+                Json::<ClientVisibleUser>(user.into()).into_response()
             } else {
                 (StatusCode::UNAUTHORIZED, "Invalid password").into_response()
             }

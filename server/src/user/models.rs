@@ -14,6 +14,21 @@ pub struct User {
     pub password: String,
 }
 
+#[derive(FromRow, Serialize)]
+pub struct ClientVisibleUser {
+    pub id: i64,
+    pub username: String,
+}
+
+impl From<User> for ClientVisibleUser {
+    fn from(user: User) -> Self {
+        Self {
+            id: user.id,
+            username: user.username,
+        }
+    }
+}
+
 #[derive(Deserialize)]
 pub struct GetUserParams {
     pub id: i64,
