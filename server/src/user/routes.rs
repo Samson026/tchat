@@ -54,7 +54,7 @@ pub async fn get_user(
     Path(params): Path<GetUserParams>,
 ) -> Response {
     match app_state.user_db.get_user_from_id(&params.id).await {
-        Ok(user) => Json::<ClientVisibleUser>(user.into()).into_response(),
+        Ok(user) => Json::<ClientVisibleUser>(user).into_response(),
         Err(sqlx::Error::RowNotFound) => StatusCode::NOT_FOUND.into_response(),
         Err(error) => {
             eprintln!("DB Error: {error}");
