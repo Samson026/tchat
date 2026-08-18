@@ -79,7 +79,7 @@ import { useForm } from "vee-validate";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ChatMessage from "../components/ChatMessage.vue";
-import { ChatId, type Attachment, type Message, type User } from "../models/user.ts";
+import type { Attachment, ChatId, Message, User } from "../models/user.ts";
 import { NewMessage } from "../models/validation.ts";
 import { useNotification } from "../stores/notifications.ts";
 import { useState } from "../stores/state.ts";
@@ -163,8 +163,8 @@ async function sendMessage(message: string, attachment: Attachment | null) {
 	};
 
 	if (!chatData) {
-		notificationStore.pushError("Error: No chat data")
-		return
+		notificationStore.pushError("Error: No chat data");
+		return;
 	}
 
 	await invoke("send", {

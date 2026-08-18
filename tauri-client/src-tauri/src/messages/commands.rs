@@ -12,9 +12,11 @@ use protocol::{CHATS, DOWNLOAD, GET_MESSAGES, READ, UPLOAD};
 use tokio::fs::{create_dir_all, write};
 
 use crate::{
-    constants::ATTACHMENTS_DIR, messages::models::{
+    constants::ATTACHMENTS_DIR,
+    messages::models::{
         Attachment, Chat, ChatId, ChatMessage, DownloadReq, GetMessagesReq, UpdateLastReadReq,
-    }, settings::SettingsWriter,
+    },
+    settings::SettingsWriter,
 };
 
 #[derive(Debug)]
@@ -152,12 +154,11 @@ impl MessageClient {
     pub async fn get_chat_by_ids(
         &self,
         receiver_id: &i64,
-        server_addr: &str
+        server_addr: &str,
     ) -> Result<ChatId, reqwest::Error> {
         let url = format!("http://{server_addr}{CHATS}/{receiver_id}");
 
-        self
-            .client
+        self.client
             .get(url)
             .send()
             .await?
@@ -288,7 +289,7 @@ pub async fn update_read(
 pub async fn get_chat_by_ids(
     message_client: tauri::State<'_, MessageClient>,
     settings_writer: tauri::State<'_, Mutex<SettingsWriter>>,
-    receiver_id: i64
+    receiver_id: i64,
 ) -> Result<ChatId, String> {
     let server_addr = settings_writer
         .lock()

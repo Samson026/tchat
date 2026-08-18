@@ -73,5 +73,5 @@ pub struct UpdateLastReadReq {
 
 #[derive(Deserialize)]
 pub struct GetChatByIdParams {
-    pub receiver_id: i64
+    pub receiver_id: i64,
 }

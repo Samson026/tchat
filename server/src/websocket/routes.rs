@@ -15,11 +15,7 @@ use protocol::BASE_ROUTE;
 
 use super::models::IncomingChatMessage;
 
-use crate::{
-    middleware::auth_middleware,
-    state::AppState,
-    websocket::models::ChatMessage,
-};
+use crate::{middleware::auth_middleware, state::AppState, websocket::models::ChatMessage};
 
 pub fn router() -> Router<AppState> {
     Router::new()

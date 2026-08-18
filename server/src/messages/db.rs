@@ -102,9 +102,9 @@ impl MessagesDB {
     }
 
     pub async fn get_chat_by_ids(
-        &self, 
-        user_1_id: &i64, 
-        user_2_id: &i64
+        &self,
+        user_1_id: &i64,
+        user_2_id: &i64,
     ) -> Result<Chat, sqlx::Error> {
         sqlx::query_as::<_, Chat>(
             "

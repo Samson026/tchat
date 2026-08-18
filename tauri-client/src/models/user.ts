@@ -11,9 +11,9 @@ export interface Chat {
 }
 
 export interface ChatId {
-    id: number,
-    user_1_id: number,
-    user_2_id: number,
+	id: number;
+	user_1_id: number;
+	user_2_id: number;
 }
 
 export interface ChatData {

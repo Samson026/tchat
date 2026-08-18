@@ -1,9 +1,16 @@
 use std::{
-    cmp::max, cmp::min, fs::OpenOptions, io::{Error, Write}, path::PathBuf,
+    fs::OpenOptions,
+    io::{Error, Write},
+    path::PathBuf,
 };
 
 use axum::{
-    Extension, Json, Router, extract::{DefaultBodyLimit, Multipart, Path, Query, State}, http::{StatusCode, header}, middleware, response::{IntoResponse, Response}, routing::{get, post},
+    Extension, Json, Router,
+    extract::{DefaultBodyLimit, Multipart, Path, Query, State},
+    http::{StatusCode, header},
+    middleware,
+    response::{IntoResponse, Response},
+    routing::{get, post},
 };
 use protocol::{BASE_ROUTE, CHATS, DOWNLOAD, READ, RECEIVER_ID_PARAM, UPLOAD};
 use tokio::{
@@ -13,8 +20,15 @@ use tokio::{
 
 use crate::{
     messages::{
-        models::{AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq, GetChatByIdParams, UpdateLastReadReq}, service::save_image,
-    }, middleware::auth_middleware, path::get_app_dir, state::AppState, user::db::UserDB,
+        models::{
+            AttachmentUser, ChatHistoryReq, ChatMessage, DownloadReq, GetChatByIdParams,
+            UpdateLastReadReq,
+        },
+        service::save_image,
+    },
+    middleware::auth_middleware,
+    path::get_app_dir,
+    state::AppState,
 };
 
 #[cfg(test)]
@@ -28,7 +42,10 @@ pub fn router() -> Router<AppState> {
         .route(UPLOAD, post(upload_image))
         .route(DOWNLOAD, get(download_image))
         .route(READ, post(update_last_read_message))
-        .route(&format!("{CHATS}{RECEIVER_ID_PARAM}"), get(get_chat_from_ids))
+        .route(
+            &format!("{CHATS}{RECEIVER_ID_PARAM}"),
+            get(get_chat_from_ids),
+        )
         .route_layer(middleware::from_fn(auth_middleware))
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024))
 }
@@ -236,19 +253,15 @@ pub async fn get_chat_from_ids(
     Extension(user_id): Extension<i64>,
     Path(params): Path<GetChatByIdParams>,
 ) -> Response {
-
     let (user_1, user_2) = if user_id < params.receiver_id {
         (user_id, params.receiver_id)
     } else {
         (params.receiver_id, user_id)
     };
 
-    match app_state
-        .message_db
-        .get_chat_by_ids(&user_1, &user_2)
-        .await {
-            Ok(chat) => Json(chat).into_response(),
-            Err(sqlx::Error::RowNotFound) => StatusCode::NOT_FOUND.into_response(),
-            Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response()
-        }
+    match app_state.message_db.get_chat_by_ids(&user_1, &user_2).await {
+        Ok(chat) => Json(chat).into_response(),
+        Err(sqlx::Error::RowNotFound) => StatusCode::NOT_FOUND.into_response(),
+        Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    }
 }
